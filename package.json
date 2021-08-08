@@ -1,0 +1,34 @@
+{
+  "name": "nody-greeter",
+  "version": "1.0.0",
+  "description": "Trying to create a node.js greeter for lightdm",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "author": {
+    "name": "Jezer Mejía",
+    "email": "amyuki4@gmail.com"
+  },
+  "license": "ISC",
+  "homepage": "github.com/JezerM",
+  "build": {
+    "appId": "web-greeter.app",
+    "productName": "web-greeter",
+    "linux": {
+      "target": "deb"
+    }
+  },
+  "devDependencies": {
+    "electron": "^13.1.8",
+    "electron-builder": "^22.11.7",
+    "electron-rebuild": "^2.3.5"
+  },
+  "dependencies": {
+    "node-gtk": "^0.9.0",
+    "winston": "^3.3.3"
+  }
+}
