@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder",
+    "build": "electron-builder",
     "postinstall": "electron-builder install-app-deps"
   },
   "author": {
@@ -16,10 +16,14 @@
   "license": "ISC",
   "homepage": "github.com/JezerM",
   "build": {
-    "appId": "web-greeter.app",
-    "productName": "web-greeter",
+    "appId": "nody-greeter.app",
+    "productName": "nody-greeter",
+    "directories": {
+      "output": "build"
+    },
     "linux": {
-      "target": "deb"
+      "target": "deb",
+      "category": "system"
     }
   },
   "devDependencies": {
@@ -28,7 +32,9 @@
     "electron-rebuild": "^2.3.5"
   },
   "dependencies": {
+    "js-yaml": "^4.1.0",
     "node-gtk": "^0.9.0",
-    "winston": "^3.3.3"
+    "winston": "^3.3.3",
+    "yargs": "^16.2.0"
   }
 }

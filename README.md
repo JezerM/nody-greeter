@@ -9,10 +9,20 @@ This is very experimental, do not use it.
 This depends on some [Web Greeter][web-greeter] files, therefore this won't work without installing it.
 
 - Only loads the gruvbox theme: `/usr/share/web-greeter/themes/gruvbox/index.html`
-- Configurations inside `/etc/lightdm/web-greeter.yml` are not loaded
+- Some configurations inside `/etc/lightdm/web-greeter.yml` are not loaded
 - Brightness and battery support not added
 - There could be bugs!!
 - It kinda works
+
+## TODO
+
+- [x] Load `web-greeter.yml`
+- [x] Basic support
+- [ ] Detect theme erros alert
+- [ ] Brightness support
+- [ ] Battery support
+- [ ] Screensaver support
+- [x] Layouts support
 
 ## Pre-installation
 ```

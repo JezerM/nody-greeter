@@ -1,49 +1,69 @@
-const { ipcMain } = require("electron")
-const winston = require("winston")
+const { ipcMain, app } = require("electron")
+const yargs = require("yargs")
+const path = require("path")
+const fs = require("fs")
 
 const gi = require("node-gtk")
 let LightDM = gi.require("LightDM", "1")
 
-const { window } = require("./globals.js")
+const { nody_greeter } = require("./config.js")
 
-const bridge = require("./bridge.js")
+let res = yargs
+  .scriptName("nody-greeter")
+  .usage("$0 [args]")
+  .command("--debug", "Runs the greeter in debug mode")
+  .command("--normal", "Runs in non-debug mode")
+  .command("--list", "Lists available themes")
+  .command("--theme [name]", "Set the theme to use")
+  .help("h")
+  .alias("h", "help")
+  .alias("v", "version")
+  .argv
 
-// 2021-08-05 12:12:57 [ DEBUG ] application - application.py:66 : run | Setting window size and position
+function list_themes(print = true) {
+  let dir = nody_greeter.app.theme_dir
+  dir = fs.existsSync(dir) ? dir : "/usr/share/web-greeter/themes"
+  let filenames = fs.readdirSync(dir, {withFileTypes: true})
+  let dirlist = []
 
-const myFormat = winston.format.printf(({ level, message, sourceID, line, timestamp }) => {
-  return `${timestamp} [ ${level.toLocaleUpperCase()} ] ${sourceID} ${line}: ${message}`;
-});
-
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp({format: "YYYY-MM-DD HH:mm:ss"}),
-    myFormat
-  ),
-  defaultMeta: { service: 'user-service' },
-  transports: [
-    new winston.transports.Console(),
-  ],
-});
-
-window.whenReady().then(() => {
-  initLogger()
-})
-
-function initLogger() {
-  window.win.webContents.addListener("console-message", (ev, code, message, line, sourceID) => {
-    if (code == 3) {
-      logger.log({ level: "error", message: message, line: line, sourceID: sourceID })
-    } else
-    if (code == 2) {
-      logger.log({ level: "warn", message: message, line: line, sourceID: sourceID })
-    }
+  filenames.forEach((file) => {
+    if (file.isDirectory()) dirlist.push(file.name)
   })
+
+  if (print) {
+    console.log(`Themes are located in ${dir}\n`)
+    dirlist.forEach((v) => console.log("-", v))
+  }
 }
 
-ipcMain.on("LightDM", (event, args) => {
-  if (args == "suspend") {
-    LightDM.suspend()
-  }
-  console.log(args)
-})
+function set_debug() {
+  nody_greeter.config.greeter.debug_mode = true
+  nody_greeter.app.fullscreen = false
+  nody_greeter.app.frame = true
+  nody_greeter.app.debug_mode = true
+}
+
+if (res.debug) {
+  set_debug()
+} else
+if (res.normal) {
+  nody_greeter.config.greeter.debug_mode = false
+  nody_greeter.app.fullscreen = true
+  nody_greeter.app.frame = false
+  nody_greeter.app.debug_mode = false
+}
+if (res.theme && typeof res.theme === "string") {
+  nody_greeter.config.greeter.theme = res.theme
+}
+if (res.list) {
+  list_themes()
+  process.exit()
+}
+
+if (nody_greeter.config.greeter.debug_mode == true) {
+  set_debug()
+}
+
+const { window } = require("./globals.js")
+
+const bridge = require("./bridge/bridge.js")

@@ -6,19 +6,23 @@ const {
 const gi = require("node-gtk")
 const LightDM = gi.require("LightDM", "1")
 
+const { nody_greeter } = require("../config.js")
+
 const LightDMGreeter = new LightDM.Greeter()
 const LightDMUsers = new LightDM.UserList()
 
 const { user_to_obj, language_to_obj, layout_to_obj, session_to_obj } = require("./bridge_objects.js")
 
-const { window } = require("./globals.js")
+const { window } = require("../globals.js")
 
 
 class Greeter {
-	constructor() {
+	constructor(config) {
 		if ('lightdm' in globalThis) {
 			return globalThis.lightdm;
 		}
+
+		this._config = config
 
 		LightDMGreeter.connectToDaemonSync()
 
@@ -54,7 +58,7 @@ class Greeter {
 	}
 
 	_emit_signal(signal) {
-		console.log("SIGNAL EMITTED", signal)
+		//console.log("SIGNAL EMITTED", signal)
 		window.win.webContents.send("LightDMSignal", signal)
 	}
 
@@ -236,7 +240,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get language() {
-		return LightDM.getLanguage();
+		return language_to_obj(LightDM.getLanguage());
 	}
 
 	/**
@@ -245,7 +249,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get languages() {
-		return LightDM.getLanguages();
+		return reduceArray(LightDM.getLanguages(), language_to_obj);
 	}
 
 	/**
@@ -253,10 +257,11 @@ class Greeter {
 	 * @type {LightDMLayout}
 	 */
 	get layout() {
-		return LightDM.getLayout();
+		return layout_to_obj(LightDM.getLayout());
 	}
 
 	set layout(layout) {
+		LightDM.getLayout()
 		return LightDM.setLayout(new LightDM.Layout(layout));
 	}
 
@@ -266,7 +271,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get layouts() {
-		return LightDM.getLayouts();
+		return reduceArray(LightDM.getLayouts(), layout_to_obj);
 	}
 
 	/**
@@ -284,7 +289,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get remote_sessions() {
-		return LightDM.getRemoteSessions();
+		return reduceArray(LightDM.getRemoteSessions(), session_to_obj);
 	}
 
 	/**
@@ -311,7 +316,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get sessions() {
-		return LightDM.getSessions();
+		return reduceArray(LightDM.getSessions(), session_to_obj);
 	}
 
 	/**
@@ -342,7 +347,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get users() {
-		return LightDMUsers.getUsers();
+		return reduceArray(LightDMUsers.getUsers(), user_to_obj);
 	}
 
 	/**
@@ -412,7 +417,6 @@ class Greeter {
 	 * @param {String} response
 	 */
 	respond( response ) {
-		console.log(response)
 		LightDMGreeter.respond(response);
 	}
 
@@ -450,9 +454,7 @@ class Greeter {
 	 * @returns {Boolean} {@link true} if successful, otherwise {@link false}
 	 */
 	start_session( session ) {
-		if (session in this.sessions) {
-			return LightDMGreeter.startSessionSync(session)
-		}
+		return LightDMGreeter.startSessionSync(session)
 	}
 
 	/**
@@ -479,37 +481,29 @@ class Greeter {
 
 }
 
+function get_layouts(config_layouts) {
+	let layouts = LightDM.getLayouts()
+	let final = []
+	for (ldm_lay of layouts) {
+		for (conf_lay of config_layouts) {
+			conf_lay = conf_lay.replaceAll(" ", "\t")
+			if (ldm_lay.getName() == conf_lay) {
+				final.push(layout_to_obj(ldm_lay))
+			}
+		}
+	}
+	return final
+}
+
 class GreeterConfig {
-	constructor() {
+	constructor(config) {
 		if ('greeter_config' in globalThis) {
 			return globalThis.greeter_config;
 		}
 
+		this._config = config
+
 		globalThis.greeter_config = this;
-	}
-
-	_branding = {
-		background_images_dir: "/usr/share/backgrounds",
-		logo_image: "/usr/share/web-greeter/themes/default/img/antergos-logo-user.png",
-		user_image: "/usr/share/web-greeter/themes/default/img/antergos.png"
-	}
-
-	_greeter = {
-		debug_mode: true,
-		detect_theme_errors: true,
-		screensaver_timeout: 300,
-		secure_mode: true,
-		time_language: "",
-		theme: "none"
-	}
-
-	_features = {
-		battery: true,
-		backlight: {
-			enabled: true,
-			value: 10,
-			steps: 0
-		}
 	}
 
 	/**
@@ -524,7 +518,7 @@ class GreeterConfig {
 	 * @readonly
 	 */
 	get branding() {
-		return this._branding;
+		return this._config.branding;
 	}
 
 	/**
@@ -543,7 +537,7 @@ class GreeterConfig {
 	 * @readonly
 	 */
 	get greeter() {
-		return this._greeter;
+		return this._config.greeter;
 	}
 
 	/**
@@ -557,7 +551,17 @@ class GreeterConfig {
 	 * @property {Number}  steps					 How many steps are needed to do the change.
 	 */
 	get features() {
-		return this._features;
+		return this._config.features;
+	}
+
+	/*
+	 * Holds a list of preferred layouts from the `layouts` section of the config file.
+	 * @type {Array}			layouts
+	 * @readonly
+	 */
+	get layouts() {
+		return get_layouts(this._config.layouts)
+		//return this._config.layouts;
 	}
 
 }
@@ -565,10 +569,12 @@ class GreeterConfig {
 let time_language = null
 
 class ThemeUtils {
-	constructor() {
+	constructor(config) {
 		if ("theme_utils" in globalThis) {
 			return globalThis.theme_utils;
 		}
+
+		this._config = config
 
 		globalThis.theme_utils = this
 	}
@@ -734,10 +740,6 @@ class ThemeUtils {
 
 }
 
-new ThemeUtils();
-new GreeterConfig();
-new Greeter();
-
 function handler(ldm, ev, ...args) {
 	if (args.length == 0) return ev.returnValue = undefined
 	let param = args[0]
@@ -816,3 +818,38 @@ ipcMain.on("LightDMGreeter", (ev, ...args) => {
 ipcMain.on("LightDMUsers", (ev, ...args) => {
 	return handler(LightDMUsers, ev, ...args)
 })
+
+ipcMain.on("GreeterConfig", (ev, ...args) => {
+	if (args.length == 0) return ev.returnValue = undefined
+	let pr = globalThis.greeter_config[args[0]]
+	ev.returnValue = pr || undefined
+})
+
+ipcMain.on("lightdm", (ev, ...args) => {
+	if (args.length == 0) return ev.returnValue = undefined
+	let descriptors = Object.getOwnPropertyDescriptors(Object.getPrototypeOf(globalThis.lightdm))
+	let param = args[0]
+	args.shift()
+	let pr = globalThis.lightdm[param]
+	let ac = descriptors[param]
+
+	let value = undefined
+
+	console.log(args)
+
+	if (typeof pr === "function") {
+		value = globalThis.lightdm[param](...args)
+	} else {
+		if (args.length > 0 && ac && ac.set) {
+			ac.set(...args)
+		} else {
+			value = pr || undefined
+		}
+	}
+
+	ev.returnValue = value
+})
+
+new ThemeUtils(nody_greeter.config)
+new GreeterConfig(nody_greeter.config)
+new Greeter(nody_greeter.config)

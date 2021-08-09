@@ -78,7 +78,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get authentication_user() {
-		return ipcRenderer.sendSync("LightDMGreeter", "getAuthenticationUser")
+		return ipcRenderer.sendSync("lightdm", "authentication_user")
 	}
 
 	/**
@@ -88,7 +88,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get autologin_guest() {
-		return ipcRenderer.sendSync("LightDMGreeter", "getAutologinGuestHint")
+		return ipcRenderer.sendSync("lightdm", "autologin_guest")
 	}
 
 	/**
@@ -97,7 +97,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get autologin_timeout() {
-		return ipcRenderer.sendSync("LightDMGreeter", "getAutologinTimeoutHint")
+		return ipcRenderer.sendSync("lightdm", "autologin_timeout")
 	}
 
 	/**
@@ -106,7 +106,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get autologin_user() {
-		return ipcRenderer.sendSync("LightDMGreeter", "getAutologinUserHint")
+		return ipcRenderer.sendSync("lightdm", "autologin_user")
 	}
 
 	/**
@@ -159,7 +159,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get can_hibernate() {
-		return ipcRenderer.sendSync("LightDM", "getCanHibernate")
+		return ipcRenderer.sendSync("lightdm", "can_hibernate")
 	}
 
 	/**
@@ -168,7 +168,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get can_restart() {
-		return ipcRenderer.sendSync("LightDM", "getCanRestart")
+		return ipcRenderer.sendSync("lightdm", "can_restart")
 	}
 
 	/**
@@ -177,7 +177,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get can_shutdown() {
-		return ipcRenderer.sendSync("LightDM", "getCanShutdown")
+		return ipcRenderer.sendSync("lightdm", "can_shutdown")
 	}
 
 	/**
@@ -186,7 +186,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get can_suspend() {
-		return ipcRenderer.sendSync("LightDM", "getCanSuspend")
+		return ipcRenderer.sendSync("lightdm", "can_suspend")
 	}
 
 	/**
@@ -195,7 +195,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get default_session() {
-		return ipcRenderer.sendSync("LightDMGreeter", "getDefaultSessionHint")
+		return ipcRenderer.sendSync("lightdm", "default_session")
 	}
 
 	/**
@@ -204,7 +204,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get has_guest_account() {
-		return ipcRenderer.sendSync("LightDMGreeter", "getHasGuestAccountHint")
+		return ipcRenderer.sendSync("lightdm", "has_guest_account")
 	}
 
 	/**
@@ -213,7 +213,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get hide_users_hint() {
-		return ipcRenderer.sendSync("LightDMGreeter", "getHideUsersHint")
+		return ipcRenderer.sendSync("lightdm", "hide_users_hint")
 	}
 
 	/**
@@ -222,7 +222,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get hostname() {
-		return ipcRenderer.sendSync("LightDM", "getHostname")
+		return ipcRenderer.sendSync("lightdm", "hostname")
 	}
 
 	/**
@@ -231,7 +231,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get in_authentication() {
-		return ipcRenderer.sendSync("LightDMGreeter", "getInAuthentication")
+		return ipcRenderer.sendSync("lightdm", "in_authentication")
 	}
 
 	/**
@@ -240,7 +240,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get is_authenticated() {
-		return ipcRenderer.sendSync("LightDMGreeter", "getIsAuthenticated")
+		return ipcRenderer.sendSync("lightdm", "is_authenticated")
 	}
 
 	/**
@@ -249,7 +249,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get language() {
-		return ipcRenderer.sendSync("LightDM", "getLanguage")
+		return ipcRenderer.sendSync("lightdm", "language")
 	}
 
 	/**
@@ -258,7 +258,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get languages() {
-		return ipcRenderer.sendSync("LightDM", "getLanguages")
+		return ipcRenderer.sendSync("lightdm", "languages")
 	}
 
 	/**
@@ -266,11 +266,11 @@ class Greeter {
 	 * @type {LightDMLayout}
 	 */
 	get layout() {
-		return ipcRenderer.sendSync("LightDM", "getLayout")
+		return ipcRenderer.sendSync("lightdm", "layout")
 	}
 
 	set layout(layout) {
-		return ipcRenderer.sendSync("LightDM", "setLayout", layout)
+		return ipcRenderer.sendSync("lightdm", "layout", layout)
 	}
 
 	/**
@@ -279,7 +279,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get layouts() {
-		return ipcRenderer.sendSync("LightDM", "getLayouts")
+		return ipcRenderer.sendSync("lightdm", "layouts")
 	}
 
 	/**
@@ -288,7 +288,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get lock_hint() {
-		return ipcRenderer.sendSync("LightDMGreeter", "getLockHint")
+		return ipcRenderer.sendSync("lightdm", "lock_hint")
 	}
 
 	/**
@@ -297,7 +297,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get remote_sessions() {
-		return ipcRenderer.sendSync("LightDM", "getRemoteSessions")
+		return ipcRenderer.sendSync("lightdm", "remote_sessions")
 	}
 
 	/**
@@ -306,7 +306,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get select_guest_hint() {
-		return ipcRenderer.sendSync("LightDMGreeter", "getSelectGuestHint")
+		return ipcRenderer.sendSync("lightdm", "select_guest_hint")
 	}
 
 	/**
@@ -315,7 +315,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get select_user_hint() {
-		return ipcRenderer.sendSync("LightDMGreeter", "getSelectUserHint")
+		return ipcRenderer.sendSync("lightdm", "select_user_hint")
 	}
 
 	/**
@@ -324,7 +324,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get sessions() {
-		return ipcRenderer.sendSync("LightDM", "getSessions")
+		return ipcRenderer.sendSync("lightdm", "sessions")
 	}
 
 	/**
@@ -335,7 +335,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get show_manual_login_hint() {
-		return ipcRenderer.sendSync("LightDMGreeter", "getShowManualLoginHint")
+		return ipcRenderer.sendSync("lightdm", "show_manual_login_hint")
 	}
 
 	/**
@@ -346,7 +346,7 @@ class Greeter {
 	 * @internal
 	 */
 	get show_remote_login_hint() {
-		return ipcRenderer.sendSync("LightDMGreeter", "getShowRemoteLoginHint")
+		return ipcRenderer.sendSync("lightdm", "show_remote_login_hint")
 	}
 
 	/**
@@ -355,7 +355,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get users() {
-		return ipcRenderer.sendSync("LightDMUsers", "getUsers")
+		return ipcRenderer.sendSync("lightdm", "users")
 	}
 
 	/**
@@ -364,14 +364,14 @@ class Greeter {
 	 * @param {String|null} username A username or {@link null} to prompt for a username.
 	 */
 	authenticate( username ) {
-		return ipcRenderer.sendSync("LightDMGreeter", "authenticate", username)
+		return ipcRenderer.sendSync("lightdm", "authenticate", username)
 	}
 
 	/**
 	 * Starts the authentication procedure for the guest user.
 	 */
 	authenticate_as_guest() {
-		return ipcRenderer.sendSync("LightDMGreeter", "authenticateAsGuest")
+		return ipcRenderer.sendSync("lightdm", "authenticate_as_guest")
 	}
 
 	/**
@@ -402,14 +402,14 @@ class Greeter {
 	 * Cancel user authentication that is currently in progress.
 	 */
 	cancel_authentication() {
-		return ipcRenderer.sendSync("LightDMGreeter", "cancelAuthentication")
+		return ipcRenderer.sendSync("lightdm", "cancel_authentication")
 	}
 
 	/**
 	 * Cancel the automatic login.
 	 */
 	cancel_autologin() {
-		return ipcRenderer.sendSync("LightDMGreeter", "cancelAutologin")
+		return ipcRenderer.sendSync("lightdm", "cancel_autologin")
 	}
 
 	/**
@@ -417,7 +417,7 @@ class Greeter {
 	 * @returns {Boolean} "true" if hibernation initiated, otherwise "false"
 	 */
 	hibernate() {
-		return ipcRenderer.sendSync("LightDM", "hibernate")
+		return ipcRenderer.sendSync("lightdm", "hibernate")
 	}
 
 	/**
@@ -425,7 +425,7 @@ class Greeter {
 	 * @param {String} response
 	 */
 	respond( response ) {
-		return ipcRenderer.sendSync("LightDMGreeter", "respond", response)
+		return ipcRenderer.sendSync("lightdm", "respond", response)
 	}
 
 	/**
@@ -433,7 +433,7 @@ class Greeter {
 	 * @returns {Boolean} {@link true} if restart initiated, otherwise {@link false}
 	 */
 	restart() {
-		return ipcRenderer.sendSync("LightDM", "restart")
+		return ipcRenderer.sendSync("lightdm", "restart")
 	}
 
 	/**
@@ -444,7 +444,7 @@ class Greeter {
 	 */
 	set_language( language ) {
 		if (this.is_authenticated) {
-			return ipcRenderer.sendSync("LightDMGreeter", "setLanguage", language)
+			return ipcRenderer.sendSync("lightdm", "set_language", language)
 		}
 	}
 
@@ -453,7 +453,7 @@ class Greeter {
 	 * @returns {Boolean} {@link true} if shutdown initiated, otherwise {@link false}
 	 */
 	shutdown() {
-		return ipcRenderer.sendSync("LightDM", "shutdown")
+		return ipcRenderer.sendSync("lightdm", "shutdown")
 	}
 
 	/**
@@ -462,7 +462,7 @@ class Greeter {
 	 * @returns {Boolean} {@link true} if successful, otherwise {@link false}
 	 */
 	start_session( session ) {
-			return ipcRenderer.sendSync("LightDMGreeter", "startSessionSync", session)
+			return ipcRenderer.sendSync("lightdm", "start_session", session)
 	}
 
 	/**
@@ -470,7 +470,7 @@ class Greeter {
 	 * @returns {Boolean} {@link true} if suspend/sleep initiated, otherwise {@link false}
 	 */
 	suspend() {
-		return ipcRenderer.sendSync("LightDM", "suspend")
+		return ipcRenderer.sendSync("lightdm", "suspend")
 	}
 }
 
@@ -479,33 +479,9 @@ class GreeterConfig {
 		if ('greeter_config' in window) {
 			return window.greeter_config;
 		}
-
 		window.greeter_config = this;
 	}
 
-	_branding = {
-		background_images_dir: "/usr/share/backgrounds",
-		logo_image: "/usr/share/web-greeter/themes/default/img/antergos-logo-user.png",
-		user_image: "/usr/share/web-greeter/themes/default/img/antergos.png"
-	}
-
-	_greeter = {
-		debug_mode: true,
-		detect_theme_errors: true,
-		screensaver_timeout: 300,
-		secure_mode: true,
-		time_language: "",
-		theme: "none"
-	}
-
-	_features = {
-		battery: true,
-		backlight: {
-			enabled: true,
-			value: 10,
-			steps: 0
-		}
-	}
 
 	/**
 	 * Holds keys/values from the `branding` section of the config file.
@@ -519,7 +495,7 @@ class GreeterConfig {
 	 * @readonly
 	 */
 	get branding() {
-		return this._branding;
+		return ipcRenderer.sendSync("GreeterConfig", "branding")
 	}
 
 	/**
@@ -538,7 +514,7 @@ class GreeterConfig {
 	 * @readonly
 	 */
 	get greeter() {
-		return this._greeter;
+		return ipcRenderer.sendSync("GreeterConfig", "greeter")
 	}
 
 	/**
@@ -550,9 +526,19 @@ class GreeterConfig {
 	 * @property {Boolean} enabled				 Enable greeter and themes to control display backlight.
 	 * @property {Number}  value					 The amount to increase/decrease brightness by greeter.
 	 * @property {Number}  steps					 How many steps are needed to do the change.
+	 * @readonly
 	 */
 	get features() {
-		return this._features;
+		return ipcRenderer.sendSync("GreeterConfig", "features")
+	}
+
+	/*
+	 * Holds a list of preferred layouts from the `layouts` section of the config file.
+	 * @type {Array}			layouts
+	 * @readonly
+	 */
+	get layouts() {
+		return ipcRenderer.sendSync("GreeterConfig", "layouts")
 	}
 
 }
@@ -735,6 +721,8 @@ new Greeter();
 
 window._ready_event = new Event("GreeterReady")
 
-setTimeout(() => {
-	window.dispatchEvent(_ready_event)
-}, 2)
+window.addEventListener("DOMContentLoaded", () => {
+	setTimeout(() => {
+		window.dispatchEvent(_ready_event)
+	}, 2)
+})
