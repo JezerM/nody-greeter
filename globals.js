@@ -39,8 +39,11 @@ const logger = winston.createLogger({
   ),
   defaultMeta: { service: 'user-service' },
   transports: [
-    new winston.transports.Console(),
+    new winston.transports.Console({
+      stderrLevels: ["debug", "warn", "error"]
+    }),
   ],
+  exitOnError: false,
 });
 
 function initLogger() {

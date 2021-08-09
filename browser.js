@@ -21,8 +21,11 @@ const logger = winston.createLogger({
   ),
   defaultMeta: { service: 'user-service' },
   transports: [
-    new winston.transports.Console(),
+    new winston.transports.Console({
+      stderrLevels: ["debug", "warn", "error"]
+    }),
   ],
+  exitOnError: false,
 });
 
 class Browser {
@@ -65,7 +68,7 @@ class Browser {
     let screen_size = screen.getPrimaryDisplay().workAreaSize
 
     this.win = new BrowserWindow({
-      fullscreen: nody_greeter.app.fullscreen,
+      //fullscreen: nody_greeter.app.fullscreen,
       height: screen_size.height,
       width: screen_size.width,
       backgroundColor: "#000000",
@@ -91,6 +94,7 @@ class Browser {
     logger.log({ level: "debug", message: "Theme loaded", sourceID: path.basename(__filename), line: __line })
 
     this.win.once('ready-to-show', () => {
+      this.win.setFullScreen(nody_greeter.app.fullscreen)
       this.win.show()
       this.win.focus()
       logger.log({ level: "debug", message: "Nody Greeter started", sourceID: path.basename(__filename), line: __line })

@@ -835,8 +835,6 @@ ipcMain.on("lightdm", (ev, ...args) => {
 
 	let value = undefined
 
-	console.log(args)
-
 	if (typeof pr === "function") {
 		value = globalThis.lightdm[param](...args)
 	} else {
