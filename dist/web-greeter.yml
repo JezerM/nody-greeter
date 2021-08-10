@@ -26,7 +26,7 @@ branding:
 greeter:
     debug_mode: False
     detect_theme_errors: True
-    screensaver_timeout: 30
+    screensaver_timeout: 300
     secure_mode: True
     theme: gruvbox
     icon_theme:

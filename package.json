@@ -2,11 +2,11 @@
   "name": "nody-greeter",
   "version": "1.0.0",
   "description": "Trying to create a node.js greeter for lightdm",
-  "main": "index.js",
+  "main": "js/index.js",
   "scripts": {
     "start": "electron .",
-    "pack": "electron-builder --dir",
-    "build": "electron-builder",
+    "pack": "tsc && electron-builder --dir",
+    "build": "tsc && electron-builder",
     "postinstall": "electron-builder install-app-deps"
   },
   "author": {
@@ -14,22 +14,46 @@
     "email": "amyuki4@gmail.com"
   },
   "license": "ISC",
-  "homepage": "github.com/JezerM",
+  "homepage": "https://github.com/JezerM/nody-greeter",
   "build": {
     "appId": "nody-greeter.app",
     "productName": "nody-greeter",
+    "npmRebuild": false,
     "directories": {
       "output": "build"
     },
     "linux": {
-      "target": "deb",
+      "target": [
+        "deb",
+        "AppImage",
+        "tar.xz"
+      ],
       "category": "system"
-    }
+    },
+    "deb": {
+      "depends": [
+        "gobject-introspection",
+        "liblightdm-gobject-1-0",
+        "libcairo2"
+      ]
+    },
+    "extraFiles": [
+      {
+        "from": "./dist/web-greeter.yml",
+        "to": "/etc/lightdm/web-greeter.yml"
+      },
+      {
+        "from": "./dist/nody-greeter.desktop",
+        "to": "/usr/share/xgreeters/nody-greeter.desktop"
+      }
+    ]
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.2",
     "electron": "^13.1.8",
     "electron-builder": "^22.11.7",
-    "electron-rebuild": "^2.3.5"
+    "electron-rebuild": "^2.3.5",
+    "typescript": "^4.3.5"
   },
   "dependencies": {
     "js-yaml": "^4.1.0",
