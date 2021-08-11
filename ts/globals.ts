@@ -1,8 +1,8 @@
-import winston from "winston";
 import * as path from "path";
-import * as browser from "./browser";
+import { Browser } from "./browser";
+import { logger } from "./logger";
 
-const window = new browser.Browser();
+const window = new Browser();
 
 window.whenReady().then(() => {
   initLogger();
@@ -13,12 +13,6 @@ window.whenReady().then(() => {
     line: __line,
   });
 });
-
-const myFormat = winston.format.printf(
-  ({ level, message, sourceID, line, timestamp }) => {
-    return `${timestamp} [ ${level.toLocaleUpperCase()} ] ${sourceID} ${line}: ${message}`;
-  }
-);
 
 Object.defineProperty(global, "__stack", {
   get: function () {
@@ -45,21 +39,6 @@ declare global {
   var __line: number;
   var __stack: string;
 }
-
-const logger = winston.createLogger({
-  level: "debug",
-  format: winston.format.combine(
-    winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-    myFormat
-  ),
-  defaultMeta: { service: "user-service" },
-  transports: [
-    new winston.transports.Console({
-      stderrLevels: ["debug", "warn", "error"],
-    }),
-  ],
-  exitOnError: false,
-});
 
 function initLogger() {
   logger.log({
@@ -90,4 +69,4 @@ function initLogger() {
   );
 }
 
-export { window };
+export { window, logger };

@@ -11,9 +11,11 @@ const { nody_greeter } = require("../config.js")
 const LightDMGreeter = new LightDM.Greeter()
 const LightDMUsers = new LightDM.UserList()
 
-const { user_to_obj, language_to_obj, layout_to_obj, session_to_obj } = require("./bridge_objects.js")
+const { user_to_obj, language_to_obj, layout_to_obj, session_to_obj, battery_to_obj } = require("./bridge_objects.js")
 
-const { window } = require("../globals.js")
+const { window } = require("../globals.js");
+const { brightness_get, brightness_change } = require("../utils/brightness.js");
+const { Battery } = require("../utils/battery")
 
 
 class Greeter {
@@ -23,6 +25,10 @@ class Greeter {
 		}
 
 		this._config = config
+
+		if (this._config.features.battery) {
+			this._battery = new Battery()
+		}
 
 		LightDMGreeter.connectToDaemonSync()
 
@@ -106,7 +112,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get batteryData() {
-		return {}
+		return battery_to_obj(this._battery)
 	}
 
 	/**
@@ -114,16 +120,15 @@ class Greeter {
 	 * @type {Number}
 	 */
 	get brightness() {
-		return -1
+		return brightness_get();
 	}
 	/**
 	 * Sets the brightness
 	 * @param {Number} quantity The quantity to set
 	 */
 	set brightness( quantity ) {
-		if (quantity > 100) quantity = 100;
-		if (quantity < 0) quantity = 0;
-		this._brightness = quantity;
+		let steps = nody_greeter.config.features.backlight.steps;
+		return brightness_change(quantity, steps, "set");
 	}
 
 	/**
@@ -132,7 +137,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get can_access_battery() {
-		return false;
+		return this._config.features.battery;
 	}
 
 	/**
@@ -141,7 +146,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get can_access_brightness() {
-		return false;
+		return this._config.features.backlight.enabled;
 	}
 
 	/**
@@ -371,7 +376,8 @@ class Greeter {
 	 * @param {Number} quantity The quantity to set
 	 */
 	brightnessSet( quantity ) {
-		//this.brightness = quantity;
+		let steps = this._config.features.backlight.steps;
+		brightness_change(quantity, steps, "set");
 	}
 
 	/**
@@ -379,7 +385,8 @@ class Greeter {
 	 * @param {Number} quantity The quantity to increase
 	 */
 	brightnessIncrease( quantity ) {
-		//this.brightness += quantity;
+		let steps = this._config.features.backlight.steps;
+		brightness_change(quantity, steps, "inc");
 	}
 
 	/**
@@ -387,7 +394,8 @@ class Greeter {
 	 * @param {Number} quantity The quantity to decrease
 	 */
 	brightnessDecrease( quantity ) {
-		//this.brightness -= quantity;
+		let steps = this._config.features.backlight.steps;
+		brightness_change(quantity, steps, "dec");
 	}
 
 	/**

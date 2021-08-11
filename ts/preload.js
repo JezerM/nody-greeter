@@ -42,6 +42,7 @@ class Signal {
 ipcRenderer.on("LightDMSignal", (ev, ...args) => {
 	allSignals.forEach((v) => {
 		if (v._name == args[0]) {
+			//console.log(args)
 			v._emit()
 		}
 	})
@@ -70,6 +71,10 @@ class Greeter {
 	show_message = new Signal("show-message");
 
 	show_prompt = new Signal("show-prompt");
+
+	brightness_update = new Signal("brightness_update");
+
+	battery_update = new Signal("battery_update");
 
 	/**
 	 * The username of the user being authenticated or {@link null}
@@ -115,7 +120,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get batteryData() {
-		return {}
+		return ipcRenderer.sendSync("lightdm", "batteryData")
 	}
 
 	/**
@@ -123,16 +128,14 @@ class Greeter {
 	 * @type {Number}
 	 */
 	get brightness() {
-		return -1
+		return ipcRenderer.sendSync("lightdm", "brightness")
 	}
 	/**
 	 * Sets the brightness
 	 * @param {Number} quantity The quantity to set
 	 */
 	set brightness( quantity ) {
-		if (quantity > 100) quantity = 100;
-		if (quantity < 0) quantity = 0;
-		this._brightness = quantity;
+		return ipcRenderer.sendSync("lightdm", "brightness", quantity)
 	}
 
 	/**
@@ -141,7 +144,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get can_access_battery() {
-		return false;
+		return ipcRenderer.sendSync("lightdm", "can_access_battery")
 	}
 
 	/**
@@ -150,7 +153,7 @@ class Greeter {
 	 * @readonly
 	 */
 	get can_access_brightness() {
-		return false;
+		return ipcRenderer.sendSync("lightdm", "can_access_brightness")
 	}
 
 	/**
@@ -379,7 +382,7 @@ class Greeter {
 	 * @param {Number} quantity The quantity to set
 	 */
 	brightnessSet( quantity ) {
-		//this.brightness = quantity;
+		return ipcRenderer.sendSync("lightdm", "brightnessSet", quantity)
 	}
 
 	/**
@@ -387,7 +390,7 @@ class Greeter {
 	 * @param {Number} quantity The quantity to increase
 	 */
 	brightnessIncrease( quantity ) {
-		//this.brightness += quantity;
+		return ipcRenderer.sendSync("lightdm", "brightnessIncrease", quantity)
 	}
 
 	/**
@@ -395,7 +398,7 @@ class Greeter {
 	 * @param {Number} quantity The quantity to decrease
 	 */
 	brightnessDecrease( quantity ) {
-		//this.brightness -= quantity;
+		return ipcRenderer.sendSync("lightdm", "brightnessDecrease", quantity)
 	}
 
 	/**

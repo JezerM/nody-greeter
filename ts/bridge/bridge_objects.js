@@ -43,9 +43,23 @@ function layout_to_obj(layout) {
 	}
 }
 
+function battery_to_obj(battery) {
+	if (!battery) return {}
+	if (battery._batteries.length == 0) return {}
+	return {
+		name: battery.name,
+		level: battery.level,
+		state: battery.state,
+		capacity: battery.capacity,
+		time: battery.time,
+		watt: battery.watt,
+	}
+}
+
 module.exports = {
 	session_to_obj: session_to_obj,
 	user_to_obj: user_to_obj,
 	language_to_obj: language_to_obj,
 	layout_to_obj: layout_to_obj,
+	battery_to_obj: battery_to_obj,
 }

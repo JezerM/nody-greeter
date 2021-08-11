@@ -1,31 +1,11 @@
 import { app, BrowserWindow, screen, session } from "electron";
-import winston from "winston";
 import * as path from "path";
 import * as fs from "fs";
 
 import { nody_greeter } from "./config";
 import { URL } from "url";
-
-const myFormat = winston.format.printf(
-  ({ level, message, sourceID, line, timestamp }) => {
-    return `${timestamp} [ ${level.toLocaleUpperCase()} ] ${sourceID} ${line}: ${message}`;
-  }
-);
-
-const logger = winston.createLogger({
-  level: "debug",
-  format: winston.format.combine(
-    winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-    myFormat
-  ),
-  defaultMeta: { service: "user-service" },
-  transports: [
-    new winston.transports.Console({
-      stderrLevels: ["debug", "warn", "error"],
-    }),
-  ],
-  exitOnError: false,
-});
+import { brightness_change } from "./utils/brightness";
+import { logger } from "./logger";
 
 class Browser {
   ready = false;
@@ -33,7 +13,7 @@ class Browser {
   constructor() {
     app.whenReady().then(() => {
       this.init();
-    })
+    });
   }
 
   // @ts-ignore
@@ -74,6 +54,17 @@ class Browser {
 
     this.win.loadFile(path_to_theme);
     this.win.setBackgroundColor("#000000");
+
+    this.win.webContents.on("before-input-event", (event, input) => {
+      let value = nody_greeter.config.features.backlight.value;
+      let steps = nody_greeter.config.features.backlight.steps;
+      if (input.type == "keyUp") return;
+      if (input.code == "BrightnessDown") {
+        brightness_change(value, steps, "dec");
+      } else if (input.code == "BrightnessUp") {
+        brightness_change(value, steps, "inc");
+      }
+    });
 
     logger.log({
       level: "debug",

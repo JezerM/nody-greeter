@@ -56,8 +56,8 @@ layouts:
 # NOTE: Backlight feature uses 'acpilight' or 'xbacklight' as brightness controller
 #
 features:
-    battery: True
+    battery: False
     backlight:
-        enabled: True
+        enabled: False
         value: 10
-        steps: 10
+        steps: 0
