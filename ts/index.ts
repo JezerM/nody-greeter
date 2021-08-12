@@ -30,20 +30,21 @@ function list_themes(print = true) {
   }
 }
 
-function set_debug() {
-  nody_greeter.config.greeter.debug_mode = true;
-  nody_greeter.app.fullscreen = false;
-  nody_greeter.app.frame = true;
-  nody_greeter.app.debug_mode = true;
+function set_debug(mode: boolean) {
+  nody_greeter.config.greeter.debug_mode = mode;
+  nody_greeter.app.fullscreen = !mode;
+  nody_greeter.app.frame = mode;
+  nody_greeter.app.debug_mode = mode;
+
+  process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = mode ? "false" : "true";
 }
 
+process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
+
 if (res.debug) {
-  set_debug();
+  set_debug(true);
 } else if (res.normal) {
-  nody_greeter.config.greeter.debug_mode = false;
-  nody_greeter.app.fullscreen = true;
-  nody_greeter.app.frame = false;
-  nody_greeter.app.debug_mode = false;
+  set_debug(false);
 }
 if (res.theme && typeof res.theme === "string") {
   nody_greeter.config.greeter.theme = res.theme;
@@ -54,7 +55,7 @@ if (res.list) {
 }
 
 if (nody_greeter.config.greeter.debug_mode == true) {
-  set_debug();
+  set_debug(true);
 }
 
 import "./browser";

@@ -7,7 +7,7 @@
     "start": "electron .",
     "pack": "tsc && electron-builder --dir",
     "build": "tsc && electron-builder",
-    "postinstall": "electron-builder install-app-deps"
+    "build_asar": "tsc && node build.js"
   },
   "author": {
     "name": "Jezer Mejía",
@@ -50,9 +50,11 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.2",
+    "asar": "^3.0.3",
     "electron": "^13.1.8",
     "electron-builder": "^22.11.7",
     "electron-rebuild": "^2.3.5",
+    "fs-extra": "^8.1.0",
     "typescript": "^4.3.5"
   },
   "dependencies": {
