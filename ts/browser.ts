@@ -67,9 +67,10 @@ class Browser {
     let done = protocol.registerFileProtocol(
       "web-greeter",
       (request, callback) => {
-        let url = new URL(request.url);
+        let req_url = request.url;
+        let url = new URL(req_url);
         let res = url.pathname;
-        if (res.startsWith("/share")) res = res.replace("/share", "/usr/share");
+        //console.log({ url, res });
         callback(res);
       }
     );
@@ -80,6 +81,13 @@ class Browser {
     let dir = nody_greeter.app.theme_dir;
     let path_to_theme = path.join(dir, theme, "index.html");
     let def_theme = "gruvbox";
+
+    if (theme.startsWith("/")) path_to_theme = theme;
+    else if (theme.includes(".") || theme.includes("/"))
+      path_to_theme = path.join(process.cwd(), theme);
+
+    if (!path_to_theme.endsWith(".html"))
+      path_to_theme = path.join(path_to_theme, "index.html");
 
     if (!fs.existsSync(path_to_theme)) {
       logger.log({
@@ -92,8 +100,14 @@ class Browser {
     }
 
     //this.win.loadFile(path_to_theme);
-    this.win.loadURL(`web-greeter://${path_to_theme}`);
-    console.log(path_to_theme);
+    let theme_url = url.format({
+      pathname: path_to_theme,
+      host: "app",
+      hostname: "app",
+      protocol: "web-greeter:",
+    });
+    //console.log({ theme_url, url: new URL(theme_url) });
+    this.win.loadURL(`${theme_url}`);
     this.win.setBackgroundColor("#000000");
 
     this.win.webContents.on("before-input-event", (event, input) => {
@@ -165,18 +179,16 @@ class Browser {
       });
     });
 
-    session.defaultSession.webRequest.onBeforeSendHeaders(
-      (details, callback) => {
-        let url = new URL(details.url);
-        let block =
-          !(
-            url.protocol.includes("web-greeter") ||
-            url.protocol.includes("file") ||
-            url.protocol.includes("devtools")
-          ) && nody_greeter.config.greeter.secure_mode;
-        callback({ cancel: block });
-      }
-    );
+    session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
+      let url = new URL(details.url);
+      let block =
+        !(
+          url.protocol.includes("web-greeter") ||
+          url.protocol.includes("file") ||
+          url.protocol.includes("devtools")
+        ) && nody_greeter.config.greeter.secure_mode;
+      callback({ cancel: block });
+    });
   }
 }
 

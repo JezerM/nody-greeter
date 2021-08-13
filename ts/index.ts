@@ -35,11 +35,7 @@ function set_debug(mode: boolean) {
   nody_greeter.app.fullscreen = !mode;
   nody_greeter.app.frame = mode;
   nody_greeter.app.debug_mode = mode;
-
-  //process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = mode ? "false" : "true";
 }
-
-//process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
 
 if (res.debug) {
   set_debug(true);
