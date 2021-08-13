@@ -24,8 +24,6 @@
     },
     "linux": {
       "target": [
-        "deb",
-        "AppImage",
         "tar.xz"
       ],
       "category": "system"

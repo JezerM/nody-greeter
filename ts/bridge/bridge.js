@@ -13,7 +13,7 @@ const LightDMUsers = new LightDM.UserList()
 
 const { user_to_obj, language_to_obj, layout_to_obj, session_to_obj, battery_to_obj } = require("./bridge_objects.js")
 
-const { window } = require("../globals.js");
+const { browser } = require("../globals.js");
 const { brightness_get, brightness_change } = require("../utils/brightness.js");
 const { Battery } = require("../utils/battery")
 
@@ -65,7 +65,7 @@ class Greeter {
 
 	_emit_signal(signal) {
 		//console.log("SIGNAL EMITTED", signal)
-		window.win.webContents.send("LightDMSignal", signal)
+		browser.win.webContents.send("LightDMSignal", signal)
 	}
 
 	/**

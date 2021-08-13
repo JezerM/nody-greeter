@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Nody Greeter
+Comment=Greeter for LightDM
+Exec=nody-greeter
+Type=Application
+X-Ubuntu-Gettext-Domain=web-greeter

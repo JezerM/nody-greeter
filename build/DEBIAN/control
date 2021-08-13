@@ -1,0 +1,9 @@
+Package: nody-greeter
+Version: 1.0.0
+Section: system
+Priority: optional
+Architecture: all
+Depends: gobject-introspection, liblightdm-gobject-1-0, libcairo2
+Maintainer: amyuki4@gmail.com
+Description: Web Greeter, but node.js, for lightdm
+ LightDM greeter made in Node.js

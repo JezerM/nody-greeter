@@ -1,9 +1,17 @@
-import { app, BrowserWindow, screen, session } from "electron";
+import {
+  app,
+  BrowserWindow,
+  screen,
+  session,
+  dialog,
+  protocol,
+} from "electron";
 import * as path from "path";
 import * as fs from "fs";
 
 import { nody_greeter } from "./config";
 import { URL } from "url";
+import * as url from "url";
 import { brightness_change } from "./utils/brightness";
 import { logger } from "./logger";
 
@@ -11,6 +19,7 @@ class Browser {
   ready = false;
 
   constructor() {
+    this.set_priviliged();
     app.whenReady().then(() => {
       this.init();
     });
@@ -31,9 +40,39 @@ class Browser {
   }
 
   init() {
+    this.set_protocol();
     this.win = this.create_window();
     this.load_theme();
     this.init_listeners();
+  }
+
+  private set_priviliged() {
+    protocol.registerSchemesAsPrivileged([
+      {
+        scheme: "web-greeter",
+        privileges: {
+          bypassCSP: true,
+          supportFetchAPI: true,
+          standard: true,
+          secure: true,
+          corsEnabled: true,
+          stream: true,
+          allowServiceWorkers: true,
+        },
+      },
+    ]);
+  }
+
+  private set_protocol() {
+    let done = protocol.registerFileProtocol(
+      "web-greeter",
+      (request, callback) => {
+        let url = new URL(request.url);
+        let res = url.pathname;
+        if (res.startsWith("/share")) res = res.replace("/share", "/usr/share");
+        callback(res);
+      }
+    );
   }
 
   load_theme(): void {
@@ -52,7 +91,9 @@ class Browser {
       path_to_theme = path.join(dir, def_theme, "index.html");
     }
 
-    this.win.loadFile(path_to_theme);
+    //this.win.loadFile(path_to_theme);
+    this.win.loadURL(`web-greeter://${path_to_theme}`);
+    console.log(path_to_theme);
     this.win.setBackgroundColor("#000000");
 
     this.win.webContents.on("before-input-event", (event, input) => {
@@ -85,7 +126,6 @@ class Browser {
     let screen_size = screen.getPrimaryDisplay().workAreaSize;
 
     let win = new BrowserWindow({
-      //fullscreen: nody_greeter.app.fullscreen,
       height: screen_size.height,
       width: screen_size.width,
       backgroundColor: "#000000",
@@ -95,7 +135,6 @@ class Browser {
         preload: path.join(__dirname, "preload.js"),
         nodeIntegration: false,
         contextIsolation: false,
-        //nodeIntegrationInWorker: true,
         allowRunningInsecureContent: !nody_greeter.config.greeter.secure_mode, // Should set option
         devTools: nody_greeter.app.debug_mode, // Should set option
       },
@@ -131,7 +170,9 @@ class Browser {
         let url = new URL(details.url);
         let block =
           !(
-            url.protocol.includes("file") || url.protocol.includes("devtools")
+            url.protocol.includes("web-greeter") ||
+            url.protocol.includes("file") ||
+            url.protocol.includes("devtools")
           ) && nody_greeter.config.greeter.secure_mode;
         callback({ cancel: block });
       }

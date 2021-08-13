@@ -1,6 +1,9 @@
 [Desktop Entry]
-Name=Nody Greeter
-Comment=Greeter for LightDM
-Exec=nody-greeter
+Name=nody-greeter
+Exec=/opt/nody-greeter/nody-greeter %U
+Terminal=false
 Type=Application
-X-Ubuntu-Gettext-Domain=web-greeter
+#Icon=nody-greeter
+StartupWMClass=nody-greeter
+Comment=Trying to create a node.js greeter for lightdm
+Categories=system;

@@ -1,0 +1,7 @@
+#!/bin/sh
+chmod +x /opt/nody-greeter/nody-greeter
+
+# Link to the binary
+ln -sf '/opt/nody-greeter/nody-greeter' '/usr/bin/nody-greeter'
+
+update-desktop-database /usr/share/applications || true
