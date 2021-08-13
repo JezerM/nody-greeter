@@ -18,11 +18,12 @@ Themes working in web-greeter should work also here.
 
 - [x] Load `web-greeter.yml`
 - [x] Basic support
-- [x] Detect theme erros alert
+- [x] Detect theme errors alert
 - [x] Brightness support
 - [x] Battery support
-- [ ] Screensaver support
+- [x] Screensaver support
 - [x] Layouts support
+- [ ] Fix API bugs
 
 ## Pre-installation
 ```
