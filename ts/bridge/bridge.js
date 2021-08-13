@@ -15,7 +15,8 @@ const { user_to_obj, language_to_obj, layout_to_obj, session_to_obj, battery_to_
 
 const { browser } = require("../globals.js");
 const { brightness_get, brightness_change } = require("../utils/brightness.js");
-const { Battery } = require("../utils/battery")
+const { Battery } = require("../utils/battery");
+const { reset_screensaver } = require("../utils/screensaver.js");
 
 
 class Greeter {
@@ -462,7 +463,9 @@ class Greeter {
 	 * @returns {Boolean} {@link true} if successful, otherwise {@link false}
 	 */
 	start_session( session ) {
-		return LightDMGreeter.startSessionSync(session)
+		let started = LightDMGreeter.startSessionSync(session);
+		if (started) reset_screensaver();
+		return started;
 	}
 
 	/**
@@ -472,21 +475,6 @@ class Greeter {
 	suspend() {
 		return LightDM.suspend()
 	}
-
-	//authentication_complete = new Signal("authentication_complete");
-
-	//autologin_timer_expired = new Signal("autologin_timer_expired");
-
-	//brightness_update = new Signal("brightness_update");
-
-	//idle = new Signal("idle");
-
-	//reset = new Signal("reset");
-
-	//show_message = new Signal("show_message");
-
-	//show_prompt = new Signal("show_prompt");
-
 }
 
 function get_layouts(config_layouts) {
@@ -569,7 +557,6 @@ class GreeterConfig {
 	 */
 	get layouts() {
 		return get_layouts(this._config.layouts)
-		//return this._config.layouts;
 	}
 
 }

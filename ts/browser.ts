@@ -14,6 +14,7 @@ import { URL } from "url";
 import * as url from "url";
 import { brightness_change } from "./utils/brightness";
 import { logger } from "./logger";
+import { set_screensaver, reset_screensaver } from "./utils/screensaver";
 
 class Browser {
   ready = false;
@@ -161,6 +162,18 @@ class Browser {
       line: global.__line,
     });
 
+    /*
+     * This seems to not work.
+     * As electron uses GTK chromium, "XCURSOR_THEME" env variable is useless,
+     * and there is no way to change it unless modifying:
+     * - ~/.config/gtk-3.0/settings.ini
+     */
+
+    let cursor_theme = nody_greeter.config.greeter.icon_theme;
+    process.env.XCURSOR_THEME = cursor_theme ? cursor_theme : "";
+
+    set_screensaver();
+
     this.ready = true;
 
     return win;
@@ -177,6 +190,10 @@ class Browser {
         sourceID: path.basename(__filename),
         line: __line,
       });
+    });
+
+    app.on("quit", () => {
+      reset_screensaver();
     });
 
     session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
