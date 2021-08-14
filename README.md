@@ -2,48 +2,43 @@
 
 [Web Greeter][web-greeter] is created with Python... which is slow. So, I wanted to re-create it with Node.js!
 
-This is very experimental, do not use it.
+This is experimental, but works. You can use it!
+
+## Features
+
+- Create themes with HTML, CSS and JavaScript!
+- Should work everywhere.
+- JavaScript error handling, allowing to load the default theme.
+- Themes could be simple, or very complex.
+- Battery and brightness control.
 
 ## Considerations
 
-This depends on some [Web Greeter][web-greeter] files, therefore this won't work without installing it.
+Themes working in **web-greeter** should work also here. All themes shipped with **web-greeter** are found here as well.
 
-Themes working in web-greeter should work also here.
-
-- Some configurations inside `/etc/lightdm/web-greeter.yml` are not loaded
-- There could be bugs!!
+- `icon_theme` configuration is not loaded, as GTK apps don't allow to set a different **X-Cursor-Theme**
 - It kinda works
 
-## TODO
+## Differences with `web-greeter`
 
-- [x] Load `web-greeter.yml`
-- [x] Basic support
-- [x] Detect theme errors alert
-- [x] Brightness support
-- [x] Battery support
-- [x] Screensaver support
-- [x] Layouts support
-- [ ] Fix API bugs
-
-## Pre-installation
-```
-npm install
-./node_modules/.bin/electron-rebuild -w node-gtk
-```
+- As this is not made in **Python**, this should be faster.
+- Actual `mock.js` system could cause lots of problems.
+- No unnecessary dependencies.
+- Won't break on **Node.js** update when installed. **web-greeter** does with **Python**.
 
 ## Installation
 
-Try:
-
-```
+```sh
+git clone https://github.com/JezerM/nody-greeter.git
+cd nody-greeter
+npm install
+npm run rebuild
 npm run build
 ```
 
-Then, install the **.deb** package
-
-There is not any simple installation process for this.
-
-- Try to compile it with `electron-builder` and install it
-- Change the greeter in `/etc/lightdm/lightdm.conf` to `nody-greeter`
+This will rebuild **electron** along with **node-gtk** and then build the package root directory inside `build/extracted`. You can pack this dir to whatever you want, like **.deb** with:
+```sh
+dpkg-deb --root-owner-group --build unpacked
+```
 
 [web-greeter]: https://github.com/JezerM/web-greeter "Web Greeter"

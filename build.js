@@ -1,3 +1,8 @@
+/*
+ * This works like "electron-builder", but only builds the base
+ * Then, you can package the "unpacked" folder to whatever you want~
+ */
+
 const asar = require("asar");
 const fs = require("fs-extra")
 const path = require("path")
@@ -26,7 +31,7 @@ function create_build() {
     child_process.execSync('npm ci --production', {cwd: "./build/nody-asar", encoding: "utf-8", stdio: "ignore"});
     console.log("Packages installed");
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 }
 
@@ -68,20 +73,30 @@ console.log("Binding copied");
 // Unpacked section
 
 let app_path = root_path + "opt/nody-greeter/"
+let bin_path = root_path + "usr/bin/"
 let lightdm_path = root_path + "etc/lightdm/"
 let webg_path = root_path + "usr/share/web-greeter/"
-
-let run_file = `#!/usr/bin/env bash
-parent_path=$( cd "$(dirname "\${BASH_SOURCE[0]}")" ; pwd -P )
-electron $parent_path/resources/app.asar $@`
+let xgreeters_path = root_path + "/usr/share/xgreeters/"
+let applications_path = root_path + "/usr/share/applications/"
 
 fs.mkdirSync(app_path, {recursive: true})
 fs.mkdirSync(lightdm_path, {recursive: true})
 fs.mkdirSync(webg_path, {recursive: true})
 
-fs.writeFileSync(app_path + "nody-greeter", run_file, {encoding: "utf-8"});
-fs.chmodSync(app_path + "nody-greeter", 0o775);
+function copy_electron() {
+  console.log("Copying electron binary")
+  fs.copySync("./node_modules/electron/dist/", app_path, {recursive: true})
+  fs.removeSync(app_path + "resources")
+  fs.renameSync(app_path + "electron", app_path + "nody-greeter")
+}
+
 fs.copySync("./dist/web-greeter.yml", lightdm_path + "web-greeter.yml");
+fs.copySync("./dist/nody-xgreeter.desktop", xgreeters_path + "nody-greeter.desktop");
+fs.copySync("./dist/nody-greeter.desktop", applications_path + "nody-greeter.desktop");
+fs.copySync("./themes/", webg_path + "themes/")
+fs.moveSync(webg_path + "themes/_vendor/", webg_path + "_vendor/")
+
+copy_electron()
 
 let src = "./build/nody-asar";
 let dest = app_path + "resources/app.asar";

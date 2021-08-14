@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Delete the link to the binary
+rm -f '/usr/bin/nody-greeter'

@@ -5,9 +5,8 @@
   "main": "js/index.js",
   "scripts": {
     "start": "electron .",
-    "pack": "tsc && electron-builder --dir",
-    "build": "tsc && electron-builder",
-    "build_asar": "tsc && node build.js"
+    "rebuild": "electron-rebuild -w node-gtk",
+    "build": "tsc && node build.js"
   },
   "author": {
     "name": "Jezer Mejía",
