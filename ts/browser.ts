@@ -70,7 +70,7 @@ class Browser {
       (request, callback) => {
         let req_url = request.url;
         let url = new URL(req_url);
-        let res = url.pathname;
+        let res = decodeURI(url.pathname);
         //console.log({ url, res });
         callback(res);
       }
@@ -198,6 +198,7 @@ class Browser {
 
     session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
       let url = new URL(details.url);
+      //console.log({ origin: details.url, url });
       let block =
         !(
           url.protocol.includes("web-greeter") ||

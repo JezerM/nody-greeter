@@ -31,19 +31,19 @@ class Signal {
 		this._callbacks.splice(ind, 1);
 	}
 
-	_emit() {
+	_emit(...args) {
 		this._callbacks.forEach( (cb) => {
 			if (typeof cb !== 'function') return;
-			cb()
+			cb(...args)
 		})
 	}
 }
 
-ipcRenderer.on("LightDMSignal", (ev, ...args) => {
+ipcRenderer.on("LightDMSignal", (ev, signal, ...args) => {
 	allSignals.forEach((v) => {
-		if (v._name == args[0]) {
+		if (v._name == signal) {
 			//console.log(args)
-			v._emit()
+			v._emit(...args)
 		}
 	})
 })
@@ -498,7 +498,7 @@ class GreeterConfig {
 	 * @readonly
 	 */
 	get branding() {
-		return ipcRenderer.sendSync("GreeterConfig", "branding")
+		return ipcRenderer.sendSync("greeter_config", "branding")
 	}
 
 	/**
@@ -517,7 +517,7 @@ class GreeterConfig {
 	 * @readonly
 	 */
 	get greeter() {
-		return ipcRenderer.sendSync("GreeterConfig", "greeter")
+		return ipcRenderer.sendSync("greeter_config", "greeter")
 	}
 
 	/**
@@ -532,7 +532,7 @@ class GreeterConfig {
 	 * @readonly
 	 */
 	get features() {
-		return ipcRenderer.sendSync("GreeterConfig", "features")
+		return ipcRenderer.sendSync("greeter_config", "features")
 	}
 
 	/*
@@ -541,7 +541,7 @@ class GreeterConfig {
 	 * @readonly
 	 */
 	get layouts() {
-		return ipcRenderer.sendSync("GreeterConfig", "layouts")
+		return ipcRenderer.sendSync("greeter_config", "layouts")
 	}
 
 }
@@ -618,7 +618,10 @@ class ThemeUtils {
 		}
 
 		try {
-			return callback([])
+			ipcRenderer.invoke("theme_utils", "dirlist", path, only_images).then((files) => {
+				callback(files)
+			})
+			return;
 		} catch( err ) {
 			console.error(`theme_utils.dirlist(): ${err}`);
 			return callback([]);

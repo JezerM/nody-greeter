@@ -5,6 +5,8 @@ const {
 
 const gi = require("node-gtk")
 const LightDM = gi.require("LightDM", "1")
+const fs = require("fs")
+const os = require("os")
 
 const { nody_greeter } = require("../config.js")
 
@@ -17,6 +19,7 @@ const { browser } = require("../globals.js");
 const { brightness_get, brightness_change } = require("../utils/brightness.js");
 const { Battery } = require("../utils/battery");
 const { reset_screensaver } = require("../utils/screensaver.js");
+const path = require("path");
 
 
 class Greeter {
@@ -37,6 +40,7 @@ class Greeter {
 
 		let user = LightDMUsers.getUsers()[0]
 		let user_data_dir = LightDMGreeter.ensureSharedDataDirSync(user.name)
+		this._shared_data_directory = user_data_dir.slice(0, user_data_dir.lastIndexOf("/"))
 
 		globalThis.lightdm = this;
 
@@ -51,10 +55,10 @@ class Greeter {
 			() => {this._emit_signal("autologin-timer-expired")}
 		);
 		LightDMGreeter.connect("show-message",
-			() => {this._emit_signal("show-message")}
+			(text, type) => {this._emit_signal("show-message", text, type)}
 		);
 		LightDMGreeter.connect("show-prompt",
-			() => {this._emit_signal("show-prompt")}
+			(text, type) => {this._emit_signal("show-prompt", text, type)}
 		);
 		LightDMGreeter.connect("idle",
 			() => {this._emit_signal("idle")}
@@ -64,9 +68,9 @@ class Greeter {
 		);
 	}
 
-	_emit_signal(signal) {
-		//console.log("SIGNAL EMITTED", signal)
-		browser.win.webContents.send("LightDMSignal", signal)
+	_emit_signal(signal, ...args) {
+		//console.log("SIGNAL EMITTED", signal, args)
+		browser.win.webContents.send("LightDMSignal", signal, ...args)
 	}
 
 	/**
@@ -326,6 +330,15 @@ class Greeter {
 	}
 
 	/**
+	 * LightDM shared data directory
+	 * @type {String}
+	 * @readonly
+	 */
+	get shared_data_directory() {
+		return this._shared_data_directory;
+	}
+
+	/**
 	 * Check if a manual login option should be shown. If {@link true}, the theme should
 	 * provide a way for a username to be entered manually. Otherwise, themes that show
 	 * a user list may limit logins to only those users.
@@ -561,8 +574,6 @@ class GreeterConfig {
 
 }
 
-let time_language = null
-
 class ThemeUtils {
 	constructor(config) {
 		if ("theme_utils" in globalThis) {
@@ -571,40 +582,14 @@ class ThemeUtils {
 
 		this._config = config
 
+		this._allowed_dirs = [
+			nody_greeter.app.theme_dir,
+			nody_greeter.config.branding.background_images_dir,
+			globalThis.lightdm.shared_data_directory,
+			os.tmpdir(),
+		]
+
 		globalThis.theme_utils = this
-	}
-
-	/**
-	 * Binds `this` to class, `context`, for all of the class's methods.
-	 *
-	 * @arg {object} context An ES6 class instance with at least one method.
-	 *
-	 * @return {object} `context` with `this` bound to it for all of its methods.
-	 */
-	bind_this( context ) {
-		let excluded_methods = ['constructor'];
-
-		function not_excluded( _method, _context ) {
-			let is_excluded = excluded_methods.findIndex( excluded_method => _method === excluded_method ) > -1,
-				is_method = 'function' === typeof _context[_method];
-
-			return is_method && !is_excluded;
-		}
-
-		for ( let obj = context; obj; obj = Object.getPrototypeOf( obj ) ) {
-			// Stop once we have traveled all the way up the inheritance chain
-			if ( 'Object' === obj.constructor.name ) {
-				break;
-			}
-
-			for ( let method of Object.getOwnPropertyNames( obj ) ) {
-				if ( not_excluded( method, context ) ) {
-					context[method] = context[method].bind( context );
-				}
-			}
-		}
-
-		return context;
 	}
 
 	/**
@@ -615,182 +600,51 @@ class ThemeUtils {
 	 *   * Is located within the greeter's shared data directory (`/var/lib/lightdm-data`).
 	 *   * Is located in `/tmp`.
 	 *
-	 * @param {String}              path        The abs path to desired directory.
+	 * @param {String}              dir_path        The abs path to desired directory.
 	 * @param {Boolean}             only_images Include only images in the results. Default `true`.
 	 * @param {function(String[])}  callback    Callback function to be called with the result.
 	 */
-	dirlist( path, only_images = true, callback ) {
-		if ( '' === path || 'string' !== typeof path ) {
-			console.error(`theme_utils.dirlist(): path must be a non-empty string!`);
-			return callback([]);
-
-		} else if ( null !== path.match(/^[^/].+/) ) {
-			console.error(`theme_utils.dirlist(): path must be absolute!`);
-			return callback([]);
+	dirlist( dir_path, only_images = true) {
+		if (!dir_path || typeof dir_path !== "string" || dir_path === "/") {
+			return []
 		}
 
-		if ( null !== path.match(/\/\.+(?=\/)/) ) {
-			// No special directory names allowed (eg ../../)
-			path = path.replace(/\/\.+(?=\/)/g, '' );
+		dir_path = fs.realpathSync(path.normalize(dir_path))
+
+		if (!path.isAbsolute(dir_path) || !fs.lstatSync(dir_path).isDirectory()) {
+			return []
 		}
 
-		try {
-			return callback([])
-		} catch( err ) {
-			console.error(`theme_utils.dirlist(): ${err}`);
-			return callback([]);
-		}
-	}
+		let allowed = false;
 
-	/**
-	 * Binds `this` to class, `context`, for all of the class's methods.
-	 *
-	 * @param {Object} context An ES6 class instance with at least one method.
-	 *
-	 * @return {Object} `context` with `this` bound to it for all of its methods.
-	 */
-	bind_this( context ) {
-		let excluded_methods = ['constructor'];
-
-		function not_excluded( _method, _context ) {
-			let is_excluded = excluded_methods.findIndex( excluded_method => _method === excluded_method ) > -1,
-				is_method = 'function' === typeof _context[_method];
-
-			return is_method && !is_excluded;
-		}
-
-		for ( let obj = context; obj; obj = Object.getPrototypeOf( obj ) ) {
-			// Stop once we have traveled all the way up the inheritance chain
-			if ( 'Object' === obj.constructor.name ) {
-				break;
+		for (let i = 0; i < this._allowed_dirs.length; i++) {
+			if (dir_path.startsWith(this._allowed_dirs[i])) {
+				allowed = true; break;
 			}
+		}
 
-			for ( let method of Object.getOwnPropertyNames( obj ) ) {
-				if ( not_excluded( method, context ) ) {
-					context[method] = context[method].bind( context );
+		if (!allowed) return []
+
+		let files = fs.readdirSync(dir_path, {withFileTypes: true});
+		let result = [];
+
+		if (only_images) {
+			result = files.reduce((cb, v) => { // This only returns files inside path, not recursively
+				if (v.isFile() && (
+					v.name.match(/.+\.(jpe?g|png|gif|bmp|webp)/)
+				)) {
+					cb.push(path.join(dir_path, v.name))
 				}
-			}
+				return cb;
+			}, [])
+		} else {
+			result = files.reduce((cb, v) => {
+				cb.push(path.join(dir_path, v.name)); return cb;
+			}, [])
 		}
-
-		return context;
+		//console.log(dir_path, result);
+		return result;
 	}
-
-	/**
-	 * Get the current date in a localized format. Local language is autodetected by default, but can be set manually in the greeter config file.
-	 * 	 * `language` defaults to the system's language, but can be set manually in the config file.
-	 * 
-	 * @returns {Object} The current date.
-	 */
-	get_current_localized_date() {
-		let config = greeter_config.greeter
-
-		var locale = []
-
-		if (time_language === null) {
-			time_language = config.time_language || ""
-		}
-
-		if (time_language != "") {
-			locale.push(time_language)
-		}
-
-		let optionsDate = { day: "2-digit", month: "2-digit", year: "2-digit" }
-
-		let fmtDate = Intl.DateTimeFormat(locale, optionsDate)
-
-		let now = new Date()
-		var date = fmtDate.format(now)
-
-		return date
-	}
-
-	/**
-	 * Get the current time in a localized format. Local language is autodetected by default, but can be set manually in the greeter config file.
-	 * 	 * `language` defaults to the system's language, but can be set manually in the config file.
-	 * 
-	 * @returns {Object} The current time.
-	 */
-	get_current_localized_time() {
-		let config = greeter_config.greeter
-
-		var locale = []
-
-		if (time_language === null) {
-			time_language = config.time_language || ""
-		}
-
-		if (time_language != "") {
-			locale.push(time_language)
-		}
-
-		let optionsTime = { hour: "2-digit", minute: "2-digit" }
-
-		let fmtTime = Intl.DateTimeFormat(locale, optionsTime)
-
-		let now = new Date()
-		var time = fmtTime.format(now)
-
-		return time
-	}
-
-}
-
-function handler(ldm, ev, ...args) {
-	if (args.length == 0) return ev.returnValue = undefined
-	let param = args[0]
-	//console.log(args)
-	args.shift()
-
-	if (typeof param !== "string"){
-		return ev.returnValue = undefined
-	}
-	let pr = ldm[param]
-
-	let value = undefined
-
-	if (typeof pr === "function") {
-		if (param == "setLayout") {
-			let layout = new LightDM.Layout(args[0])
-			LightDM.getLayout()
-			value = LightDM.setLayout(layout)
-		} else
-		value = ldm[param](...args)
-	}
-	if (!value) {
-		return ev.returnValue = undefined
-	}
-
-	if (args.length > 0) {
-		return ev.returnValue = value
-	}
-
-	let str = value.toString()
-
-	if (str.includes("LightDMLanguage")) {
-		if (Array.isArray(value)) {
-			value = reduceArray(value, language_to_obj)
-		} else
-		value = language_to_obj(value)
-	} else
-	if (str.includes("LightDMLayout")) {
-		if (Array.isArray(value)) {
-			value = reduceArray(value, layout_to_obj)
-		} else
-		value = layout_to_obj(value)
-	} else
-	if (str.includes("LightDMSession")) {
-		if (Array.isArray(value)) {
-			value = reduceArray(value, session_to_obj)
-		} else
-		value = session_to_obj(value)
-	} else
-	if (str.includes("LightDMUser")) {
-		if (Array.isArray(value)) {
-			value = reduceArray(value, user_to_obj)
-		} else
-		value = user_to_obj(value)
-	}
-	return ev.returnValue = value
 }
 
 function reduceArray(arr, func) {
@@ -802,36 +656,18 @@ function reduceArray(arr, func) {
 	}, [])
 }
 
-ipcMain.on("LightDM", (ev, ...args) => {
-	return handler(LightDM, ev, ...args)
-})
-
-ipcMain.on("LightDMGreeter", (ev, ...args) => {
-	return handler(LightDMGreeter, ev, ...args)
-})
-
-ipcMain.on("LightDMUsers", (ev, ...args) => {
-	return handler(LightDMUsers, ev, ...args)
-})
-
-ipcMain.on("GreeterConfig", (ev, ...args) => {
+function handler(accesor, ev, ...args) {
 	if (args.length == 0) return ev.returnValue = undefined
-	let pr = globalThis.greeter_config[args[0]]
-	ev.returnValue = pr || undefined
-})
-
-ipcMain.on("lightdm", (ev, ...args) => {
-	if (args.length == 0) return ev.returnValue = undefined
-	let descriptors = Object.getOwnPropertyDescriptors(Object.getPrototypeOf(globalThis.lightdm))
+	let descriptors = Object.getOwnPropertyDescriptors(Object.getPrototypeOf(accesor))
 	let param = args[0]
 	args.shift()
-	let pr = globalThis.lightdm[param]
+	let pr = accesor[param]
 	let ac = descriptors[param]
 
 	let value = undefined
 
 	if (typeof pr === "function") {
-		value = globalThis.lightdm[param](...args)
+		value = accesor[param](...args)
 	} else {
 		if (args.length > 0 && ac && ac.set) {
 			ac.set(...args)
@@ -839,10 +675,27 @@ ipcMain.on("lightdm", (ev, ...args) => {
 			value = pr || undefined
 		}
 	}
+	return ev.returnValue = value
+}
 
-	ev.returnValue = value
+ipcMain.on("greeter_config", (ev, ...args) => {
+	if (args.length == 0) return ev.returnValue = undefined;
+	let pr = globalThis.greeter_config[args[0]]
+	ev.returnValue = pr || undefined
 })
 
-new ThemeUtils(nody_greeter.config)
-new GreeterConfig(nody_greeter.config)
+ipcMain.on("theme_utils", (ev, ...args) => {
+	handler(globalThis.theme_utils, ev, ...args)
+})
+
+ipcMain.handle("theme_utils", (ev, ...args) => {
+	return handler(globalThis.theme_utils, ev, ...args)
+})
+
+ipcMain.on("lightdm", (ev, ...args) => {
+	handler(globalThis.lightdm, ev, ...args)
+})
+
 new Greeter(nody_greeter.config)
+new GreeterConfig(nody_greeter.config)
+new ThemeUtils(nody_greeter.config)
