@@ -1,4 +1,5 @@
 node_modules/
-js/
 build/*
+js/
+!themes/**/js
 !build/DEBIAN
