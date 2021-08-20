@@ -61,8 +61,12 @@ class Battery {
     return this._perc;
   }
 
-  get state() {
+  get status() {
     return this._status;
+  }
+
+  get ac_status() {
+    return this._ac_status;
   }
 
   get capacity() {
@@ -111,7 +115,7 @@ class Battery {
   }
 
   /**
-   * Based on "bat" widget fro "lain" awesome-wm library
+   * Based on "bat" widget from "lain" awesome-wm library
    * * (c) 2013,      Luca CPZ
    * * (c) 2010-2012, Peter Hofmann
    * @see https://github.com/lcpz/lain/blob/master/widget/bat.lua
@@ -221,7 +225,7 @@ class Battery {
         let hours = Math.floor(rate_time);
         let minutes = Math.floor((rate_time - hours) * 60);
         this._perc = Math.floor(
-          Math.min(100, (sum_energy_now / sum_energy_full) * 100) + 0.5
+          Math.min(100, (sum_energy_now / sum_energy_full) * 100 + 0.5)
         );
         this._time = `${hours.toString().padStart(2, "0")}:${minutes
           .toString()

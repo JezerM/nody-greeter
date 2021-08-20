@@ -16,7 +16,7 @@ const LightDMUsers = new LightDM.UserList()
 const { user_to_obj, language_to_obj, layout_to_obj, session_to_obj, battery_to_obj } = require("./bridge_objects.js")
 
 const { browser } = require("../globals.js");
-const { brightness_get, brightness_change } = require("../utils/brightness.js");
+const { Brightness } = require("../utils/brightness.js");
 const { Battery } = require("../utils/battery");
 const { reset_screensaver } = require("../utils/screensaver.js");
 const path = require("path");
@@ -125,15 +125,14 @@ class Greeter {
 	 * @type {Number}
 	 */
 	get brightness() {
-		return brightness_get();
+		return Brightness.get_brightness();
 	}
 	/**
 	 * Sets the brightness
 	 * @param {Number} quantity The quantity to set
 	 */
 	set brightness( quantity ) {
-		let steps = nody_greeter.config.features.backlight.steps;
-		return brightness_change(quantity, steps, "set");
+		Brightness.set_brightness(quantity);
 	}
 
 	/**
@@ -390,8 +389,7 @@ class Greeter {
 	 * @param {Number} quantity The quantity to set
 	 */
 	brightnessSet( quantity ) {
-		let steps = this._config.features.backlight.steps;
-		brightness_change(quantity, steps, "set");
+		Brightness.set_brightness(quantity);
 	}
 
 	/**
@@ -399,8 +397,7 @@ class Greeter {
 	 * @param {Number} quantity The quantity to increase
 	 */
 	brightnessIncrease( quantity ) {
-		let steps = this._config.features.backlight.steps;
-		brightness_change(quantity, steps, "inc");
+		Brightness.inc_brightness(quantity);
 	}
 
 	/**
@@ -408,8 +405,7 @@ class Greeter {
 	 * @param {Number} quantity The quantity to decrease
 	 */
 	brightnessDecrease( quantity ) {
-		let steps = this._config.features.backlight.steps;
-		brightness_change(quantity, steps, "dec");
+		Brightness.dec_brightness(quantity);
 	}
 
 	/**

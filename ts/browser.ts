@@ -12,7 +12,7 @@ import * as fs from "fs";
 import { nody_greeter } from "./config";
 import { URL } from "url";
 import * as url from "url";
-import { brightness_change } from "./utils/brightness";
+import { Brightness } from "./utils/brightness";
 import { logger } from "./logger";
 import { set_screensaver, reset_screensaver } from "./utils/screensaver";
 
@@ -116,9 +116,9 @@ class Browser {
       let steps = nody_greeter.config.features.backlight.steps;
       if (input.type == "keyUp") return;
       if (input.code == "BrightnessDown") {
-        brightness_change(value, steps, "dec");
+        Brightness.dec_brightness(value);
       } else if (input.code == "BrightnessUp") {
-        brightness_change(value, steps, "inc");
+        Brightness.inc_brightness(value);
       }
     });
 
