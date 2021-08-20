@@ -4,6 +4,7 @@ import * as fs from "fs";
 
 import { nody_greeter } from "../config";
 import { logger } from "../logger";
+import { ACPI } from "./acpi";
 
 interface battery {
   name: string;
@@ -81,36 +82,10 @@ class Battery {
   }
 
   acpi_listen() {
-    const acpi = child_process.spawn("acpi_listen");
-    const grep = child_process.spawn("grep", [
-      "--line-buffered",
-      "-E",
-      "battery|ac_adapter",
-    ]);
-    acpi.on("close", () => grep.stdin.end());
-    acpi.stdout.on("data", (data) => grep.stdin.write(data.toString()));
-    acpi.on("error", (err) => {
-      logger.log({
-        level: "error",
-        message: "Battery: " + err.message,
-        sourceID: path.basename(__dirname),
-        line: __line,
-      });
-    });
-    acpi.on("close", () => {
-      grep.stdin.end();
-      if (acpi_tries < 5) {
-        acpi_tries++;
-        logger.log({
-          level: "debug",
-          message: "Restarting acpi_listen",
-        });
-        return this.acpi_listen();
+    ACPI.connect((data) => {
+      if (data.match(/battery|ac_adapter/)) {
+        this.full_update();
       }
-    });
-    grep.stdout.on("data", (data) => {
-      data = data.toString().replace("\n", "");
-      this.full_update();
     });
   }
 
