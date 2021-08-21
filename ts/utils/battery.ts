@@ -186,31 +186,34 @@ class Battery {
         this._watt = 0;
       } else if (this._status != "Full") {
         rate_time = 0;
-      }
-
-      if (sum_rate_power > 0 || sum_rate_current > 0) {
-        let div = (sum_rate_power > 0 && sum_rate_power) || sum_rate_current;
-        if (this._status == "Charging")
-          rate_time = (sum_energy_full - sum_energy_now) / div;
-        else rate_time = sum_energy_now / div;
-        if (0 < rate_time && rate_time < 0.01) {
-          rate_time_magnitude = Math.abs(Math.floor(Math.log10(rate_time)));
-          rate_time = (rate_time * 10) ^ (rate_time_magnitude - 2);
+        if (sum_rate_power > 0 || sum_rate_current > 0) {
+          let div = (sum_rate_power > 0 && sum_rate_power) || sum_rate_current;
+          if (this._status == "Charging")
+            rate_time = (sum_energy_full - sum_energy_now) / div;
+          else rate_time = sum_energy_now / div;
+          if (0 < rate_time && rate_time < 0.01) {
+            rate_time_magnitude = Math.abs(Math.floor(Math.log10(rate_time)));
+            rate_time = (rate_time * 10) ^ (rate_time_magnitude - 2);
+          }
+          let hours = Math.floor(rate_time);
+          let minutes = Math.floor((rate_time - hours) * 60);
+          this._perc = Math.floor(
+            Math.min(100, (sum_energy_now / sum_energy_full) * 100 + 0.5)
+          );
+          this._time = `${hours.toString().padStart(2, "0")}:${minutes
+            .toString()
+            .padStart(2, "0")}`;
+          this._watt = sum_rate_energy / 1e6;
         }
-        let hours = Math.floor(rate_time);
-        let minutes = Math.floor((rate_time - hours) * 60);
-        this._perc = Math.floor(
-          Math.min(100, (sum_energy_now / sum_energy_full) * 100 + 0.5)
-        );
-        this._time = `${hours.toString().padStart(2, "0")}:${minutes
-          .toString()
-          .padStart(2, "0")}`;
-        this._watt = sum_rate_energy / 1e6;
+      } else if (this._status == "Full") {
+        this._perc = 100;
+        this._time = "00:00";
+        this._watt = 0;
       }
     }
     this._perc = this._perc == null ? 0 : this._perc;
 
-    globalThis.lightdm._emit_signal("battery_update");
+    if (globalThis.lightdm) globalThis.lightdm._emit_signal("battery_update");
 
     running_update = false;
   }
