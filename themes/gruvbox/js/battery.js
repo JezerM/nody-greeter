@@ -17,7 +17,7 @@ class Battery {
     charging = ac == 1 ? "-charging" : ""
 
     if (blevel < 10) icon = "-outline"
-    if (state == "Full" ) { icon = ""; charging = ""}
+    if (level == 100 && ac == 0) {icon = ""}
     if (level >= 0) {
       this._battery.style.visibility = "visible"
       this._battery.innerHTML = `<span class="mdi mdi-battery${charging}${icon}"></span> ${level}%`
