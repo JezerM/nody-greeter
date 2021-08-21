@@ -1,7 +1,7 @@
 import * as yaml from "js-yaml";
 import * as fs from "fs";
 
-interface greeter_config {
+interface web_greeter_config {
   branding: {
     background_images_dir: string;
     logo_image: string;
@@ -35,7 +35,7 @@ interface app_config {
 }
 
 interface nody_config {
-  config: greeter_config;
+  config: web_greeter_config;
   app: app_config;
 }
 
@@ -75,9 +75,9 @@ const nody_greeter: nody_config = {
 
 try {
   let file = fs.readFileSync("/etc/lightdm/web-greeter.yml", "utf-8");
-  nody_greeter.config = yaml.load(file) as greeter_config;
+  nody_greeter.config = yaml.load(file) as web_greeter_config;
 } catch (err) {
   console.error(err);
 }
 
-export { nody_greeter };
+export { nody_greeter, web_greeter_config };
