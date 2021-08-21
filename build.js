@@ -78,10 +78,12 @@ let lightdm_path = root_path + "etc/lightdm/"
 let webg_path = root_path + "usr/share/web-greeter/"
 let xgreeters_path = root_path + "/usr/share/xgreeters/"
 let applications_path = root_path + "/usr/share/applications/"
+let xdg_ldm_path = root_path + "/etc/xdg/lightdm/lightdm.conf.d/"
 
 fs.mkdirSync(app_path, {recursive: true})
 fs.mkdirSync(lightdm_path, {recursive: true})
 fs.mkdirSync(webg_path, {recursive: true})
+fs.mkdirSync(xdg_ldm_path, {recursive: true})
 
 function copy_electron() {
   console.log("Copying electron binary")
@@ -94,7 +96,10 @@ fs.copySync("./dist/web-greeter.yml", lightdm_path + "web-greeter.yml");
 fs.copySync("./dist/nody-xgreeter.desktop", xgreeters_path + "nody-greeter.desktop");
 fs.copySync("./dist/nody-greeter.desktop", applications_path + "nody-greeter.desktop");
 fs.copySync("./themes/", webg_path + "themes/")
-fs.moveSync(webg_path + "themes/_vendor/", webg_path + "_vendor/")
+fs.copySync("./dist/90-greeter-wrapper.conf", xdg_ldm_path + "90-greeter-wrapper.conf");
+fs.copySync("./dist/Xgreeter", lightdm_path + "Xgreeter");
+fs.chmodSync(lightdm_path + "Xgreeter", 0755);
+fs.moveSync(webg_path + "themes/_vendor/", webg_path + "_vendor/", {overwrite: true});
 
 copy_electron()
 
