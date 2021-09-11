@@ -61,4 +61,4 @@ function error_prompt(message: string, source: string, line: number) {
   }
 }
 
-export { browser, logger };
+export { browser, logger, error_prompt };

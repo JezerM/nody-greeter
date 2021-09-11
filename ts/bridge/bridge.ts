@@ -1,4 +1,4 @@
-import { ipcMain } from "electron";
+import { dialog, ipcMain } from "electron";
 import * as gi from "node-gtk";
 import * as fs from "fs";
 import * as os from "os";
@@ -16,7 +16,7 @@ import {
   session_to_obj,
   battery_to_obj,
 } from "./bridge_objects";
-import { browser } from "../globals";
+import { browser, error_prompt } from "../globals";
 
 import { Brightness } from "../utils/brightness.js";
 import { Battery } from "../utils/battery";
@@ -29,6 +29,7 @@ import {
   LightDMSession,
   LightDMUser,
 } from "../ldm_interfaces";
+import { logger } from "../logger";
 
 class Greeter {
   _config: web_greeter_config;
@@ -46,7 +47,21 @@ class Greeter {
       this._battery = new Battery();
     }
 
-    LightDMGreeter.connectToDaemonSync();
+    try {
+      LightDMGreeter.connectToDaemonSync();
+    } catch (err) {
+      logger.error(err);
+      browser.whenReady().then(() => {
+        dialog.showMessageBoxSync(browser.win, {
+          message:
+            "Detected a problem that could interfere with the system login process", // Yeah, that problematic message
+          detail: `LightDM: ${err}\nYou can continue without major problems, but you won't be able to log in`,
+          type: "error",
+          title: "An error ocurred",
+          buttons: ["Okay"],
+        });
+      });
+    }
 
     this._connect_signals();
 
@@ -56,6 +71,8 @@ class Greeter {
       0,
       user_data_dir.lastIndexOf("/")
     );
+
+    logger.debug("LightDM API connected");
 
     globalThis.lightdm = this;
 
