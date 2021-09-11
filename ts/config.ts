@@ -1,7 +1,9 @@
 import * as yaml from "js-yaml";
 import * as fs from "fs";
+import * as path from "path";
+import { logger } from "./logger";
 
-interface web_greeter_config {
+export interface web_greeter_config {
   branding: {
     background_images_dir: string;
     logo_image: string;
@@ -27,19 +29,19 @@ interface web_greeter_config {
   };
 }
 
-interface app_config {
+export interface app_config {
   fullscreen: boolean;
   frame: boolean;
   debug_mode: boolean;
   theme_dir: string;
 }
 
-interface nody_config {
+export interface nody_config {
   config: web_greeter_config;
   app: app_config;
 }
 
-const nody_greeter: nody_config = {
+export const nody_greeter: nody_config = {
   config: {
     branding: {
       background_images_dir: "/usr/share/backgrounds",
@@ -73,11 +75,17 @@ const nody_greeter: nody_config = {
   },
 };
 
-try {
-  let file = fs.readFileSync("/etc/lightdm/web-greeter.yml", "utf-8");
-  nody_greeter.config = yaml.load(file) as web_greeter_config;
-} catch (err) {
-  console.error(err);
+let path_to_config = "/etc/lightdm/web-greeter.yml";
+
+export function load_config() {
+  try {
+    if (!fs.existsSync(path_to_config))
+      throw new Error("Config file not found");
+    let file = fs.readFileSync(path_to_config, "utf-8");
+    nody_greeter.config = yaml.load(file) as web_greeter_config;
+  } catch (err) {
+    logger.error(`Config was not loaded:\n\t${err}`);
+  }
 }
 
-export { nody_greeter, web_greeter_config };
+load_config();

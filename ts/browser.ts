@@ -91,12 +91,7 @@ class Browser {
       path_to_theme = path.join(path_to_theme, "index.html");
 
     if (!fs.existsSync(path_to_theme)) {
-      logger.log({
-        level: "warn",
-        message: `"${theme}" theme does not exists. Using "${def_theme}" theme`,
-        sourceID: path.basename(__filename),
-        line: __line,
-      });
+      logger.warn(`"${theme}" theme does not exists. Using "${def_theme}" theme`);
       path_to_theme = path.join(dir, def_theme, "index.html");
     }
 
@@ -122,21 +117,11 @@ class Browser {
       }
     });
 
-    logger.log({
-      level: "debug",
-      message: "Theme loaded",
-      sourceID: path.basename(__filename),
-      line: __line,
-    });
+    logger.debug("Theme loaded");
   }
 
   create_window() {
-    logger.log({
-      level: "debug",
-      message: "Initializing Browser Window",
-      sourceID: path.basename(__filename),
-      line: __line,
-    });
+    logger.debug("Initializing Browser Window");
 
     let screen_size = screen.getPrimaryDisplay().workAreaSize;
 
@@ -155,12 +140,7 @@ class Browser {
       },
     });
 
-    logger.log({
-      level: "debug",
-      message: "Browser Window created",
-      sourceID: path.basename(__filename),
-      line: global.__line,
-    });
+    logger.debug("Browser Window created");
 
     /*
      * This seems to not work.
@@ -184,12 +164,7 @@ class Browser {
       this.win.setFullScreen(nody_greeter.app.fullscreen);
       this.win.show();
       this.win.focus();
-      logger.log({
-        level: "debug",
-        message: "Nody Greeter started",
-        sourceID: path.basename(__filename),
-        line: __line,
-      });
+      logger.debug("Nody Greeter started");
     });
 
     app.on("quit", () => {

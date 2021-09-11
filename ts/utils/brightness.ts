@@ -53,6 +53,14 @@ class BrightnessController {
     let steps = nody_greeter.config.features.backlight.steps;
     this.steps = steps <= 1 ? 1 : steps;
     this.delay = 200;
+    this.watch_brightness();
+  }
+
+  private watch_brightness() {
+    fs.watch(this._brightness_path, () => {
+      if (globalThis.lightdm)
+        globalThis.lightdm._emit_signal("brightness_update");
+    });
   }
 
   _max_brightness: number;
@@ -60,19 +68,17 @@ class BrightnessController {
     return this._max_brightness;
   }
 
-  public get real_brightness(): number {
+  private get real_brightness(): number {
     return parseInt(
       fs.readFileSync(this._brightness_path, { encoding: "utf-8" })
     );
   }
-  public set real_brightness(v: number) {
+  private set real_brightness(v: number) {
     if (v > this.max_brightness) v = this.max_brightness;
     else if (v <= 0) v = 0;
 
     if (!fs.existsSync(this._brightness_path)) return;
     fs.writeFileSync(this._brightness_path, String(Math.round(v)));
-    if (globalThis.lightdm)
-      globalThis.lightdm._emit_signal("brightness_update");
   }
 
   public get brightness() {

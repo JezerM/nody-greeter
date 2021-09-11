@@ -1,6 +1,4 @@
 import * as child_process from "child_process";
-import * as path from "path";
-import * as fs from "fs";
 import { logger } from "../logger";
 
 type callback = (data: string) => any;
@@ -27,20 +25,12 @@ class ACPI_controller {
   private listen() {
     const acpi = child_process.spawn("acpi_listen");
     acpi.on("error", (err) => {
-      logger.log({
-        level: "error",
-        message: "Battery: " + err.message,
-        sourceID: path.basename(__dirname),
-        line: __line,
-      });
+      logger.error("Battery: " + err.message);
     });
     acpi.on("close", () => {
       if (this.tries < 5) {
         this.tries++;
-        logger.log({
-          level: "debug",
-          message: "Restarting acpi_listen",
-        });
+        logger.debug("Restarting acpi_listen");
         return this.listen();
       }
     });

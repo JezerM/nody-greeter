@@ -26,23 +26,13 @@ async function set_screensaver(timeout?: number) {
   if (!taken) await get_screensaver();
   timeout = timeout ? timeout : nody_greeter.config.greeter.screensaver_timeout;
   child_process.exec(`xset s ${timeout}`);
-  logger.log({
-    level: "debug",
-    message: "Screensaver set",
-    sourceID: path.basename(__filename),
-    line: __line,
-  });
+  logger.debug("Screensaver set");
 }
 
 async function reset_screensaver() {
   if (!taken) await get_screensaver();
   child_process.exec(`xset s ${initial_timeout}`);
-  logger.log({
-    level: "debug",
-    message: "Screensaver reset",
-    sourceID: path.basename(__filename),
-    line: __line,
-  });
+  logger.debug("Screensaver reset");
 }
 
 export { get_screensaver, set_screensaver, reset_screensaver };

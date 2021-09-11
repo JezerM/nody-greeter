@@ -1,4 +1,3 @@
-import * as path from "path";
 import { dialog } from "electron";
 import { Browser } from "./browser";
 import { logger } from "./logger";
@@ -8,47 +7,11 @@ const browser = new Browser();
 
 browser.whenReady().then(() => {
   initLogger();
-  logger.log({
-    level: "debug",
-    message: "Window is ready",
-    sourceID: path.basename(__filename),
-    line: __line,
-  });
+  logger.debug("Window is ready");
 });
-
-Object.defineProperty(global, "__stack", {
-  get: function () {
-    var orig = Error.prepareStackTrace;
-    Error.prepareStackTrace = function (_, stack) {
-      return stack;
-    };
-    var err = new Error();
-    Error.captureStackTrace(err, arguments.callee);
-    var stack = err.stack;
-    Error.prepareStackTrace = orig;
-    return stack;
-  },
-});
-
-Object.defineProperty(global, "__line", {
-  get: function () {
-    // @ts-ignore
-    return __stack[1].getLineNumber();
-  },
-});
-
-declare global {
-  var __line: number;
-  var __stack: string;
-}
 
 function initLogger() {
-  logger.log({
-    level: "debug",
-    message: "Logger is ready",
-    sourceID: path.basename(__filename),
-    line: __line,
-  });
+  logger.debug("Javascript logger is ready");
   browser.win.webContents.addListener(
     "console-message",
     (ev, code, message, line, sourceID) => {
@@ -58,7 +21,7 @@ function initLogger() {
           level: "error",
           message: message,
           line: line,
-          sourceID: sourceID,
+          source: sourceID,
         });
         error_prompt(message, sourceID, line);
       } else if (code == 2) {
@@ -66,7 +29,7 @@ function initLogger() {
           level: "warn",
           message: message,
           line: line,
-          sourceID: sourceID,
+          source: sourceID,
         });
       }
     }
