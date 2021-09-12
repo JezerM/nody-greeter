@@ -3,7 +3,7 @@ Version: 1.1.0
 Section: system
 Priority: optional
 Architecture: all
-Installed-Size: 223492
+Installed-Size: 223524
 Depends: gobject-introspection,
   liblightdm-gobject-1-0,
   libcairo2,

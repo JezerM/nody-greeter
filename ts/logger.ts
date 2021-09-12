@@ -61,7 +61,6 @@ class Logger {
   private winston_logger: winston.Logger;
   constructor() {
     this.winston_logger = winston_logger;
-    this.debug("Logger created");
   }
 
   debug(message: string) {
