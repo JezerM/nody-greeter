@@ -1,6 +1,6 @@
 {
   "name": "nody-greeter",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Trying to create a node.js greeter for lightdm",
   "main": "js/index.js",
   "scripts": {
