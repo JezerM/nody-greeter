@@ -186,6 +186,10 @@ input:focus-visible {
   border: 0;
   outline: auto var(--fg0);
 }
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
 :focus {
   outline: auto var(--fg0) !important;
 }
@@ -201,6 +205,23 @@ input:focus-visible {
   box-shadow: 0 2px var(--cyan);
   box-sizing: border-box;
   margin: 0;
+}
+#input {
+  position: relative;
+}
+#input #pass-eye {
+  position: absolute;
+  right: 15px;
+  top: 0;
+  bottom: 0;
+  margin-top: auto;
+  margin-bottom: auto;
+  height: fit-content;
+  background-color: var(--bg2);
+}
+#input #pass-eye:hover,
+#input #pass-eye:focus {
+  background-color: var(--bg3);
 }
 
 #input-username {

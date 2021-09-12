@@ -195,6 +195,27 @@ input:focus-visible {
   border: 0;
   outline: auto var(--fg);
 }
+#input {
+  position: relative;
+}
+#input #pass-eye {
+  position: absolute;
+  right: 15px;
+  top: 0;
+  bottom: 0;
+  margin-top: auto;
+  margin-bottom: auto;
+  height: fit-content;
+  background-color: var(--bg1);
+}
+#input #pass-eye:hover,
+#input #pass-eye:focus {
+  background-color: var(--bg2);
+}
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
 
 :focus {
   outline: auto var(--fg) !important;

@@ -2,6 +2,7 @@ class Authenticate {
   constructor() {
     this._input = document.querySelector("#input-password");
     this._form = document.querySelector("#pass-form > form");
+    this._input_eye = document.querySelector("#pass-eye");
     this._password = "";
     this._init();
   }
@@ -24,6 +25,15 @@ class Authenticate {
         this._authentication_failed();
       }
     };
+  }
+  _setPasswordEye() {
+    this._input_eye.addEventListener("click", () => {
+      if (this._input.type === "password") {
+        this._input.type = "text";
+      } else {
+        this._input.type = "password";
+      }
+    });
   }
 
   _respond() {
@@ -74,6 +84,7 @@ class Authenticate {
   _init() {
     this._setForm();
     this._setAuthentication_done();
+    this._setPasswordEye();
     console.log("Start authentication");
     this.startAuthentication();
   }

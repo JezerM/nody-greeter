@@ -1,6 +1,9 @@
 class Authenticate {
   constructor() {
     this._form = document.querySelector("#login-form");
+    this._inputUser = document.querySelector("#input-username");
+    this._inputPass = document.querySelector("#input-password");
+    this._input_eye = document.querySelector("#pass-eye");
     this._username = "";
     this._password = "";
     this._init();
@@ -17,14 +20,21 @@ class Authenticate {
       this._respond();
     });
   }
+  _setPasswordEye() {
+    this._input_eye.addEventListener("click", () => {
+      if (this._inputPass.type === "password") {
+        this._inputPass.type = "text";
+      } else {
+        this._inputPass.type = "password";
+      }
+    });
+  }
 
   async _respond() {
-    let inputUser = document.querySelector("#input-username");
-    let inputPass = document.querySelector("#input-password");
-    inputUser.blur();
-    inputUser.disabled = true;
-    inputPass.blur();
-    inputPass.disabled = true;
+    this._inputUser.blur();
+    this._inputUser.disabled = true;
+    this._inputPass.blur();
+    this._inputPass.disabled = true;
 
     lightdm.cancel_authentication();
     lightdm.authenticate(String(this._username));
@@ -89,13 +99,11 @@ class Authenticate {
     topbar.classList.remove("hide");
     bottombar.classList.remove("hide");
 
-    let inputUser = document.querySelector("#input-username");
-    let inputPass = document.querySelector("#input-password");
-    inputUser.blur();
-    inputUser.disabled = false;
-    inputPass.blur();
-    inputPass.disabled = false;
-    inputPass.value = "";
+    this._inputUser.blur();
+    this._inputUser.disabled = false;
+    this._inputPass.blur();
+    this._inputPass.disabled = false;
+    this._inputPass.value = "";
 
     body.classList.remove("failed");
   }
@@ -113,5 +121,6 @@ class Authenticate {
   _init() {
     this._setForm();
     this._setAuthentication_done();
+    this._setPasswordEye();
   }
 }
