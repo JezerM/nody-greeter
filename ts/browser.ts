@@ -91,9 +91,13 @@ class Browser {
       path_to_theme = path.join(path_to_theme, "index.html");
 
     if (!fs.existsSync(path_to_theme)) {
-      logger.warn(`"${theme}" theme does not exists. Using "${def_theme}" theme`);
+      logger.warn(
+        `"${theme}" theme does not exists. Using "${def_theme}" theme`
+      );
       path_to_theme = path.join(dir, def_theme, "index.html");
     }
+
+    nody_greeter.config.greeter.theme = path_to_theme;
 
     //this.win.loadFile(path_to_theme);
     let theme_url = url.format({

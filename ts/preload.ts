@@ -624,9 +624,6 @@ class ThemeUtils {
     if ("" === path || "string" !== typeof path) {
       console.error(`theme_utils.dirlist(): path must be a non-empty string!`);
       return callback([]);
-    } else if (null !== path.match(/^[^/].+/)) {
-      console.error(`theme_utils.dirlist(): path must be absolute!`);
-      return callback([]);
     }
 
     if (null !== path.match(/\/\.+(?=\/)/)) {
@@ -644,6 +641,23 @@ class ThemeUtils {
     } catch (err) {
       console.error(`theme_utils.dirlist(): ${err}`);
       return callback([]);
+    }
+  }
+
+  dirlist_sync(path: string, only_images: boolean = true): string[] {
+    if ("" === path || "string" !== typeof path) {
+      console.error(`theme_utils.dirlist(): path must be a non-empty string!`);
+      return [];
+    }
+    if (null !== path.match(/\/\.+(?=\/)/)) {
+      // No special directory names allowed (eg ../../)
+      path = path.replace(/\/\.+(?=\/)/g, "");
+    }
+    try {
+      return ipcRenderer.sendSync("theme_utils", "dirlist", path, only_images);
+    } catch (err) {
+      console.error(`theme_utils.dirlist(): ${err}`);
+      return [];
     }
   }
 

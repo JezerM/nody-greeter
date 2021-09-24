@@ -31,7 +31,7 @@ import {
 } from "../ldm_interfaces";
 import { logger } from "../logger";
 
-class Greeter {
+export class Greeter {
   _config: web_greeter_config;
   _battery: Battery;
   _shared_data_directory: string;
@@ -503,7 +503,7 @@ function get_layouts(config_layouts: string[]): LightDMLayout[] {
   return final;
 }
 
-class GreeterConfig {
+export class GreeterConfig {
   _config: web_greeter_config;
 
   constructor(config: web_greeter_config) {
@@ -574,7 +574,7 @@ class GreeterConfig {
   }
 }
 
-class ThemeUtils {
+export class ThemeUtils {
   _config: web_greeter_config;
   _allowed_dirs: string[];
 
@@ -589,6 +589,7 @@ class ThemeUtils {
       nody_greeter.app.theme_dir,
       nody_greeter.config.branding.background_images_dir,
       globalThis.lightdm.shared_data_directory,
+      path.dirname(nody_greeter.config.greeter.theme),
       os.tmpdir(),
     ];
 
@@ -610,6 +611,9 @@ class ThemeUtils {
   dirlist(dir_path: string, only_images: boolean = true) {
     if (!dir_path || typeof dir_path !== "string" || dir_path === "/") {
       return [];
+    }
+    if (dir_path.startsWith("./")) {
+      dir_path = path.join(path.dirname(this._config.greeter.theme), dir_path);
     }
 
     dir_path = fs.realpathSync(path.normalize(dir_path));
@@ -716,6 +720,8 @@ ipcMain.on("lightdm", (ev, ...args) => {
   handler(globalThis.lightdm, ev, ...args);
 });
 
-new Greeter(nody_greeter.config);
-new GreeterConfig(nody_greeter.config);
-new ThemeUtils(nody_greeter.config);
+browser.whenReady().then(() => {
+  new Greeter(nody_greeter.config);
+  new GreeterConfig(nody_greeter.config);
+  new ThemeUtils(nody_greeter.config);
+});
