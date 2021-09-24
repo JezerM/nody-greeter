@@ -39,9 +39,14 @@ class BrightnessController {
   _controllers: string[];
   steps: number;
   delay: number;
+  _available: boolean;
 
   constructor() {
     this._controllers = get_controllers();
+    if (this._controllers.length == 0) {
+      this._available = false;
+      return;
+    }
     let b_path = this._controllers[0];
     this._brightness_path = path.join(b_path, "brightness");
     this._max_brightness = parseInt(
@@ -50,6 +55,8 @@ class BrightnessController {
       })
     );
 
+    this._available = true;
+
     let steps = nody_greeter.config.features.backlight.steps;
     this.steps = steps <= 1 ? 1 : steps;
     this.delay = 200;
@@ -57,6 +64,7 @@ class BrightnessController {
   }
 
   private watch_brightness() {
+    if (!this._available) return;
     fs.watch(this._brightness_path, () => {
       if (globalThis.lightdm)
         globalThis.lightdm._emit_signal("brightness_update");
@@ -69,11 +77,13 @@ class BrightnessController {
   }
 
   private get real_brightness(): number {
+    if (!this._available) return -1;
     return parseInt(
       fs.readFileSync(this._brightness_path, { encoding: "utf-8" })
     );
   }
   private set real_brightness(v: number) {
+    if (!this._available) return;
     if (v > this.max_brightness) v = this.max_brightness;
     else if (v <= 0) v = 0;
 
@@ -89,6 +99,7 @@ class BrightnessController {
   }
 
   public set_brightness(value: number) {
+    if (!this._available) return;
     let steps = this.steps;
     let sleep = this.delay / steps;
     let current = this.brightness;
