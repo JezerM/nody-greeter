@@ -473,7 +473,7 @@ export class Greeter {
    */
   start_session(session: string | null): boolean {
     let started = LightDMGreeter.startSessionSync(session);
-    if (started) reset_screensaver();
+    if (started || this.is_authenticated) reset_screensaver();
     return started;
   }
 
