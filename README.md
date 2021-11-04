@@ -26,6 +26,16 @@ Themes working in **web-greeter** should work also here. All themes shipped with
 - No unnecessary dependencies.
 - Won't break on **Node.js** update when installed. **web-greeter** does with **Python**.
 
+## Dependencies
+
+## Dependencies
+
+- lightdm (as obvious)
+- gobject-introspection
+- liblightdm-gobject,
+- liblightdm-gobject-dev
+- libcairo2
+
 ## Installation
 
 ```sh
@@ -40,6 +50,8 @@ This will rebuild **electron** along with **node-gtk** and then build the packag
 ```sh
 dpkg-deb --root-owner-group --build unpacked
 ```
+
+> Note: There is no process to install it securely without packaging it or something... TODO
 
 ## Aditional features
 
