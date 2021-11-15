@@ -1,6 +1,6 @@
 # Nody Greeter
 
-[Web Greeter][web-greeter] is created with Python... which is slow. So, I wanted to re-create it with Node.js!
+[Web Greeter][web-greeter] is created with Python... which sometimes is slow. So, I wanted to re-create it with Node.js!
 
 This is experimental, but works. You can use it!
 
@@ -25,8 +25,6 @@ Themes working in **web-greeter** should work also here. All themes shipped with
 - Actual `mock.js` system could cause lots of problems.
 - No unnecessary dependencies.
 - Won't break on **Node.js** update when installed. **web-greeter** does with **Python**.
-
-## Dependencies
 
 ## Dependencies
 
