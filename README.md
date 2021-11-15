@@ -44,7 +44,7 @@ npm run rebuild
 npm run build
 ```
 
-This will rebuild **electron** along with **node-gtk** and then build the package root directory inside `build/extracted`. You can pack this dir to whatever you want, like **.deb** with:
+This will rebuild **electron** along with **node-gtk** and then build the package root directory inside `build/unpacked`. You can pack this dir to whatever you want, like **.deb** with:
 ```sh
 dpkg-deb --root-owner-group --build unpacked
 ```
