@@ -3,3 +3,4 @@ build/*
 js/
 !themes/**/js
 !build/DEBIAN
+!build/utils.js

@@ -1,12 +1,13 @@
 {
   "name": "nody-greeter",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Trying to create a node.js greeter for lightdm",
   "main": "js/index.js",
   "scripts": {
     "start": "electron .",
     "rebuild": "electron-rebuild -w node-gtk",
-    "build": "tsc && node build.js"
+    "build": "tsc && node build.js",
+    "do_install": "node install.js"
   },
   "author": {
     "name": "Jezer Mejía",
@@ -48,6 +49,7 @@
   "devDependencies": {
     "@types/js-yaml": "^4.0.2",
     "asar": "^3.0.3",
+    "cli-progress": "^3.9.1",
     "electron": "^13.1.8",
     "electron-builder": "^22.11.7",
     "electron-rebuild": "^2.3.5",

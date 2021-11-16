@@ -42,15 +42,15 @@ cd nody-greeter
 npm install
 npm run rebuild
 npm run build
+node install.js
 ```
 
-This will rebuild **electron** along with **node-gtk** and then build the package root directory inside `build/unpacked`. You can pack this dir to whatever you want, like **.deb** with:
+This will rebuild **electron** along with **node-gtk** and then build the package root directory inside `build/unpacked`. Later, install it with `node install.js`.
+
+Also, you can package `build/unpacked` to whatever you want, like **.deb** with:
 ```sh
 dpkg-deb --root-owner-group --build unpacked
 ```
-
-> Note: There is no process to install it securely without packaging it or something... TODO
-
 ## Aditional features
 
 ### Brightness control

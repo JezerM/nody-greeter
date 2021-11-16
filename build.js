@@ -4,110 +4,255 @@
  */
 
 const asar = require("asar");
-const fs = require("fs-extra")
-const path = require("path")
-const child_process = require('child_process');
+const fs = require("fs-extra");
+const path = require("path");
+const child_process = require("child_process");
+const progress = require("cli-progress");
+const { makeCopy, iterateCopy, getFileSize } = require("./build/utils.js");
+const yargs = require("yargs");
 
-let build_path = "./build/nody-asar/";
-let root_path = "./build/unpacked/";
+let DEST_DIR = "/";
+let PREFIX = "/usr";
+let INSTALL_ROOT = path.resolve(__dirname, "./build/unpacked/");
+let ASAR_ROOT = path.resolve(__dirname, "./build/nody-asar/");
+
+yargs.parserConfiguration({
+  "short-option-groups": true,
+  "camel-case-expansion": false,
+  "dot-notation": true,
+  "parse-numbers": true,
+  "parse-positional-numbers": true,
+  "boolean-negation": true,
+  "deep-merge-config": false,
+});
+
+let argv = yargs
+  .scriptName("build")
+  .option("DEST_DIR", {
+    type: "string",
+    describe: "Where to install nody-greeter",
+    default: DEST_DIR,
+  })
+  .option("PREFIX", {
+    type: "string",
+    describe: "Prefix to install at",
+    default: PREFIX,
+  })
+  .help("h")
+  .alias("h", "help")
+  .version(false).argv;
+
+DEST_DIR = argv.DEST_DIR;
+PREFIX = argv.PREFIX;
+
+// Some global variables
+
+let nody_path = path.join(INSTALL_ROOT, "opt/nody-greeter");
+let bin_path = path.join(INSTALL_ROOT, PREFIX, "bin");
+let lightdm_path = path.join(INSTALL_ROOT, "etc/lightdm");
+let webg_path = path.join(INSTALL_ROOT, PREFIX, "share/web-greeter");
+let xgreeters_path = path.join(INSTALL_ROOT, PREFIX, "share/xgreeters");
+let applications_path = path.join(INSTALL_ROOT, PREFIX, "share/applications");
+let xdg_ldm_path = path.join(INSTALL_ROOT, "etc/xdg/lightdm/lightdm.conf.d/");
+
+// Functions
 
 let copies = [
-  {from: "./js", to: build_path + "js"},
-  {from: "./package.json", to: build_path + "package.json"},
-  {from: "./package-lock.json", to: build_path + "package-lock.json"},
+  { from: "./js", to: path.join(ASAR_ROOT, "js") },
+  { from: "./package.json", to: path.join(ASAR_ROOT, "package.json") },
+  {
+    from: "./package-lock.json",
+    to: path.join(ASAR_ROOT, "package-lock.json"),
+  },
 ];
 
-function create_build() {
-  fs.mkdirSync(build_path, {recursive: true});
-  fs.mkdirSync(root_path, {recursive: true});
+async function create_build() {
+  fs.mkdirSync(ASAR_ROOT, { recursive: true });
+  fs.mkdirSync(INSTALL_ROOT, { recursive: true });
 
-  copies.forEach((v) => {
-    fs.copySync(v.from, v.to, {recursive: true});
-  })
+  let source_size = copies.reduce((prev, curr) => {
+    let size = getFileSize(curr.from);
+    //console.log(curr.from, size);
+    return prev + size;
+  }, 0);
+  //console.log(source_size);
+
+  let copy_bar = new progress.Bar({
+    stopOnComplete: true,
+    clearOnComplete: true,
+  });
+  copy_bar.start(source_size, 0);
+
+  let bytesCopied = 0;
+
+  for (let i = 0; i < copies.length; i++) {
+    let source = copies[i].from;
+    let dest = copies[i].to;
+    bytesCopied = await iterateCopy(source, dest, copy_bar, bytesCopied);
+  }
+  copy_bar.stop();
+
   console.log("Resources copied");
 
   try {
-    console.log("Installing packages with 'npm ci --production'");
-    child_process.execSync('npm ci --production', {cwd: "./build/nody-asar", encoding: "utf-8", stdio: "ignore"});
+    console.log("Installing packages with 'npm ci --production -s'");
+    child_process.execSync("npm ci --production -s", {
+      cwd: "./build/nody-asar",
+      encoding: "utf-8",
+      stdio: "inherit",
+    });
     console.log("Packages installed");
   } catch (err) {
     console.error(err);
   }
 }
 
-create_build()
-
-let binding_exists = fs.pathExistsSync("./node_modules/node-gtk/lib/binding");
-if (!binding_exists) {
-  console.error("Node-gtk bindings not found, be sure to install npm dependencies");
-  process.exit(1);
-}
-
-fs.removeSync("./build/nody-asar/node_modules/node-gtk/lib/binding/");
-
 function find_electron_binding() {
-  let bindings = fs.readdirSync("./node_modules/node-gtk/lib/binding/", {encoding: "utf-8"});
+  let binding_exists = fs.pathExistsSync(
+    "./node_modules/node-gtk/lib/binding/"
+  );
+  if (!binding_exists) {
+    console.error(
+      "Node-gtk bindings not found, be sure to install npm dependencies"
+    );
+    process.exit(1);
+  }
+  fs.removeSync("./build/nody-asar/node_modules/node-gtk/lib/binding/");
+  let bindings = fs.readdirSync("./node_modules/node-gtk/lib/binding/");
   let electron_binding = bindings.find((v) => v.includes("electron"));
   return electron_binding;
 }
 
-let electron_binding = find_electron_binding();
-
-if (electron_binding) {
-  console.log("Node-gtk binding for electron found!");
-} else {
-  try {
-    console.log("Node-gtk binding for electron not found. Compiling...");
-    child_process.execSync("./node_modules/.bin/electron-rebuild -w node-gtk --build-from-source", {encoding: "utf-8"});
-    electron_binding = find_electron_binding();
-    console.log("Done")
-  } catch (err) {
-    console.error(err);
-    process.exit(1);
+function ensure_electron_binding() {
+  let electron_binding = find_electron_binding();
+  if (electron_binding) {
+    console.log("Node-gtk binding for electron found!");
+  } else {
+    try {
+      console.log("Node-gtk binding for electron not found. Compiling...");
+      child_process.execSync(
+        "./node_modules/.bin/electron-rebuild -w node-gtk --build-from-source",
+        {
+          encoding: "utf-8",
+          stdio: "inherit",
+        }
+      );
+      electron_binding = find_electron_binding();
+    } catch (err) {
+      console.error(err);
+      process.exit(1);
+    }
   }
+  return electron_binding;
 }
 
-fs.copySync("./node_modules/node-gtk/lib/binding/" + electron_binding, build_path + "node_modules/node-gtk/lib/binding/" + electron_binding);
-console.log("Binding copied");
-
-// Unpacked section
-
-let app_path = root_path + "opt/nody-greeter/"
-let bin_path = root_path + "usr/bin/"
-let lightdm_path = root_path + "etc/lightdm/"
-let webg_path = root_path + "usr/share/web-greeter/"
-let xgreeters_path = root_path + "/usr/share/xgreeters/"
-let applications_path = root_path + "/usr/share/applications/"
-let xdg_ldm_path = root_path + "/etc/xdg/lightdm/lightdm.conf.d/"
-
-fs.mkdirSync(app_path, {recursive: true})
-fs.mkdirSync(lightdm_path, {recursive: true})
-fs.mkdirSync(webg_path, {recursive: true})
-fs.mkdirSync(xdg_ldm_path, {recursive: true})
-
-function copy_electron() {
-  console.log("Copying electron binary")
-  fs.copySync("./node_modules/electron/dist/", app_path, {recursive: true})
-  fs.removeSync(app_path + "resources")
-  fs.renameSync(app_path + "electron", app_path + "nody-greeter")
+async function copy_electron_binding() {
+  let electron_binding = ensure_electron_binding();
+  let path_to_binding = path.join(
+    "node_modules/node-gtk/lib/binding",
+    electron_binding
+  );
+  await makeCopy(
+    path.resolve(path_to_binding),
+    path.resolve(ASAR_ROOT, path_to_binding)
+  );
+  console.log("Binding copied");
 }
 
-fs.copySync("./dist/web-greeter.yml", lightdm_path + "web-greeter.yml");
-fs.copySync("./dist/nody-xgreeter.desktop", xgreeters_path + "nody-greeter.desktop");
-fs.copySync("./dist/nody-greeter.desktop", applications_path + "nody-greeter.desktop");
-fs.copySync("./themes/", webg_path + "themes/")
-fs.copySync("./dist/90-greeter-wrapper.conf", xdg_ldm_path + "90-greeter-wrapper.conf");
-fs.copySync("./dist/Xgreeter", lightdm_path + "Xgreeter");
-fs.chmodSync(lightdm_path + "Xgreeter", 0755);
-fs.moveSync(webg_path + "themes/_vendor/", webg_path + "_vendor/", {overwrite: true});
+function create_install_root() {
+  fs.mkdirsSync(nody_path, { recursive: true });
+  fs.mkdirsSync(lightdm_path, { recursive: true });
+  fs.mkdirsSync(webg_path, { recursive: true });
+  fs.mkdirsSync(xdg_ldm_path, { recursive: true });
+  fs.mkdirsSync(xgreeters_path, { recursive: true });
+  fs.mkdirsSync(applications_path, { recursive: true });
+}
 
-copy_electron()
+let copies_prepare = [
+  {
+    from: "./dist/web-greeter.yml",
+    to: path.join(lightdm_path, "web-greeter.yml"),
+  },
+  {
+    from: "./dist/nody-xgreeter.desktop",
+    to: path.join(xgreeters_path, "nody-greeter.desktop"),
+  },
+  {
+    from: "./dist/nody-greeter.desktop",
+    to: path.join(applications_path, "nody-greeter.desktop"),
+  },
+  {
+    from: "./dist/90-greeter-wrapper.conf",
+    to: path.join(xdg_ldm_path, "90-greeter-wrapper.conf"),
+  },
+  {
+    from: "./dist/Xgreeter",
+    to: path.join(lightdm_path, "Xgreeter"),
+  },
+  {
+    from: "./themes/",
+    to: path.join(webg_path, "themes/"),
+  },
+  {
+    from: "./node_modules/electron/dist/",
+    to: nody_path,
+  },
+];
 
-let src = "./build/nody-asar";
-let dest = app_path + "resources/app.asar";
+async function prepare_install() {
+  create_install_root();
 
-(async () => {
-  console.log(`Creating 'asar' package in '${dest}'`)
-  await asar.createPackage(src, dest);
-  console.log("'asar' package created")
-})()
+  let source_size = copies_prepare.reduce((prev, curr) => {
+    let size = getFileSize(curr.from);
+    //console.log(curr.from, size);
+    return prev + size;
+  }, 0);
+  //console.log(source_size);
+
+  let copy_bar = new progress.Bar({
+    stopOnComplete: true,
+    clearOnComplete: true,
+  });
+  copy_bar.start(source_size, 0);
+
+  let bytesCopied = 0;
+
+  for (let i = 0; i < copies_prepare.length; i++) {
+    let source = copies_prepare[i].from;
+    let dest = copies_prepare[i].to;
+    bytesCopied = await iterateCopy(source, dest, copy_bar, bytesCopied);
+  }
+  copy_bar.stop();
+
+  fs.removeSync(path.join(nody_path, "resources"));
+  fs.renameSync(
+    path.join(nody_path, "electron"),
+    path.join(nody_path, "nody-greeter")
+  );
+  fs.moveSync(
+    path.join(webg_path, "themes/_vendor"),
+    path.join(webg_path, "_vendor/"),
+    {
+      overwrite: true,
+    }
+  );
+  console.log("INSTALL_ROOT (build/unpacked) prepared");
+}
+
+async function build_asar() {
+  let asar_dest = path.join(nody_path, "resources/app.asar");
+
+  console.log(`Creating 'asar' package in '${asar_dest}'`);
+  await asar.createPackage(ASAR_ROOT, asar_dest);
+  console.log("'asar' package created");
+}
+
+async function build() {
+  await create_build();
+  await copy_electron_binding();
+  await prepare_install();
+  await build_asar();
+  console.log("\x1b[92mSUCCESS!\x1b[0m");
+}
+
+build();
