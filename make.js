@@ -1,8 +1,6 @@
 const fs = require("fs-extra");
 const path = require("path");
 const yargs = require("yargs");
-const { makeCopy } = require("./build/utils.js");
-const { build } = require("./build.js");
 
 let DEST_DIR = "/";
 let PREFIX = "/usr";
@@ -19,7 +17,10 @@ yargs.parserConfiguration({
 });
 
 let argv = yargs
-  .scriptName("install")
+  .scriptName("make")
+  .usage("$0 [args]")
+  .command("install", "Install nody-greeter")
+  .command("build", "Build nody-greeter")
   .option("DEST_DIR", {
     type: "string",
     describe: "Where to install nody-greeter",
@@ -37,18 +38,28 @@ let argv = yargs
 PREFIX = argv.PREFIX;
 DEST_DIR = argv.DEST_DIR;
 
-async function install() {
-  console.log(`Copying nody-greeter to ${DEST_DIR}...`);
-  await makeCopy(INSTALL_ROOT, DEST_DIR);
-  fs.createSymlinkSync(
-    path.join(DEST_DIR, "opt/nody-greeter/nody-greeter"),
-    path.join(DEST_DIR, PREFIX, "bin/nody-greeter")
-  );
-  console.log("\x1b[92mSUCCESS!!\x1b[0m");
+async function do_install() {
+  const { build } = require("./build.js");
+  const { install } = require("./install.js");
+
+  if (!fs.pathExistsSync("./build/unpacked")) {
+    console.log("nody-greeter is not built");
+    await build();
+  }
+  await install();
 }
 
-if (require.main == module) {
-  install();
+async function do_build() {
+  const { build } = require("./build.js");
+
+  build();
 }
 
-module.exports = { install };
+if (argv._[0] == "install") {
+  do_install();
+} else if (argv._[0] == "build") {
+  do_build();
+} else {
+  yargs.showHelp();
+  process.exit(1);
+}

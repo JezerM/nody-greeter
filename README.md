@@ -41,8 +41,8 @@ git clone https://github.com/JezerM/nody-greeter.git
 cd nody-greeter
 npm install
 npm run rebuild
-npm run build
-node install.js
+node make build
+sudo node make install
 ```
 
 This will rebuild **electron** along with **node-gtk** and then build the package root directory inside `build/unpacked`. Later, install it with `node install.js`.

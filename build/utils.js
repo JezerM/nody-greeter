@@ -30,6 +30,8 @@ async function do_copy(source_file, dest_file, copy_bar, bytes) {
     mode: file_stat.mode,
   });
 
+  let filename = path.basename(source_file);
+
   readStream.on("data", (buff) => {
     //console.log({
     //source_file,
@@ -39,7 +41,7 @@ async function do_copy(source_file, dest_file, copy_bar, bytes) {
 
     bytesCopied += buff.length;
 
-    copy_bar.update(bytesCopied);
+    copy_bar.update(bytesCopied, { filename });
     writeStream.write(buff);
   });
 
@@ -107,13 +109,58 @@ async function makeCopy(source, dest) {
     throw new Error("Source does not exists: " + source);
   let source_size = getFileSize(source);
 
-  let copy_bar = new progress.Bar({
-    stopOnComplete: true,
-    clearOnComplete: true,
+  let copy_bar = new progress.Bar(
+    {
+      format:
+        "Progress |" +
+        "\x1b[96m{bar}\x1b[0m" +
+        "| {percentage}% || {value}/{total} || {filename}",
+      stopOnComplete: true,
+      clearOnComplete: true,
+      hideCursor: true,
+    },
+    progress.Presets.shades_classic
+  );
+  copy_bar.start(source_size, 0, {
+    filename: "N/A",
   });
-  copy_bar.start(source_size, 0);
 
   await iterateCopy(source, dest, copy_bar, 0);
 }
 
-module.exports = { iterateCopy, makeCopy, getFileSize };
+async function makeCopyFromTo(array) {
+  let source_size = array.reduce((prev, curr) => {
+    let size = getFileSize(curr.from);
+    //console.log(curr.from, size);
+    return prev + size;
+  }, 0);
+  //console.log(source_size);
+
+  let copy_bar = new progress.Bar(
+    {
+      format:
+        "Progress |" +
+        "\x1b[96m{bar}\x1b[0m" +
+        "| {percentage}% || {value}/{total} || {filename}",
+      stopOnComplete: true,
+      clearOnComplete: true,
+      hideCursor: true,
+    },
+    progress.Presets.shades_classic
+  );
+
+  copy_bar.start(source_size, 0, {
+    filename: "N/A",
+  });
+
+  let bytesCopied = 0;
+
+  for (let i = 0; i < array.length; i++) {
+    let source = array[i].from;
+    let dest = array[i].to;
+    bytesCopied = await iterateCopy(source, dest, copy_bar, bytesCopied);
+  }
+  copy_bar.stop();
+}
+
+module.exports = { iterateCopy, makeCopy, makeCopyFromTo, getFileSize };

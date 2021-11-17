@@ -8,7 +8,12 @@ const fs = require("fs-extra");
 const path = require("path");
 const child_process = require("child_process");
 const progress = require("cli-progress");
-const { makeCopy, iterateCopy, getFileSize } = require("./build/utils.js");
+const {
+  makeCopy,
+  iterateCopy,
+  getFileSize,
+  makeCopyFromTo,
+} = require("./build/utils.js");
 const yargs = require("yargs");
 
 let DEST_DIR = "/";
@@ -70,27 +75,7 @@ async function create_build() {
   fs.mkdirSync(ASAR_ROOT, { recursive: true });
   fs.mkdirSync(INSTALL_ROOT, { recursive: true });
 
-  let source_size = copies.reduce((prev, curr) => {
-    let size = getFileSize(curr.from);
-    //console.log(curr.from, size);
-    return prev + size;
-  }, 0);
-  //console.log(source_size);
-
-  let copy_bar = new progress.Bar({
-    stopOnComplete: true,
-    clearOnComplete: true,
-  });
-  copy_bar.start(source_size, 0);
-
-  let bytesCopied = 0;
-
-  for (let i = 0; i < copies.length; i++) {
-    let source = copies[i].from;
-    let dest = copies[i].to;
-    bytesCopied = await iterateCopy(source, dest, copy_bar, bytesCopied);
-  }
-  copy_bar.stop();
+  await makeCopyFromTo(copies);
 
   console.log("Resources copied");
 
@@ -202,27 +187,7 @@ let copies_prepare = [
 async function prepare_install() {
   create_install_root();
 
-  let source_size = copies_prepare.reduce((prev, curr) => {
-    let size = getFileSize(curr.from);
-    //console.log(curr.from, size);
-    return prev + size;
-  }, 0);
-  //console.log(source_size);
-
-  let copy_bar = new progress.Bar({
-    stopOnComplete: true,
-    clearOnComplete: true,
-  });
-  copy_bar.start(source_size, 0);
-
-  let bytesCopied = 0;
-
-  for (let i = 0; i < copies_prepare.length; i++) {
-    let source = copies_prepare[i].from;
-    let dest = copies_prepare[i].to;
-    bytesCopied = await iterateCopy(source, dest, copy_bar, bytesCopied);
-  }
-  copy_bar.stop();
+  await makeCopyFromTo(copies_prepare);
 
   fs.removeSync(path.join(nody_path, "resources"));
   fs.renameSync(
@@ -248,6 +213,7 @@ async function build_asar() {
 }
 
 async function build() {
+  console.log("Building with prefix:", PREFIX);
   await create_build();
   await copy_electron_binding();
   await prepare_install();
@@ -255,4 +221,8 @@ async function build() {
   console.log("\x1b[92mSUCCESS!\x1b[0m");
 }
 
-build();
+if (require.main == module) {
+  build();
+}
+
+module.exports = { build };
