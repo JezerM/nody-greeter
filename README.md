@@ -2,7 +2,7 @@
 
 [Web Greeter][web-greeter] is created with Python... which sometimes is slow. So, I wanted to re-create it with Node.js!
 
-This is experimental, but works. You can use it!
+This is a LightDM Greeter made with [Electron.js][Electron] and [node-gtk][node-gtk] that allows to create web based themes with HTMl, CSS and JavaScript. Also, this could be considered as a side project of [web-greeter][web-greeter], both being equal in behavior, but this one is easier to mantain~
 
 ## Features
 
@@ -17,7 +17,6 @@ This is experimental, but works. You can use it!
 Themes working in **web-greeter** should work also here. All themes shipped with **web-greeter** are found here as well.
 
 - `icon_theme` configuration is not loaded, as GTK apps don't allow to set a different **X-Cursor-Theme**
-- It kinda works
 
 ## Differences with `web-greeter`
 
@@ -25,12 +24,13 @@ Themes working in **web-greeter** should work also here. All themes shipped with
 - Actual `mock.js` system could cause lots of problems.
 - No unnecessary dependencies.
 - Won't break on **Node.js** update when installed. **web-greeter** does with **Python**.
+- Pretty build/install process
 
 ## Dependencies
 
 - lightdm (as obvious)
 - gobject-introspection
-- liblightdm-gobject,
+- liblightdm-gobject
 - liblightdm-gobject-dev
 - libcairo2
 
@@ -62,7 +62,7 @@ udev rules are needed to be applied before using it, check [acpilight rules][acp
 You can enable it inside `/etc/lightdm/web-greeter.yml`
 
 ### Battery status
-`acpi` is the only tool you need (and a battery). This functionality is based on ["bat" widget][bat_widget] from ["lain" awesome-wm library][lain].
+`acpi` and `acpi_listen` are the only tools you need (and a battery). This functionality is based on ["bat" widget][bat_widget] from ["lain" awesome-wm library][lain].
 
 You can enable it inside `/etc/lightdm/web-greeter.yml`.
 
@@ -72,3 +72,5 @@ You can enable it inside `/etc/lightdm/web-greeter.yml`.
 [acpilight_rules]: https://gitlab.com/wavexx/acpilight/-/blob/master/90-backlight.rules "udev rules"
 [bat_widget]: https://github.com/lcpz/lain/blob/master/widget/bat.lua "Battery widget"
 [lain]: https://github.com/lcpz/lain "Lain awesome library"
+[Electron]: https://www.electronjs.org "Electron"
+[node-gtk]: https://github.com/romgrk/node-gtk "Node GTK"
