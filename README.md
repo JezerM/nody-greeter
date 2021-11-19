@@ -41,11 +41,12 @@ git clone https://github.com/JezerM/nody-greeter.git
 cd nody-greeter
 npm install
 npm run rebuild
+npx tsc
 node make build
 sudo node make install
 ```
 
-This will rebuild **electron** along with **node-gtk** and then build the package root directory inside `build/unpacked`. Later, install it with `node install.js`.
+This will rebuild **electron** along with **node-gtk**, compile typescript with `npx tsc`, and then build the package root directory inside `build/unpacked`. Later, install it with `node install.js`.
 
 Also, you can package `build/unpacked` to whatever you want, like **.deb** with:
 ```sh
