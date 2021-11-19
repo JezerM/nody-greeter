@@ -5,7 +5,8 @@ type callback = (data: string) => any;
 
 class ACPI_controller {
   constructor() {
-    this.listen();
+    if (this.check_acpi()) this.listen();
+    else logger.error("ACPI: acpi_listen does not exists");
   }
 
   protected tries = 0;
@@ -22,10 +23,18 @@ class ACPI_controller {
     this.callbacks.splice(ind, 1);
   }
 
+  private check_acpi(): boolean {
+    let res = child_process.spawnSync("which", ["acpi_listen"], {
+      encoding: "utf-8",
+    });
+    if (res.status == 0) return true;
+    else return false;
+  }
+
   private listen() {
     const acpi = child_process.spawn("acpi_listen");
     acpi.on("error", (err) => {
-      logger.error("Battery: " + err.message);
+      logger.error("ACPI: " + err.message);
     });
     acpi.on("close", () => {
       if (this.tries < 5) {
@@ -38,7 +47,7 @@ class ACPI_controller {
     acpi.stdout.addListener("data", (d: Buffer) => {
       let data = d.toString().trim();
       this.callbacks.forEach((cb) => {
-        cb(data);
+        if (cb !== undefined) cb(data);
       });
     });
   }

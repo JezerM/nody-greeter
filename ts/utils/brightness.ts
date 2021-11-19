@@ -43,7 +43,11 @@ class BrightnessController {
 
   constructor() {
     this._controllers = get_controllers();
-    if (this._controllers.length == 0) {
+    if (
+      this._controllers.length == 0 ||
+      this._controllers[0] == undefined ||
+      nody_greeter.config.features.backlight.enabled == false
+    ) {
       this._available = false;
       return;
     }

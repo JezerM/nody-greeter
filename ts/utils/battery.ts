@@ -1,4 +1,3 @@
-import * as child_process from "child_process";
 import * as path from "path";
 import * as fs from "fs";
 
@@ -13,7 +12,6 @@ interface battery {
 }
 
 let running_update = false;
-let acpi_tries = 0;
 
 class Battery {
   _batteries: battery[] = [];
@@ -27,7 +25,7 @@ class Battery {
   _watt = 0;
 
   constructor() {
-    this._init();
+    if (nody_greeter.config.features.battery == true) this._init();
   }
 
   _init() {
