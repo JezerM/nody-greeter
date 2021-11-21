@@ -7,14 +7,9 @@ const asar = require("asar");
 const fs = require("fs-extra");
 const path = require("path");
 const child_process = require("child_process");
-const progress = require("cli-progress");
-const {
-  makeCopy,
-  iterateCopy,
-  getFileSize,
-  makeCopyFromTo,
-} = require("./build/utils.js");
+const { makeCopy, makeCopyFromTo } = require("./build/utils.js");
 const yargs = require("yargs");
+const ora = require("ora");
 
 let DEST_DIR = "/";
 let PREFIX = "/usr";
@@ -208,8 +203,15 @@ async function build_asar() {
   let asar_dest = path.join(nody_path, "resources/app.asar");
 
   console.log(`Creating 'asar' package in '${asar_dest}'`);
+
+  let spinner = ora({
+    text: `Creating package...`,
+    spinner: "dots",
+  });
+  spinner.start();
+
   await asar.createPackage(ASAR_ROOT, asar_dest);
-  console.log("'asar' package created");
+  spinner.succeed('"asar" package created');
 }
 
 async function build() {

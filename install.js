@@ -38,7 +38,7 @@ PREFIX = argv.PREFIX;
 DEST_DIR = argv.DEST_DIR;
 
 async function install() {
-  console.log(`Copying nody-greeter to ${DEST_DIR}...`);
+  console.log(`Copying nody-greeter to "${DEST_DIR}"...`);
   await makeCopy(INSTALL_ROOT, DEST_DIR);
   fs.createSymlinkSync(
     path.join(DEST_DIR, "opt/nody-greeter/nody-greeter"),

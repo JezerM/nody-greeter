@@ -163,4 +163,4 @@ async function makeCopyFromTo(array) {
   copy_bar.stop();
 }
 
-module.exports = { iterateCopy, makeCopy, makeCopyFromTo, getFileSize };
+module.exports = { iterateCopy, makeCopy, makeCopyFromTo, getFileSize, wait };

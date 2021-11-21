@@ -21,6 +21,7 @@ let argv = yargs
   .usage("$0 [args]")
   .command("install", "Install nody-greeter")
   .command("build", "Build nody-greeter")
+  .command("uninstall", "Uninstall nody-greeter")
   .option("DEST_DIR", {
     type: "string",
     describe: "Where to install nody-greeter",
@@ -55,10 +56,18 @@ async function do_build() {
   build();
 }
 
+async function do_uninstall() {
+  const { uninstall } = require("./uninstall.js");
+
+  uninstall();
+}
+
 if (argv._[0] == "install") {
   do_install();
 } else if (argv._[0] == "build") {
   do_build();
+} else if (argv._[0] == "uninstall") {
+  do_uninstall();
 } else {
   yargs.showHelp();
   process.exit(1);
