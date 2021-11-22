@@ -66,6 +66,14 @@ You can enable it inside `/etc/lightdm/web-greeter.yml`
 
 You can enable it inside `/etc/lightdm/web-greeter.yml`.
 
+## Troubleshooting
+
+### node-gyp fails on `npm run rebuild`
+
+> Supported Node.js versions: 12, 14, 15, 16 (other versions should work but are untested)
+
+Make sure you are using a [node-gtk][node-gtk] supported Node.js version.
+
 
 [web-greeter]: https://github.com/JezerM/web-greeter "Web Greeter"
 [acpilight]: https://gitlab.com/wavexx/acpilight/ "acpilight"
