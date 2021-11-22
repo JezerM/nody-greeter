@@ -54,6 +54,16 @@ let webg_path = path.join(INSTALL_ROOT, PREFIX, "share/web-greeter");
 let xgreeters_path = path.join(INSTALL_ROOT, PREFIX, "share/xgreeters");
 let applications_path = path.join(INSTALL_ROOT, PREFIX, "share/applications");
 let xdg_ldm_path = path.join(INSTALL_ROOT, "etc/xdg/lightdm/lightdm.conf.d/");
+let bash_c_path = path.join(
+  INSTALL_ROOT,
+  PREFIX,
+  "share/bash-completion/completions"
+);
+let zsh_c_path = path.join(
+  INSTALL_ROOT,
+  PREFIX,
+  "share/zsh/vendor-completions/"
+);
 
 // Functions
 
@@ -65,6 +75,14 @@ let copies = [
     to: path.join(ASAR_ROOT, "package-lock.json"),
   },
 ];
+
+function check_program(program) {
+  let res = child_process.spawnSync("which", [program], {
+    encoding: "utf-8",
+  });
+  if (res.status == 0) return true;
+  else return false;
+}
 
 async function create_build() {
   fs.mkdirSync(ASAR_ROOT, { recursive: true });
@@ -146,6 +164,8 @@ function create_install_root() {
   fs.mkdirsSync(xdg_ldm_path, { recursive: true });
   fs.mkdirsSync(xgreeters_path, { recursive: true });
   fs.mkdirsSync(applications_path, { recursive: true });
+  if (check_program("bash")) fs.mkdirsSync(bash_c_path, { recursive: true });
+  if (check_program("zsh")) fs.mkdirsSync(zsh_c_path, { recursive: true });
 }
 
 let copies_prepare = [
@@ -181,6 +201,16 @@ let copies_prepare = [
 
 async function prepare_install() {
   create_install_root();
+  if (check_program("bash"))
+    copies_prepare.push({
+      from: "./dist/nody-greeter-bash",
+      to: path.join(bash_c_path, "nody-greeter"),
+    });
+  if (check_program("zsh"))
+    copies_prepare.push({
+      from: "./dist/nody-greeter-zsh",
+      to: path.join(zsh_c_path, "_nody-greeter"),
+    });
 
   await makeCopyFromTo(copies_prepare);
 
