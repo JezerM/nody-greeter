@@ -735,7 +735,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }, 2);
 });
 
-declare const lightdm: Greeter;
-declare const greeter_config: GreeterConfig;
-declare const theme_utils: ThemeUtils;
-declare const _ready_event: Event;
+export declare const lightdm: Greeter;
+export declare const greeter_config: GreeterConfig;
+export declare const theme_utils: ThemeUtils;
+export declare const _ready_event: Event;

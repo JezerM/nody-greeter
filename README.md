@@ -52,6 +52,17 @@ Also, you can package `build/unpacked` to whatever you want, like **.deb** with:
 ```sh
 dpkg-deb --root-owner-group --build unpacked
 ```
+
+## Theme JavaScript API
+
+To create themes for nody-greeter and web-greeter, check the documentation available at [gh-pages][gh-pages].
+
+Also, you can install the TypeScript types definitions inside your theme with npm:
+
+```sh
+npm install nody-greeter-types
+```
+
 ## Aditional features
 
 ### Brightness control
@@ -76,6 +87,8 @@ Make sure you are using a [node-gtk][node-gtk] supported Node.js version.
 
 
 [web-greeter]: https://github.com/JezerM/web-greeter "Web Greeter"
+[nody-greeter-types]: https://github.com/JezerM/nody-greeter-types "nody-greeter-types" 
+[gh-pages]: https://jezerm.github.io/web-greeter/ "API Documentation"
 [acpilight]: https://gitlab.com/wavexx/acpilight/ "acpilight"
 [acpilight_rules]: https://gitlab.com/wavexx/acpilight/-/blob/master/90-backlight.rules "udev rules"
 [bat_widget]: https://github.com/lcpz/lain/blob/master/widget/bat.lua "Battery widget"
