@@ -644,6 +644,19 @@ class ThemeUtils {
     }
   }
 
+  /**
+   * Returns the contents of directory found at `path` provided that the (normalized) `path`
+   * meets at least one of the following conditions:
+   *   * Is located within the greeter themes' root directory.
+   *   * Has been explicitly allowed in the greeter's config file.
+   *   * Is located within the greeter's shared data directory (`/var/lib/lightdm-data`).
+   *   * Is located in `/tmp`.
+   *
+   * @param {string}              path        The abs path to desired directory.
+   * @param {boolean}             only_images Include only images in the results. Default `true`.
+   * @param {function(string[])}  callback    Callback function to be called with the result.
+   * @experimental Available only for nody-greeter. DO NOT use it if you want compatibility between web-greeter and nody-greeter
+   */
   dirlist_sync(path: string, only_images: boolean = true): string[] {
     if ("" === path || "string" !== typeof path) {
       console.error(`theme_utils.dirlist(): path must be a non-empty string!`);
