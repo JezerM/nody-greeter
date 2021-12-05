@@ -58,7 +58,7 @@ ipcRenderer.on("LightDMSignal", (_ev, signal, ...args) => {
 
 class Greeter {
   constructor() {
-    if ("lightdm" in window) {
+    if ("lightdm" in globalThis) {
       return globalThis.lightdm;
     }
 
@@ -492,7 +492,7 @@ interface gc_branding {
 
 class GreeterConfig {
   constructor() {
-    if ("greeter_config" in window) {
+    if ("greeter_config" in globalThis) {
       return globalThis.greeter_config;
     }
     globalThis.greeter_config = this;
@@ -561,7 +561,7 @@ let time_language = null;
 
 class ThemeUtils {
   constructor() {
-    if ("theme_utils" in window) {
+    if ("theme_utils" in globalThis) {
       return globalThis.theme_utils;
     }
 
@@ -679,7 +679,7 @@ class ThemeUtils {
    * 	 * `language` defaults to the system's language, but can be set manually in the config file.
    */
   get_current_localized_date(): string {
-    let config = greeter_config.greeter;
+    let config = globalThis.greeter_config.greeter;
 
     var locale = [];
 
@@ -710,7 +710,7 @@ class ThemeUtils {
    * 	 * `language` defaults to the system's language, but can be set manually in the config file.
    */
   get_current_localized_time(): string {
-    let config = greeter_config.greeter;
+    let config = globalThis.greeter_config.greeter;
 
     var locale = [];
 
@@ -742,9 +742,9 @@ new Greeter();
 
 globalThis._ready_event = new Event("GreeterReady");
 
-window.addEventListener("DOMContentLoaded", () => {
+globalThis.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
-    window.dispatchEvent(_ready_event);
+    globalThis.dispatchEvent(globalThis._ready_event);
   }, 2);
 });
 
