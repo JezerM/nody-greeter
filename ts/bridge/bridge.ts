@@ -456,6 +456,7 @@ export class Greeter {
     if (this.is_authenticated) {
       return LightDMGreeter.setLanguage(language);
     }
+    return false;
   }
 
   /**

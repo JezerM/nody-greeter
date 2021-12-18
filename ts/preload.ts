@@ -9,7 +9,7 @@ import {
 
 let allSignals = [];
 
-class Signal {
+export class Signal {
   _name: string;
   _callbacks: Function[];
 
@@ -56,7 +56,7 @@ ipcRenderer.on("LightDMSignal", (_ev, signal, ...args) => {
   });
 });
 
-class Greeter {
+export class Greeter {
   constructor() {
     if ("lightdm" in globalThis) {
       return globalThis.lightdm;
@@ -320,10 +320,10 @@ class Greeter {
 
   /**
    * The username to select by default.
-   * @type {string}
+   * @type {string|undefined}
    * @readonly
    */
-  get select_user_hint(): boolean {
+  get select_user_hint(): string | undefined {
     return ipcRenderer.sendSync("lightdm", "select_user_hint");
   }
 
@@ -484,13 +484,70 @@ class Greeter {
 }
 
 interface gc_branding {
-  /* Path to directory that contains background images */
+  /**
+   * Path to directory that contains background images
+   */
   background_images_dir: string;
+  /**
+   * Path to distro logo image for use in greeter themes
+   */
   logo: string;
+  /**
+   * Default user image/avatar.
+   */
   user_image: string;
 }
+interface gc_greeter {
+  /**
+   * Greeter theme debug mode
+   */
+  debug_mode: boolean;
+  /**
+   * Provide an option to load a fallback theme when theme errors are detected
+   */
+  detect_theme_errors: boolean;
+  /**
+   * Blank the screen after this many seconds of inactivity
+   */
+  screensaver_timeout: number;
+  /**
+   * Don't allow themes to make remote http requests
+   */
+  secure_mode: boolean;
+  /**
+   * Language to use when displaying the time or "" to use the system's language
+   */
+  time_language: string;
+  /**
+   * The name of the theme to be used by the greeter
+   */
+  theme: string;
+}
+interface gc_features {
+  /**
+   * Enable greeter and themes to get battery status
+   */
+  battery: boolean;
+  /**
+   * Backlight options
+   */
+  backlight: {
+    /**
+     * Enable greeter and themes to control display backlight
+     */
+    enabled: boolean;
+    /**
+     * The amount to increase/decrease brightness by greeter
+     */
+    value: number;
+    /**
+     * How many steps are needed to do the change
+     */
+    steps: number;
+  };
+}
 
-class GreeterConfig {
+export class GreeterConfig {
   constructor() {
     if ("greeter_config" in globalThis) {
       return globalThis.greeter_config;
@@ -502,11 +559,9 @@ class GreeterConfig {
    * Holds keys/values from the `branding` section of the config file.
    *
    * @type {object} branding
-   * @property {string} background_images_dir Path to directory that contains background images
-   *                                      for use in greeter themes.
-   * @property {string} logo                  Path to distro logo image for use in greeter themes.
-   * @property {string} user_image            Default user image/avatar. This is used by greeter themes
-   *                                      for users that have not configured a `.face` image.
+   * @property {string} background_images_dir Path to directory that contains background images for use in greeter themes.
+   * @property {string} logo Path to distro logo image for use in greeter themes.
+   * @property {string} user_image Default user image/avatar. This is used by greeter themes for users that have not configured a `.face` image.
    * @readonly
    */
   get branding(): gc_branding {
@@ -517,18 +572,15 @@ class GreeterConfig {
    * Holds keys/values from the `greeter` section of the config file.
    *
    * @type {object}  greeter
-   * @property {boolean} debug_mode          Greeter theme debug mode.
-   * @property {boolean} detect_theme_errors Provide an option to load a fallback theme when theme
-   *                                     errors are detected.
+   * @property {boolean} debug_mode Greeter theme debug mode.
+   * @property {boolean} detect_theme_errors Provide an option to load a fallback theme when theme errors are detected.
    * @property {number}  screensaver_timeout Blank the screen after this many seconds of inactivity.
-   * @property {boolean} secure_mode         Don't allow themes to make remote http requests.
-   *                                     generate localized time for display.
-   * @property {string}  time_language       Language to use when displaying the time or ""
-   *                                     to use the system's language.
-   * @property {string}  theme               The name of the theme to be used by the greeter.
+   * @property {boolean} secure_mode Don't allow themes to make remote http requests.
+   * @property {string}  time_language Language to use when displaying the time or "" to use the system's language.
+   * @property {string}  theme The name of the theme to be used by the greeter.
    * @readonly
    */
-  get greeter() {
+  get greeter(): gc_greeter {
     return ipcRenderer.sendSync("greeter_config", "greeter");
   }
 
@@ -536,30 +588,30 @@ class GreeterConfig {
    * Holds keys/values from the `features` section of the config file.
    *
    * @type {Object}      features
-   * @property {boolean} battery				 Enable greeter and themes to ger battery status.
+   * @property {boolean} battery Enable greeter and themes to get battery status.
    * @property {Object}  backlight
-   * @property {boolean} enabled				 Enable greeter and themes to control display backlight.
-   * @property {number}  value					 The amount to increase/decrease brightness by greeter.
-   * @property {number}  steps					 How many steps are needed to do the change.
+   * @property {boolean} backlight.enabled Enable greeter and themes to control display backlight.
+   * @property {number}  backlight.value The amount to increase/decrease brightness by greeter.
+   * @property {number}  backlight.steps How many steps are needed to do the change.
    * @readonly
    */
-  get features() {
+  get features(): gc_features {
     return ipcRenderer.sendSync("greeter_config", "features");
   }
 
   /*
    * Holds a list of preferred layouts from the `layouts` section of the config file.
-   * @type {Array}			layouts
+   * @type {LightDMLayout[]} layouts
    * @readonly
    */
-  get layouts() {
+  get layouts(): LightDMLayout[] {
     return ipcRenderer.sendSync("greeter_config", "layouts");
   }
 }
 
 let time_language = null;
 
-class ThemeUtils {
+export class ThemeUtils {
   constructor() {
     if ("theme_utils" in globalThis) {
       return globalThis.theme_utils;
@@ -619,7 +671,7 @@ class ThemeUtils {
   dirlist(
     path: string,
     only_images: boolean = true,
-    callback: (args: string[]) => any
+    callback: (args: string[]) => void
   ) {
     if ("" === path || "string" !== typeof path) {
       console.error(`theme_utils.dirlist(): path must be a non-empty string!`);
@@ -740,11 +792,11 @@ new ThemeUtils();
 new GreeterConfig();
 new Greeter();
 
-globalThis._ready_event = new Event("GreeterReady");
+window._ready_event = new Event("GreeterReady");
 
-globalThis.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
-    globalThis.dispatchEvent(globalThis._ready_event);
+    window.dispatchEvent(globalThis._ready_event);
   }, 2);
 });
 
@@ -752,3 +804,12 @@ export declare const lightdm: Greeter;
 export declare const greeter_config: GreeterConfig;
 export declare const theme_utils: ThemeUtils;
 export declare const _ready_event: Event;
+
+declare global {
+  interface Window {
+    lightdm: Greeter | undefined;
+    greeter_config: GreeterConfig | undefined;
+    theme_utils: ThemeUtils | undefined;
+    _ready_event: Event | undefined;
+  }
+}
