@@ -21,9 +21,8 @@ Themes working in **web-greeter** should work also here. All themes shipped with
 ## Differences with `web-greeter`
 
 - As this is not made in **Python**, this should be faster.
-- Actual `mock.js` system could cause lots of problems.
 - No unnecessary dependencies.
-- Won't break on **Node.js** update when installed. **web-greeter** does with **Python**.
+- Won't break on **Node.js** update when installed. **web-greeter** could do with **Python**.
 - Pretty build/install process
 
 ## Dependencies
@@ -41,12 +40,12 @@ git clone https://github.com/JezerM/nody-greeter.git
 cd nody-greeter
 npm install
 npm run rebuild
-npx tsc
+npx tsc --build
 node make build
 sudo node make install
 ```
 
-This will rebuild **electron** along with **node-gtk**, compile typescript with `npx tsc`, and then build the package root directory inside `build/unpacked`. Later, install it with `node install.js`.
+This will rebuild **electron** along with **node-gtk**, compile typescript with `npx tsc`, and then build the package root directory inside `build/unpacked`. Later, install it with `node make install`.
 
 Also, you can package `build/unpacked` to whatever you want, like **.deb** with:
 ```sh
