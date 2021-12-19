@@ -67,6 +67,43 @@ let zsh_c_path = path.join(
 
 // Functions
 
+let copies_binding = [
+  { from: "./ts/bindings/screensaver.cc", to: "./js/bindings/screensaver.cc" },
+  { from: "./ts/bindings/binding.gyp", to: "./js/bindings/binding.gyp" },
+  { from: "./ts/bindings/package.json", to: "./js/bindings/package.json" },
+];
+
+async function compile_bindings() {
+  await makeCopyFromTo(copies_binding);
+  console.log("Bindings copied");
+
+  let spinner = ora({
+    text: `Compiling bindings with electron-rebuild...`,
+    spinner: "dots",
+  });
+  spinner.start();
+
+  await new Promise((resolve) => {
+    child_process.exec(
+      "npx electron-rebuild -m .",
+      {
+        cwd: "./js/bindings",
+        encoding: "utf-8",
+        stdio: "ignore",
+      },
+      (error) => {
+        if (error) {
+          console.error(error);
+          spinner.fail("electron-rebuild failed");
+          process.exit(1);
+        }
+        resolve();
+      }
+    );
+  });
+  spinner.succeed("Bindings compiled succesfully");
+}
+
 let copies = [
   { from: "./js", to: path.join(ASAR_ROOT, "js") },
   { from: "./package.json", to: path.join(ASAR_ROOT, "package.json") },
@@ -121,20 +158,37 @@ function find_electron_binding() {
   return electron_binding;
 }
 
-function ensure_electron_binding() {
+async function ensure_electron_binding() {
   let electron_binding = find_electron_binding();
   if (electron_binding) {
     console.log("Node-gtk binding for electron found!");
   } else {
     try {
-      console.log("Node-gtk binding for electron not found. Compiling...");
-      child_process.execSync(
-        "./node_modules/.bin/electron-rebuild -w node-gtk --build-from-source",
-        {
-          encoding: "utf-8",
-          stdio: "inherit",
-        }
-      );
+      let spinner = ora({
+        text: `Node-gtk binding for electron not found. Compiling...`,
+        spinner: "dots",
+      });
+      spinner.start();
+
+      await new Promise((resolve) => {
+        child_process.exec(
+          "npx electron-rebuild -w node-gtk --build-from-source",
+          {
+            encoding: "utf-8",
+            stdio: "ignore",
+          },
+          (error) => {
+            if (error) {
+              console.error(error);
+              spinner.fail("electron-rebuild failed");
+              process.exit(1);
+            }
+            resolve();
+          }
+        );
+      });
+      spinner.succeed("Node-gtk compiled");
+
       electron_binding = find_electron_binding();
     } catch (err) {
       console.error(err);
@@ -145,7 +199,7 @@ function ensure_electron_binding() {
 }
 
 async function copy_electron_binding() {
-  let electron_binding = ensure_electron_binding();
+  let electron_binding = await ensure_electron_binding();
   let path_to_binding = path.join(
     "node_modules/node-gtk/lib/binding",
     electron_binding
@@ -246,6 +300,7 @@ async function build_asar() {
 
 async function build() {
   console.log("Building with prefix:", PREFIX);
+  await compile_bindings();
   await create_build();
   await copy_electron_binding();
   await prepare_install();

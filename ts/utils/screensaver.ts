@@ -4,34 +4,49 @@ import * as path from "path";
 import { nody_greeter } from "../config";
 import { logger } from "../logger";
 
-let initial_timeout = 0;
+import { getScreenSaver, setScreenSaver } from "../bindings/screensaver";
+
+let initial_timeout = -1;
 let taken = false;
 
-async function get_screensaver(): Promise<number> {
-  return new Promise((resolve) => {
-    if (taken) return resolve(initial_timeout);
-    child_process.exec(
-      "xset -q | awk '/^  timeout: / {print $2}'",
-      { encoding: "utf-8" },
-      (err, stdout, stderr) => {
-        initial_timeout = parseInt(stdout.replace(/\n/g, ""));
-        resolve(initial_timeout);
-        taken = true;
-      }
-    );
-  });
+function get_screensaver(): number {
+  let timeout = 0;
+  try {
+    timeout = getScreenSaver().timeout;
+  } catch (err) {
+    logger.error(err);
+    return -1;
+  }
+  if (initial_timeout == -1) initial_timeout = timeout;
+  taken = true;
+  return timeout;
 }
 
-async function set_screensaver(timeout?: number) {
-  if (!taken) await get_screensaver();
-  timeout = timeout ? timeout : nody_greeter.config.greeter.screensaver_timeout;
-  child_process.exec(`xset s ${timeout}`);
+function set_screensaver(timeout?: number): void {
+  if (!taken) get_screensaver();
+  if (initial_timeout == -1) return;
+  timeout =
+    timeout != undefined
+      ? timeout
+      : nody_greeter.config.greeter.screensaver_timeout;
+  try {
+    setScreenSaver(timeout);
+  } catch (err) {
+    logger.error(err);
+    return;
+  }
   logger.debug("Screensaver set");
 }
 
-async function reset_screensaver() {
-  if (!taken) await get_screensaver();
-  child_process.exec(`xset s ${initial_timeout}`);
+function reset_screensaver(): void {
+  if (!taken) get_screensaver();
+  if (initial_timeout == -1) return;
+  try {
+    setScreenSaver(initial_timeout);
+  } catch (err) {
+    logger.error(err);
+    return;
+  }
   logger.debug("Screensaver reset");
 }
 

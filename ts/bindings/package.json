@@ -1,0 +1,16 @@
+{
+  "name": "bindings",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "install": "node-gyp install",
+    "build": "node-gyp build",
+    "build:full": "node-gyp rebuild",
+    "configure": "node-gyp configure"
+  },
+  "author": "",
+  "license": "ISC",
+  "gypfile": true,
+  "dependencies": {
+  }
+}

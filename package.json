@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "rebuild": "electron-rebuild -w node-gtk",
-    "build": "tsc && node build.js",
+    "build": "tsc --build && node make build",
     "do_install": "node install.js"
   },
   "author": {
