@@ -6,4 +6,4 @@ Type=Application
 #Icon=nody-greeter
 StartupWMClass=nody-greeter
 Comment=Trying to create a node.js greeter for lightdm
-Categories=system;
+Categories=System;

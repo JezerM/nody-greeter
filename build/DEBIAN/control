@@ -1,13 +1,13 @@
 Package: nody-greeter
-Version: 1.2.0
-Section: system
+Version: 1.3.0
+Provides: lightdm-greeter
+Replaces: lightdm-webkit-greeter
+Section: x11
 Priority: optional
-Architecture: all
-Installed-Size: 223524
-Depends: gobject-introspection,
-  liblightdm-gobject-1-0,
-  libcairo2,
-  liblightdm-gobject-1-dev
+Homepage: https://github.com/JezerM/nody-greeter
+Installed-Size: 221880
+Architecture: amd64
 Maintainer: JezerM <amyuki4@gmail.com>
+Depends: gobject-introspection, liblightdm-gobject-1-0, libcairo2, liblightdm-gobject-1-dev, libc6
 Description: Web Greeter, but node.js, for lightdm
  LightDM greeter made in Node.js
