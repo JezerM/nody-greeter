@@ -1,5 +1,6 @@
 import * as yargs from "yargs";
 import * as fs from "fs";
+import * as path from "path";
 
 import { nody_greeter } from "./config";
 
@@ -22,6 +23,10 @@ function list_themes(print = true) {
 
   filenames.forEach((file) => {
     if (file.isDirectory()) dirlist.push(file.name);
+    else if (file.isSymbolicLink()) {
+      let real_path = fs.realpathSync(path.join(dir, file.name));
+      if (fs.statSync(real_path).isDirectory()) dirlist.push(file.name);
+    }
   });
 
   if (print) {

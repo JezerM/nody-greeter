@@ -590,7 +590,7 @@ export class ThemeUtils {
       nody_greeter.app.theme_dir,
       nody_greeter.config.branding.background_images_dir,
       globalThis.lightdm.shared_data_directory,
-      path.dirname(nody_greeter.config.greeter.theme),
+      path.dirname(fs.realpathSync(nody_greeter.config.greeter.theme)),
       os.tmpdir(),
     ];
 
@@ -632,7 +632,10 @@ export class ThemeUtils {
       }
     }
 
-    if (!allowed) return [];
+    if (!allowed) {
+      logger.error(`Path "${dir_path}" is not allowed`);
+      return [];
+    }
 
     let files = fs.readdirSync(dir_path, { withFileTypes: true });
     let result = [];
