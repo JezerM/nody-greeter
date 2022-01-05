@@ -32,6 +32,9 @@ Themes working in **web-greeter** should work also here. All themes shipped with
 - liblightdm-gobject
 - liblightdm-gobject-dev
 - libcairo2
+- libxcb-dev
+- libx11-dev
+- base-devel (build-essentials)
 
 ## Installation
 
