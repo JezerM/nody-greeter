@@ -10,7 +10,7 @@ async function wait(ms) {
 }
 
 function getFileSize(ph) {
-  let buf = child_process.execSync("du -sb " + ph, { encoding: "utf-8" });
+  let buf = child_process.execSync(`du -sb "${ph}"`, { encoding: "utf-8" });
 
   let match = buf.match(/^(\d+)/);
   return Number(match[0]);
@@ -67,8 +67,8 @@ async function iterateCopy(source, dest, copy_bar, bytes) {
 
   let stat = fs.statSync(source);
   if (!stat.isDirectory()) {
-    let source_file = source;
-    let dest_file = dest;
+    let source_file = path.resolve(source);
+    let dest_file = path.resolve(dest);
     return await do_copy(source_file, dest_file, copy_bar, bytesCopied);
   }
   if (!fs.pathExistsSync(dest)) fs.mkdirSync(dest, { recursive: true });
