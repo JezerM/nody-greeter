@@ -4,6 +4,7 @@ const yargs = require("yargs");
 
 let DEST_DIR = "/";
 let PREFIX = "/usr";
+let ARCH = process.arch;
 let INSTALL_ROOT = path.resolve(__dirname, "./build/unpacked/");
 
 yargs.parserConfiguration({
@@ -32,12 +33,18 @@ let argv = yargs
     describe: "Prefix to install at",
     default: PREFIX,
   })
+  .option("ARCH", {
+    type: "string",
+    describe: "Architecture to build for",
+    default: ARCH,
+  })
   .help("h")
   .alias("h", "help")
   .version(false).argv;
 
 PREFIX = argv.PREFIX;
 DEST_DIR = argv.DEST_DIR;
+ARCH = argv.ARCH;
 
 async function do_install() {
   const { build } = require("./build.js");

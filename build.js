@@ -13,6 +13,7 @@ const ora = require("ora");
 
 let DEST_DIR = "/";
 let PREFIX = "/usr";
+let ARCH = process.arch;
 let INSTALL_ROOT = path.resolve(__dirname, "./build/unpacked/");
 let ASAR_ROOT = path.resolve(__dirname, "./build/nody-asar/");
 
@@ -38,12 +39,18 @@ let argv = yargs
     describe: "Prefix to install at",
     default: PREFIX,
   })
+  .option("ARCH", {
+    type: "string",
+    describe: "Architecture to build for",
+    default: ARCH,
+  })
   .help("h")
   .alias("h", "help")
   .version(false).argv;
 
 DEST_DIR = argv.DEST_DIR;
 PREFIX = argv.PREFIX;
+ARCH = argv.ARCH;
 
 // Some global variables
 
@@ -78,14 +85,14 @@ async function compile_bindings() {
   console.log("Bindings copied");
 
   let spinner = ora({
-    text: `Compiling bindings with electron-rebuild...`,
+    text: `Compiling bindings with electron-rebuild for ${ARCH}...`,
     spinner: "dots",
   });
   spinner.start();
 
   await new Promise((resolve) => {
     child_process.exec(
-      "npx electron-rebuild -m .",
+      `npx electron-rebuild -m . --arch ${ARCH}`,
       {
         cwd: "./js/bindings",
         encoding: "utf-8",
@@ -154,7 +161,8 @@ function find_electron_binding() {
   }
   fs.removeSync("./build/nody-asar/node_modules/node-gtk/lib/binding/");
   let bindings = fs.readdirSync("./node_modules/node-gtk/lib/binding/");
-  let electron_binding = bindings.find((v) => v.includes("electron"));
+  let re = new RegExp(`electron-.*-linux-${ARCH}`);
+  let electron_binding = bindings.find((v) => v.match(re));
   return electron_binding;
 }
 
@@ -165,14 +173,14 @@ async function ensure_electron_binding() {
   } else {
     try {
       let spinner = ora({
-        text: `Node-gtk binding for electron not found. Compiling...`,
+        text: `Node-gtk binding for electron not found. Compiling for ${ARCH}...`,
         spinner: "dots",
       });
       spinner.start();
 
       await new Promise((resolve) => {
         child_process.exec(
-          "npx electron-rebuild -w node-gtk --build-from-source",
+          `npx electron-rebuild -w node-gtk --build-from-source --arch ${ARCH}`,
           {
             encoding: "utf-8",
             stdio: "ignore",
@@ -194,6 +202,10 @@ async function ensure_electron_binding() {
       console.error(err);
       process.exit(1);
     }
+  }
+  if (!electron_binding) {
+    console.error("Electron binding couldn't be found");
+    process.exit(1);
   }
   return electron_binding;
 }
