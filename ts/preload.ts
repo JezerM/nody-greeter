@@ -7,11 +7,11 @@ import {
   LightDMUser,
 } from "./ldm_interfaces";
 
-let allSignals = [];
+const allSignals = [];
 
 export class Signal {
-  _name: string;
-  _callbacks: Function[];
+  private _name: string;
+  private _callbacks: ((...args: unknown[]) => void)[];
 
   constructor(name: string) {
     this._name = name;
@@ -21,29 +21,40 @@ export class Signal {
 
   /**
    * Connects a callback to the signal.
-   * @param {Function} callback The callback to attach.
+   * @param {() => void} callback The callback to attach.
    */
-  public connect(callback: Function) {
+  public connect(callback: (...args: unknown[]) => void): void {
     if (typeof callback !== "function") return;
     this._callbacks.push(callback);
   }
   /**
    * Disconnects a callback to the signal.
-   * @param {Function} callback The callback to disattach.
+   * @param {() => void} callback The callback to disattach.
    */
-  public disconnect(callback: Function) {
-    var ind = this._callbacks.findIndex((cb) => {
+  public disconnect(callback: () => void): void {
+    const ind = this._callbacks.findIndex((cb) => {
       return cb === callback;
     });
     if (ind == -1) return;
     this._callbacks.splice(ind, 1);
   }
 
-  _emit(...args: [...any]) {
+  _emit(...args: unknown[]): void {
     this._callbacks.forEach((cb) => {
       if (typeof cb !== "function") return;
       cb(...args);
     });
+  }
+}
+
+export class MessageSignal extends Signal {
+  public connect(callback: (message: string, type: number) => void): void {
+    super.connect(callback);
+  }
+}
+export class PromptSignal extends Signal {
+  public connect(callback: (message: string, type: number) => void): void {
+    super.connect(callback);
   }
 }
 
@@ -75,9 +86,9 @@ export class Greeter {
 
   reset = new Signal("reset");
 
-  show_message = new Signal("show-message");
+  show_message = new MessageSignal("show-message");
 
-  show_prompt = new Signal("show-prompt");
+  show_prompt = new PromptSignal("show-prompt");
 
   brightness_update = new Signal("brightness_update");
 
@@ -372,14 +383,14 @@ export class Greeter {
    *
    * @param {string|null} username A username or "null" to prompt for a username.
    */
-  authenticate(username: string | null) {
+  authenticate(username: string | null): boolean {
     return ipcRenderer.sendSync("lightdm", "authenticate", username);
   }
 
   /**
    * Starts the authentication procedure for the guest user.
    */
-  authenticate_as_guest() {
+  authenticate_as_guest(): boolean {
     return ipcRenderer.sendSync("lightdm", "authenticate_as_guest");
   }
 
@@ -387,7 +398,7 @@ export class Greeter {
    * Set the brightness to quantity
    * @param {number} quantity The quantity to set
    */
-  brightnessSet(quantity: number) {
+  brightnessSet(quantity: number): void {
     return ipcRenderer.sendSync("lightdm", "brightnessSet", quantity);
   }
 
@@ -395,7 +406,7 @@ export class Greeter {
    * Increase the brightness by quantity
    * @param {number} quantity The quantity to increase
    */
-  brightnessIncrease(quantity: number) {
+  brightnessIncrease(quantity: number): void {
     return ipcRenderer.sendSync("lightdm", "brightnessIncrease", quantity);
   }
 
@@ -403,21 +414,21 @@ export class Greeter {
    * Decrease the brightness by quantity
    * @param {number} quantity The quantity to decrease
    */
-  brightnessDecrease(quantity: number) {
+  brightnessDecrease(quantity: number): void {
     return ipcRenderer.sendSync("lightdm", "brightnessDecrease", quantity);
   }
 
   /**
    * Cancel user authentication that is currently in progress.
    */
-  cancel_authentication() {
+  cancel_authentication(): boolean {
     return ipcRenderer.sendSync("lightdm", "cancel_authentication");
   }
 
   /**
    * Cancel the automatic login.
    */
-  cancel_autologin() {
+  cancel_autologin(): boolean {
     return ipcRenderer.sendSync("lightdm", "cancel_autologin");
   }
 
@@ -433,7 +444,7 @@ export class Greeter {
    * Provide a response to a prompt.
    * @param {string} response
    */
-  respond(response: string) {
+  respond(response: string): boolean {
     return ipcRenderer.sendSync("lightdm", "respond", response);
   }
 
@@ -628,10 +639,10 @@ export class ThemeUtils {
    * @return {object} `context` with `this` bound to it for all of its methods.
    */
   bind_this(context: object): object {
-    let excluded_methods = ["constructor"];
+    const excluded_methods = ["constructor"];
 
-    function not_excluded(_method: string, _context: object) {
-      let is_excluded =
+    function not_excluded(_method: string, _context: object): boolean {
+      const is_excluded =
           excluded_methods.findIndex(
             (excluded_method) => _method === excluded_method
           ) > -1,
@@ -646,7 +657,7 @@ export class ThemeUtils {
         break;
       }
 
-      for (let method of Object.getOwnPropertyNames(obj)) {
+      for (const method of Object.getOwnPropertyNames(obj)) {
         if (not_excluded(method, context)) {
           context[method] = context[method].bind(context);
         }
@@ -670,9 +681,9 @@ export class ThemeUtils {
    */
   dirlist(
     path: string,
-    only_images: boolean = true,
+    only_images = true,
     callback: (args: string[]) => void
-  ) {
+  ): void {
     if ("" === path || "string" !== typeof path) {
       console.error(`theme_utils.dirlist(): path must be a non-empty string!`);
       return callback([]);
@@ -709,7 +720,7 @@ export class ThemeUtils {
    * @param {function(string[])}  callback    Callback function to be called with the result.
    * @experimental Available only for nody-greeter. DO NOT use it if you want compatibility between web-greeter and nody-greeter
    */
-  dirlist_sync(path: string, only_images: boolean = true): string[] {
+  dirlist_sync(path: string, only_images = true): string[] {
     if ("" === path || "string" !== typeof path) {
       console.error(`theme_utils.dirlist(): path must be a non-empty string!`);
       return [];
@@ -731,9 +742,9 @@ export class ThemeUtils {
    * 	 * `language` defaults to the system's language, but can be set manually in the config file.
    */
   get_current_localized_date(): string {
-    let config = globalThis.greeter_config.greeter;
+    const config = globalThis.greeter_config.greeter;
 
-    var locale = [];
+    const locale = [];
 
     if (time_language === null) {
       time_language = config.time_language || "";
@@ -743,16 +754,16 @@ export class ThemeUtils {
       locale.push(time_language);
     }
 
-    let optionsDate: Intl.DateTimeFormatOptions = {
+    const optionsDate: Intl.DateTimeFormatOptions = {
       day: "2-digit",
       month: "2-digit",
       year: "2-digit",
     };
 
-    let fmtDate = Intl.DateTimeFormat(locale, optionsDate);
+    const fmtDate = Intl.DateTimeFormat(locale, optionsDate);
 
-    let now = new Date();
-    var date = fmtDate.format(now);
+    const now = new Date();
+    const date = fmtDate.format(now);
 
     return date;
   }
@@ -762,9 +773,9 @@ export class ThemeUtils {
    * 	 * `language` defaults to the system's language, but can be set manually in the config file.
    */
   get_current_localized_time(): string {
-    let config = globalThis.greeter_config.greeter;
+    const config = globalThis.greeter_config.greeter;
 
-    var locale = [];
+    const locale = [];
 
     if (time_language === null) {
       time_language = config.time_language || "";
@@ -774,15 +785,15 @@ export class ThemeUtils {
       locale.push(time_language);
     }
 
-    let optionsTime: Intl.DateTimeFormatOptions = {
+    const optionsTime: Intl.DateTimeFormatOptions = {
       hour: "2-digit",
       minute: "2-digit",
     };
 
-    let fmtTime = Intl.DateTimeFormat(locale, optionsTime);
+    const fmtTime = Intl.DateTimeFormat(locale, optionsTime);
 
-    let now = new Date();
-    var time = fmtTime.format(now);
+    const now = new Date();
+    const time = fmtTime.format(now);
 
     return time;
   }

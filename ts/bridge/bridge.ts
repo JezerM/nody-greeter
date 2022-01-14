@@ -16,7 +16,7 @@ import {
   session_to_obj,
   battery_to_obj,
 } from "./bridge_objects";
-import { browser, error_prompt } from "../globals";
+import { browser } from "../globals";
 
 import { Brightness } from "../utils/brightness.js";
 import { Battery } from "../utils/battery";
@@ -48,6 +48,7 @@ export class Greeter {
     }
 
     try {
+      //LightDMGreeter.setResettable(true);
       LightDMGreeter.connectToDaemonSync();
     } catch (err) {
       logger.error(err);
@@ -65,8 +66,8 @@ export class Greeter {
 
     this._connect_signals();
 
-    let user = LightDMUsers.getUsers()[0];
-    let user_data_dir = LightDMGreeter.ensureSharedDataDirSync(user.name);
+    const user = LightDMUsers.getUsers()[0];
+    const user_data_dir = LightDMGreeter.ensureSharedDataDirSync(user.name);
     this._shared_data_directory = user_data_dir.slice(
       0,
       user_data_dir.lastIndexOf("/")
@@ -79,17 +80,17 @@ export class Greeter {
     return globalThis.lightdm;
   }
 
-  _connect_signals() {
+  _connect_signals(): void {
     LightDMGreeter.connect("authentication-complete", () => {
       this._emit_signal("authentication-complete");
     });
     LightDMGreeter.connect("autologin-timer-expired", () => {
       this._emit_signal("autologin-timer-expired");
     });
-    LightDMGreeter.connect("show-message", (text, type) => {
+    LightDMGreeter.connect("show-message", (text: string, type: number) => {
       this._emit_signal("show-message", text, type);
     });
-    LightDMGreeter.connect("show-prompt", (text, type) => {
+    LightDMGreeter.connect("show-prompt", (text: string, type: number) => {
       this._emit_signal("show-prompt", text, type);
     });
     LightDMGreeter.connect("idle", () => {
@@ -100,7 +101,7 @@ export class Greeter {
     });
   }
 
-  _emit_signal(signal: string, ...args: [...any]) {
+  _emit_signal(signal: string, ...args: unknown[]): void {
     //console.log("SIGNAL EMITTED", signal, args)
     browser.win.webContents.send("LightDMSignal", signal, ...args);
   }
@@ -143,7 +144,7 @@ export class Greeter {
    * Gets the battery data.
    * @readonly
    */
-  get batteryData(): LightDMBattery | {} {
+  get batteryData(): LightDMBattery | object {
     return battery_to_obj(this._battery);
   }
 
@@ -261,7 +262,7 @@ export class Greeter {
    * The current language or "null" if no language.
    * @readonly
    */
-  get language(): LightDMLanguage | {} {
+  get language(): LightDMLanguage | object {
     return language_to_obj(LightDM.getLanguage());
   }
 
@@ -276,11 +277,11 @@ export class Greeter {
   /**
    * The currently active layout for the selected user.
    */
-  get layout(): LightDMLayout | {} {
+  get layout(): LightDMLayout | object {
     return layout_to_obj(LightDM.getLayout());
   }
 
-  set layout(layout: LightDMLayout | {}) {
+  set layout(layout: LightDMLayout | object) {
     LightDM.getLayout();
     LightDM.setLayout(new LightDM.Layout(layout));
   }
@@ -373,53 +374,53 @@ export class Greeter {
    * Starts the authentication procedure for a user.
    * @param {string|null} username A username or "null" to prompt for a username.
    */
-  authenticate(username: string | null) {
-    LightDMGreeter.authenticate(username);
+  authenticate(username: string | null): boolean {
+    return LightDMGreeter.authenticate(username);
   }
 
   /**
    * Starts the authentication procedure for the guest user.
    */
-  authenticate_as_guest() {
-    LightDMGreeter.authenticateAsGuest();
+  authenticate_as_guest(): boolean {
+    return LightDMGreeter.authenticateAsGuest();
   }
 
   /**
    * Set the brightness to quantity
    * @param {number} quantity The quantity to set
    */
-  brightnessSet(quantity: number) {
-    Brightness.set_brightness(quantity);
+  brightnessSet(quantity: number): void {
+    return Brightness.set_brightness(quantity);
   }
 
   /**
    * Increase the brightness by quantity
    * @param {number} quantity The quantity to increase
    */
-  brightnessIncrease(quantity: number) {
-    Brightness.inc_brightness(quantity);
+  brightnessIncrease(quantity: number): void {
+    return Brightness.inc_brightness(quantity);
   }
 
   /**
    * Decrease the brightness by quantity
    * @param {number} quantity The quantity to decrease
    */
-  brightnessDecrease(quantity: number) {
-    Brightness.dec_brightness(quantity);
+  brightnessDecrease(quantity: number): void {
+    return Brightness.dec_brightness(quantity);
   }
 
   /**
    * Cancel user authentication that is currently in progress.
    */
-  cancel_authentication() {
-    LightDMGreeter.cancelAuthentication();
+  cancel_authentication(): boolean {
+    return LightDMGreeter.cancelAuthentication();
   }
 
   /**
    * Cancel the automatic login.
    */
-  cancel_autologin() {
-    LightDMGreeter.cancelAutologin();
+  cancel_autologin(): boolean {
+    return LightDMGreeter.cancelAutologin();
   }
 
   /**
@@ -434,8 +435,8 @@ export class Greeter {
    * Provide a response to a prompt.
    * @param {string} response
    */
-  respond(response: string) {
-    LightDMGreeter.respond(response);
+  respond(response: string): boolean {
+    return LightDMGreeter.respond(response);
   }
 
   /**
@@ -473,7 +474,7 @@ export class Greeter {
    * @returns {boolean} "true" if successful, otherwise "false"
    */
   start_session(session: string | null): boolean {
-    let started = LightDMGreeter.startSessionSync(session);
+    const started = LightDMGreeter.startSessionSync(session);
     if (started || this.is_authenticated) reset_screensaver();
     return started;
   }
@@ -488,13 +489,13 @@ export class Greeter {
 }
 
 function get_layouts(config_layouts: string[]): LightDMLayout[] {
-  let layouts = LightDM.getLayouts();
-  let final: LightDMLayout[] = [];
-  for (let ldm_lay of layouts) {
+  const layouts = LightDM.getLayouts();
+  const final: LightDMLayout[] = [];
+  for (const ldm_lay of layouts) {
     for (let conf_lay of config_layouts) {
       conf_lay = conf_lay.replace(/\s/g, "\t");
       if (ldm_lay.getName() == conf_lay) {
-        let leys = layout_to_obj(ldm_lay);
+        const leys = layout_to_obj(ldm_lay);
         if (Object.keys(leys).length == 0) continue;
         // @ts-ignore
         final.push(leys);
@@ -528,7 +529,7 @@ export class GreeterConfig {
    *                                      for users that have not configured a `.face` image.
    * @readonly
    */
-  get branding() {
+  get branding(): web_greeter_config["branding"] {
     return this._config.branding;
   }
 
@@ -547,7 +548,7 @@ export class GreeterConfig {
    * @property {string}  theme               The name of the theme to be used by the greeter.
    * @readonly
    */
-  get greeter() {
+  get greeter(): web_greeter_config["greeter"] {
     return this._config.greeter;
   }
 
@@ -561,7 +562,7 @@ export class GreeterConfig {
    * @property {Number}  value					 The amount to increase/decrease brightness by greeter.
    * @property {Number}  steps					 How many steps are needed to do the change.
    */
-  get features() {
+  get features(): web_greeter_config["features"] {
     return this._config.features;
   }
 
@@ -570,7 +571,7 @@ export class GreeterConfig {
    * @type {Array}			layouts
    * @readonly
    */
-  get layouts() {
+  get layouts(): LightDMLayout[] {
     return get_layouts(this._config.layouts);
   }
 }
@@ -609,7 +610,7 @@ export class ThemeUtils {
    * @param {Boolean}             only_images Include only images in the results. Default `true`.
    * @param {function(String[])}  callback    Callback function to be called with the result.
    */
-  dirlist(dir_path: string, only_images: boolean = true) {
+  dirlist(dir_path: string, only_images = true): string[] {
     if (!dir_path || typeof dir_path !== "string" || dir_path === "/") {
       return [];
     }
@@ -637,7 +638,7 @@ export class ThemeUtils {
       return [];
     }
 
-    let files = fs.readdirSync(dir_path, { withFileTypes: true });
+    const files = fs.readdirSync(dir_path, { withFileTypes: true });
     let result = [];
 
     if (only_images) {
@@ -659,38 +660,40 @@ export class ThemeUtils {
   }
 }
 
+/* eslint-disable */ //
 function reduceArray(
   arr: any[],
   func: {
-    (lang: any): {} | LightDMLanguage;
-    (layout: any): {} | LightDMLayout;
-    (session: any): {} | LightDMSession;
-    (session: any): {} | LightDMSession;
-    (user: any): {} | LightDMUser;
-    (arg0: any): any;
+    (lang: any): object | LightDMLanguage;
+    (layout: any): object | LightDMLayout;
+    (session: any): object | LightDMSession;
+    (session: any): object | LightDMSession;
+    (user: any): object | LightDMUser;
+    (arg0: any): object;
   }
-): any {
+): any[] {
   if (!Array.isArray(arr)) return;
   return arr.reduce((acc, val) => {
-    let v = func(val);
+    const v = func(val);
     acc.push(v);
     return acc;
   }, []);
 }
+/* eslint-enable */ //
 
 function handler(
-  accesor: any,
+  accesor: object,
   ev: Electron.IpcMainInvokeEvent,
-  ...args: [...any]
-) {
+  ...args: string[]
+): object {
   if (args.length == 0) return (ev.returnValue = undefined);
-  let descriptors = Object.getOwnPropertyDescriptors(
+  const descriptors = Object.getOwnPropertyDescriptors(
     Object.getPrototypeOf(accesor)
   );
-  let param = args[0];
+  const param = args[0];
   args.shift();
-  let pr = accesor[param];
-  let ac = descriptors[param];
+  const pr = accesor[param];
+  const ac = descriptors[param];
 
   let value = undefined;
 
@@ -708,7 +711,7 @@ function handler(
 
 ipcMain.on("greeter_config", (ev, ...args) => {
   if (args.length == 0) return (ev.returnValue = undefined);
-  let pr = globalThis.greeter_config[args[0]];
+  const pr = globalThis.greeter_config[args[0]];
   ev.returnValue = pr || undefined;
 });
 

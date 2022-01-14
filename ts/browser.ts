@@ -32,7 +32,7 @@ class Browser {
 
   whenReady(): Promise<void> {
     return new Promise((resolve) => {
-      let interval = setInterval(() => {
+      const interval = setInterval(() => {
         if (this.ready) {
           resolve();
           clearInterval(interval);
@@ -66,23 +66,20 @@ class Browser {
   }
 
   private set_protocol(): void {
-    let done = protocol.registerFileProtocol(
-      "web-greeter",
-      (request, callback) => {
-        let req_url = request.url;
-        let url = new URL(req_url);
-        let res = decodeURI(url.pathname);
-        //console.log({ url, res });
-        callback(res);
-      }
-    );
+    protocol.registerFileProtocol("web-greeter", (request, callback) => {
+      const req_url = request.url;
+      const url = new URL(req_url);
+      const res = decodeURI(url.pathname);
+      //console.log({ url, res });
+      callback(res);
+    });
   }
 
   load_theme(): void {
-    let theme = nody_greeter.config.greeter.theme;
-    let dir = nody_greeter.app.theme_dir;
+    const theme = nody_greeter.config.greeter.theme;
+    const dir = nody_greeter.app.theme_dir;
     let path_to_theme = path.join(dir, theme, "index.html");
-    let def_theme = "gruvbox";
+    const def_theme = "gruvbox";
 
     if (theme.startsWith("/")) path_to_theme = theme;
     else if (theme.includes(".") || theme.includes("/"))
@@ -101,7 +98,7 @@ class Browser {
     nody_greeter.config.greeter.theme = path_to_theme;
 
     //this.win.loadFile(path_to_theme);
-    let theme_url = url.format({
+    const theme_url = url.format({
       pathname: path_to_theme,
       host: "app",
       hostname: "app",
@@ -112,7 +109,7 @@ class Browser {
     this.win.setBackgroundColor("#000000");
 
     this.win.webContents.on("before-input-event", (_event, input) => {
-      let value = nody_greeter.config.features.backlight.value;
+      const value = nody_greeter.config.features.backlight.value;
       if (input.type == "keyUp") return;
       if (input.code == "BrightnessDown") {
         Brightness.dec_brightness(value);
@@ -127,9 +124,9 @@ class Browser {
   create_window(): BrowserWindow {
     logger.debug("Initializing Browser Window");
 
-    let screen_size = screen.getPrimaryDisplay().workAreaSize;
+    const screen_size = screen.getPrimaryDisplay().workAreaSize;
 
-    let win = new BrowserWindow({
+    const win = new BrowserWindow({
       height: screen_size.height,
       width: screen_size.width,
       backgroundColor: "#000000",
@@ -153,7 +150,7 @@ class Browser {
      * - ~/.config/gtk-3.0/settings.ini
      */
 
-    let cursor_theme = nody_greeter.config.greeter.icon_theme;
+    const cursor_theme = nody_greeter.config.greeter.icon_theme;
     process.env.XCURSOR_THEME = cursor_theme ? cursor_theme : "";
 
     set_screensaver();
@@ -205,7 +202,7 @@ class Browser {
         { role: "toggleDevTools", accelerator: "T" },
         {
           label: "Inspect Element",
-          click: () => {
+          click: (): void => {
             this.win.webContents.inspectElement(position.x, position.y);
           },
           accelerator: "I",
@@ -216,9 +213,9 @@ class Browser {
     });
 
     session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
-      let url = new URL(details.url);
+      const url = new URL(details.url);
       //console.log({ origin: details.url, url });
-      let block =
+      const block =
         !(
           url.protocol.includes("web-greeter") ||
           url.protocol.includes("file") ||

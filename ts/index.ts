@@ -4,7 +4,7 @@ import * as path from "path";
 
 import { nody_greeter } from "./config";
 
-let res = yargs
+const res = yargs
   .scriptName("nody-greeter")
   .usage("$0 [args]")
   .command("--debug", "Runs the greeter in debug mode")
@@ -15,16 +15,16 @@ let res = yargs
   .alias("h", "help")
   .alias("v", "version").argv;
 
-function list_themes(print = true) {
+function list_themes(print = true): void {
   let dir = nody_greeter.app.theme_dir;
   dir = fs.existsSync(dir) ? dir : "/usr/share/web-greeter/themes";
-  let filenames = fs.readdirSync(dir, { withFileTypes: true });
-  let dirlist: string[] = [];
+  const filenames = fs.readdirSync(dir, { withFileTypes: true });
+  const dirlist: string[] = [];
 
   filenames.forEach((file) => {
     if (file.isDirectory()) dirlist.push(file.name);
     else if (file.isSymbolicLink()) {
-      let real_path = fs.realpathSync(path.join(dir, file.name));
+      const real_path = fs.realpathSync(path.join(dir, file.name));
       if (fs.statSync(real_path).isDirectory()) dirlist.push(file.name);
     }
   });
@@ -35,7 +35,7 @@ function list_themes(print = true) {
   }
 }
 
-function set_debug(mode: boolean) {
+function set_debug(mode: boolean): void {
   nody_greeter.config.greeter.debug_mode = mode;
   nody_greeter.app.fullscreen = !mode;
   nody_greeter.app.frame = mode;
@@ -58,6 +58,8 @@ if (res.list) {
 if (nody_greeter.config.greeter.debug_mode == true) {
   set_debug(true);
 }
+
+// Import browser and bridge to initialize nody-greeter
 
 import "./browser";
 

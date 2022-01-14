@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 const addon = require("./build/Release/screensaver");
 
 export interface Screensaver {
@@ -16,6 +17,6 @@ export function setScreenSaver(
   interval?: number,
   prefer_blank?: number,
   allow_exp?: number
-) {
+): void {
   addon.setScreenSaver(timeout, interval, prefer_blank, allow_exp);
 }

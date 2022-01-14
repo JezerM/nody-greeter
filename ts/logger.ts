@@ -3,13 +3,13 @@ import * as path from "path";
 
 Object.defineProperty(global, "__stack", {
   get: function () {
-    var orig = Error.prepareStackTrace;
-    Error.prepareStackTrace = function (_, stack) {
+    const orig = Error.prepareStackTrace;
+    Error.prepareStackTrace = function (_, stack): NodeJS.CallSite[] {
       return stack;
     };
-    var err = new Error();
+    const err = new Error();
     Error.captureStackTrace(err, arguments.callee);
-    var stack: NodeJS.CallSite[] = err.stack as any;
+    const stack: NodeJS.CallSite[] = err.stack as unknown as NodeJS.CallSite[];
     Error.prepareStackTrace = orig;
     return stack;
   },
@@ -17,23 +17,23 @@ Object.defineProperty(global, "__stack", {
 
 Object.defineProperty(global, "__line", {
   get: function () {
-    let stack: NodeJS.CallSite[] = __stack;
+    const stack: NodeJS.CallSite[] = __stack;
     if (stack[2]) return stack[2].getLineNumber();
     return stack[1].getLineNumber();
   },
 });
 Object.defineProperty(global, "__source", {
-  get: function () {
-    let stack: NodeJS.CallSite[] = __stack;
+  get: function (): string {
+    const stack: NodeJS.CallSite[] = __stack;
     if (stack[2]) return stack[2].getFileName();
     return stack[1].getFileName();
   },
 });
 
 declare global {
-  var __line: number;
-  var __stack: NodeJS.CallSite[];
-  var __source: string;
+  const __line: number;
+  const __stack: NodeJS.CallSite[];
+  const __source: string;
 }
 
 const myFormat = winston.format.printf(
@@ -63,7 +63,7 @@ class Logger {
     this.winston_logger = winston_logger;
   }
 
-  debug(message: string) {
+  debug(message: string): void {
     this.winston_logger.log({
       level: "debug",
       message: message,
@@ -71,7 +71,7 @@ class Logger {
       source: path.basename(__source),
     });
   }
-  warn(message: string) {
+  warn(message: string): void {
     this.winston_logger.log({
       level: "warn",
       message: message,
@@ -79,7 +79,7 @@ class Logger {
       source: path.basename(__source),
     });
   }
-  error(message: string) {
+  error(message: string): void {
     this.winston_logger.log({
       level: "error",
       message: message,
@@ -97,7 +97,7 @@ class Logger {
     message: string;
     line: number;
     source: string;
-  }) {
+  }): void {
     this.winston_logger.log({
       level: level,
       message: message,

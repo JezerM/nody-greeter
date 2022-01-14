@@ -11,6 +11,5 @@
   "author": "",
   "license": "ISC",
   "gypfile": true,
-  "dependencies": {
-  }
+  "dependencies": {}
 }

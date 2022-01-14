@@ -6,7 +6,8 @@ import {
   LightDMUser,
 } from "../ldm_interfaces";
 
-function session_to_obj(session: any): LightDMSession | {} {
+// eslint-disable-next-line
+function session_to_obj(session: any): LightDMSession | object {
   if (!session) return {};
   return {
     comment: session.getComment(),
@@ -16,7 +17,8 @@ function session_to_obj(session: any): LightDMSession | {} {
   };
 }
 
-function user_to_obj(user: any): LightDMUser | {} {
+// eslint-disable-next-line
+function user_to_obj(user: any): LightDMUser | object {
   if (!user) return {};
   return {
     background: user.getBackground(),
@@ -32,7 +34,8 @@ function user_to_obj(user: any): LightDMUser | {} {
   };
 }
 
-function language_to_obj(lang: any): LightDMLanguage | {} {
+// eslint-disable-next-line
+function language_to_obj(lang: any): LightDMLanguage | object {
   if (!lang) return {};
   return {
     code: lang.getCode(),
@@ -41,7 +44,8 @@ function language_to_obj(lang: any): LightDMLanguage | {} {
   };
 }
 
-function layout_to_obj(layout: any): LightDMLayout | {} {
+// eslint-disable-next-line
+function layout_to_obj(layout: any): LightDMLayout | object {
   if (!layout) return {};
   return {
     description: layout.getDescription(),
@@ -50,7 +54,8 @@ function layout_to_obj(layout: any): LightDMLayout | {} {
   };
 }
 
-function battery_to_obj(battery: any): LightDMBattery | {} {
+// eslint-disable-next-line
+function battery_to_obj(battery: any): LightDMBattery | object {
   if (!battery) return {};
   if (battery._batteries.length == 0) return {};
   return {

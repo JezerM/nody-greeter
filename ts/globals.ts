@@ -10,11 +10,11 @@ browser.whenReady().then(() => {
   logger.debug("Window is ready");
 });
 
-function initLogger() {
+function initLogger(): void {
   logger.debug("Javascript logger is ready");
   browser.win.webContents.addListener(
     "console-message",
-    (ev, code, message, line, sourceID) => {
+    (_ev, code, message, line, sourceID) => {
       sourceID = sourceID == "" ? "console" : sourceID;
       if (code == 3) {
         logger.log({
@@ -36,9 +36,15 @@ function initLogger() {
   );
 }
 
-function error_prompt(message: string, source: string, line: number) {
+/**
+ * Prompts to change to default theme (gruvbox) on error
+ * @param {string} message Message or error to show
+ * @param {string} source Source of error
+ * @param {number} line Line number where error was detected
+ */
+function error_prompt(message: string, source: string, line: number): void {
   if (!nody_greeter.config.greeter.detect_theme_errors) return;
-  let ind = dialog.showMessageBoxSync(browser.win, {
+  const ind = dialog.showMessageBoxSync(browser.win, {
     message:
       "An error ocurred. Do you want to change to default theme? (gruvbox)",
     detail: `${source} ${line}: ${message}`,

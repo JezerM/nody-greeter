@@ -1,6 +1,5 @@
 import * as yaml from "js-yaml";
 import * as fs from "fs";
-import * as path from "path";
 import { logger } from "./logger";
 
 export interface web_greeter_config {
@@ -75,13 +74,13 @@ export const nody_greeter: nody_config = {
   },
 };
 
-let path_to_config = "/etc/lightdm/web-greeter.yml";
+const path_to_config = "/etc/lightdm/web-greeter.yml";
 
-export function load_config() {
+export function load_config(): void {
   try {
     if (!fs.existsSync(path_to_config))
       throw new Error("Config file not found");
-    let file = fs.readFileSync(path_to_config, "utf-8");
+    const file = fs.readFileSync(path_to_config, "utf-8");
     nody_greeter.config = yaml.load(file) as web_greeter_config;
   } catch (err) {
     logger.error(`Config was not loaded:\n\t${err}`);

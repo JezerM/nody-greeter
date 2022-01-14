@@ -16,13 +16,13 @@ const sys_path = ["/sys/class/backlight"];
  * Gets the controllers inside "sys_path"
  */
 function get_controllers(): string[] {
-  let ctrls: string[] = [];
+  const ctrls: string[] = [];
   for (let i = 0; i < sys_path.length; i++) {
-    let dev = sys_path[i];
+    const dev = sys_path[i];
     if (fs.existsSync(dev) && fs.statSync(dev).isDirectory()) {
-      let drs = fs.readdirSync(dev);
+      const drs = fs.readdirSync(dev);
       for (let o = 0; o < drs.length; o++) {
-        let name = drs[o];
+        const name = drs[o];
         ctrls[o] = path.join(dev, name);
       }
     }
@@ -35,11 +35,12 @@ function get_controllers(): string[] {
  * @class
  */
 class BrightnessController {
-  _brightness_path: string;
-  _controllers: string[];
-  steps: number;
-  delay: number;
-  _available: boolean;
+  private _brightness_path: string;
+  private _max_brightness_path: string;
+  private _controllers: string[];
+  private steps: number;
+  private delay: number;
+  private _available: boolean;
 
   constructor() {
     this._controllers = get_controllers();
@@ -51,23 +52,52 @@ class BrightnessController {
       this._available = false;
       return;
     }
-    let b_path = this._controllers[0];
+    const b_path = this._controllers[0];
     this._brightness_path = path.join(b_path, "brightness");
+    this._max_brightness_path = path.join(b_path, "max_brightness");
+    if (
+      !this.can_write(this._brightness_path) ||
+      !this.can_read(this._brightness_path) ||
+      !this.can_read(this._max_brightness_path)
+    ) {
+      this._available = false;
+      return;
+    }
+    this._available = true;
+
     this._max_brightness = parseInt(
-      fs.readFileSync(path.join(b_path, "max_brightness"), {
+      fs.readFileSync(this._max_brightness_path, {
         encoding: "utf-8",
       })
     );
 
-    this._available = true;
-
-    let steps = nody_greeter.config.features.backlight.steps;
+    const steps = nody_greeter.config.features.backlight.steps;
     this.steps = steps <= 1 ? 1 : steps;
     this.delay = 200;
     this.watch_brightness();
   }
 
-  private watch_brightness() {
+  private can_read(path: string): boolean {
+    try {
+      fs.accessSync(path, fs.constants.R_OK);
+    } catch (err) {
+      logger.error(`${err.code}: Cannot read "${path}"`);
+      return false;
+    }
+    return true;
+  }
+  private can_write(path: string): boolean {
+    try {
+      fs.accessSync(path, fs.constants.W_OK);
+    } catch (err) {
+      logger.error(`${err.code}: Cannot write on "${path}"`);
+      console.log(err);
+      return false;
+    }
+    return true;
+  }
+
+  private watch_brightness(): void {
     if (!this._available) return;
     fs.watch(this._brightness_path, () => {
       if (globalThis.lightdm)
@@ -75,8 +105,8 @@ class BrightnessController {
     });
   }
 
-  _max_brightness: number;
-  public get max_brightness() {
+  private _max_brightness: number;
+  public get max_brightness(): number {
     return this._max_brightness;
   }
 
@@ -92,21 +122,22 @@ class BrightnessController {
     else if (v <= 0) v = 0;
 
     if (!fs.existsSync(this._brightness_path)) return;
+
     fs.writeFileSync(this._brightness_path, String(Math.round(v)));
   }
 
-  public get brightness() {
+  public get brightness(): number {
     return Math.round((this.real_brightness * 100) / this._max_brightness);
   }
   public set brightness(v: number) {
     this.real_brightness = (v * this.max_brightness) / 100;
   }
 
-  public set_brightness(value: number) {
+  public set_brightness(value: number): void {
     if (!this._available) return;
-    let steps = this.steps;
-    let sleep = this.delay / steps;
-    let current = this.brightness;
+    const steps = this.steps;
+    const sleep = this.delay / steps;
+    const current = this.brightness;
 
     if (steps <= 1) {
       this.brightness = value;
@@ -114,22 +145,22 @@ class BrightnessController {
     }
 
     let i = 0;
-    let interval = setInterval(async () => {
+    const interval = setInterval(async () => {
       if (i > steps) return clearInterval(interval);
-      let brigh = current + ((value - current) * i) / steps;
+      const brigh = current + ((value - current) * i) / steps;
       this.brightness = brigh;
       i++;
     }, sleep);
   }
 
-  public inc_brightness(value: number) {
+  public inc_brightness(value: number): void {
     this.set_brightness(this.brightness + value);
   }
-  public dec_brightness(value: number) {
+  public dec_brightness(value: number): void {
     this.set_brightness(this.brightness - value);
   }
 
-  public get_brightness() {
+  public get_brightness(): number {
     return this.brightness;
   }
 }

@@ -28,7 +28,7 @@ class Battery {
     if (nody_greeter.config.features.battery == true) this._init();
   }
 
-  _init() {
+  private _init(): void {
     if (this._batteries.length == 0) {
       scandir_line(this.ps_path, this._update_batteries.bind(this));
     }
@@ -36,8 +36,8 @@ class Battery {
     this.full_update();
   }
 
-  _update_batteries(line: string) {
-    let match = line.match(/BAT\w+/);
+  private _update_batteries(line: string): void {
+    const match = line.match(/BAT\w+/);
     if (match) {
       this._batteries.push({
         name: match[0],
@@ -46,39 +46,39 @@ class Battery {
         capacity: 0,
       });
     } else {
-      let ac = line.match(/A\w+/);
+      const ac = line.match(/A\w+/);
       this._ac = ac ? ac[0] : this._ac;
     }
   }
 
-  get name() {
+  get name(): string {
     return this._batteries[0].name;
   }
 
-  get level() {
+  get level(): number {
     return this._perc;
   }
 
-  get status() {
+  get status(): string {
     return this._status;
   }
 
-  get ac_status() {
+  get ac_status(): string | number {
     return this._ac_status;
   }
 
-  get capacity() {
+  get capacity(): number {
     return this._capacity;
   }
 
-  get time() {
+  get time(): string {
     return this._time;
   }
-  get watt() {
+  get watt(): number {
     return this._watt;
   }
 
-  acpi_listen() {
+  public acpi_listen(): void {
     ACPI.connect((data) => {
       if (data.match(/battery|ac_adapter/)) {
         this.full_update();
@@ -92,7 +92,7 @@ class Battery {
    * * (c) 2010-2012, Peter Hofmann
    * @see https://github.com/lcpz/lain/blob/master/widget/bat.lua
    */
-  async full_update() {
+  public async full_update(): Promise<void> {
     if (running_update) return;
     running_update = true;
 
@@ -104,31 +104,31 @@ class Battery {
     let sum_charge_full = 0;
     let sum_charge_design = 0;
 
-    async function read_data(...p: string[]) {
+    async function read_data(...p: string[]): Promise<string> {
       return read_first_line(path.join(...p));
     }
 
     for (let i = 0; i < this._batteries.length; i++) {
-      let battery = this._batteries[i];
-      let bat_path = this.ps_path + battery.name;
-      let present = await read_first_line(path.join(bat_path, "present"));
+      const battery = this._batteries[i];
+      const bat_path = this.ps_path + battery.name;
+      const present = await read_first_line(path.join(bat_path, "present"));
 
       if (parseInt(present) == 1) {
-        let rate_current = parseInt(await read_data(bat_path, "current_now"));
-        let rate_voltage = parseInt(await read_data(bat_path, "voltage_now"));
-        let rate_power = parseInt(await read_data(bat_path, "power_now"));
-        let charge_full = parseInt(await read_data(bat_path, "charge_full"));
-        let charge_desing = parseInt(
+        const rate_current = parseInt(await read_data(bat_path, "current_now"));
+        const rate_voltage = parseInt(await read_data(bat_path, "voltage_now"));
+        const rate_power = parseInt(await read_data(bat_path, "power_now"));
+        const charge_full = parseInt(await read_data(bat_path, "charge_full"));
+        const charge_desing = parseInt(
           await read_data(bat_path, "charge_full_design")
         );
 
-        let energy_now = parseInt(
+        const energy_now = parseInt(
           (await read_data(bat_path, "energy_now")) ||
             (await read_data(bat_path, "charge_now"))
         );
-        let energy_full =
+        const energy_full =
           parseInt(await read_data(bat_path, "energy_full")) || charge_full;
-        let energy_percentage =
+        const energy_percentage =
           parseInt(await read_data(bat_path, "capacity")) ||
           Math.floor((energy_now / energy_full) * 100);
         this._batteries[i].status =
@@ -159,7 +159,7 @@ class Battery {
       this._batteries.length > 0 ? this._batteries[0].status : "N/A";
 
     for (let i = 0; i < this._batteries.length; i++) {
-      let battery = this._batteries[i];
+      const battery = this._batteries[i];
       if (battery.status == "Discharging" || battery.status == "Charging") {
         this._status = battery.status;
       }
@@ -184,7 +184,8 @@ class Battery {
       } else if (this._status != "Full") {
         rate_time = 0;
         if (sum_rate_power > 0 || sum_rate_current > 0) {
-          let div = (sum_rate_power > 0 && sum_rate_power) || sum_rate_current;
+          const div =
+            (sum_rate_power > 0 && sum_rate_power) || sum_rate_current;
           if (this._status == "Charging")
             rate_time = (sum_energy_full - sum_energy_now) / div;
           else rate_time = sum_energy_now / div;
@@ -192,8 +193,8 @@ class Battery {
             rate_time_magnitude = Math.abs(Math.floor(Math.log10(rate_time)));
             rate_time = (rate_time * 10) ^ (rate_time_magnitude - 2);
           }
-          let hours = Math.floor(rate_time);
-          let minutes = Math.floor((rate_time - hours) * 60);
+          const hours = Math.floor(rate_time);
+          const minutes = Math.floor((rate_time - hours) * 60);
           this._perc = Math.floor(
             Math.min(100, (sum_energy_now / sum_energy_full) * 100 + 0.5)
           );
@@ -216,14 +217,14 @@ class Battery {
   }
 }
 
-function scandir_line(dir: string, callback: Function) {
-  let lines = fs.readdirSync(dir, { encoding: "utf8" });
+function scandir_line(dir: string, callback: (lines: string) => void): void {
+  const lines = fs.readdirSync(dir, { encoding: "utf8" });
   lines.forEach((l) => callback(l));
 }
 
 function read_first_line(file_path: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let rs = fs.createReadStream(file_path, { encoding: "utf8" });
+  return new Promise((resolve) => {
+    const rs = fs.createReadStream(file_path, { encoding: "utf8" });
     let val = "";
     let ind = 0;
     let pos = 0;
@@ -240,7 +241,7 @@ function read_first_line(file_path: string): Promise<string> {
       .on("close", () =>
         resolve(val.slice((val.charCodeAt(0) === 0xfeff && 1) || 0, pos))
       )
-      .on("error", (err) => resolve(undefined));
+      .on("error", () => resolve(undefined));
   });
 }
 

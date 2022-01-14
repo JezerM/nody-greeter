@@ -1,6 +1,3 @@
-import * as child_process from "child_process";
-import * as path from "path";
-
 import { nody_greeter } from "../config";
 import { logger } from "../logger";
 
