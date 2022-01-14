@@ -46,6 +46,11 @@ async function initGreeter() {
   battery = new Battery();
 
   brightness = new Brightness();
+
+  if (!nody_greeter.window_metadata.is_primary) {
+    // Hide login elements on non-primary screen
+    document.querySelector("#screen").classList.add("hide");
+  }
 }
 
 if (window._ready_event === undefined) {

@@ -48,6 +48,11 @@ async function initGreeter() {
   if (lock) {
     document.querySelector("#lock-label").classList.remove("hide");
   }
+
+  if (!nody_greeter.window_metadata.is_primary) {
+    // Hide login elements on non-primary screen
+    document.querySelector("#screen").classList.add("hide");
+  }
 }
 
 const notGreeter = false;
