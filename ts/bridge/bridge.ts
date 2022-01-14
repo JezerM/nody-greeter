@@ -53,7 +53,7 @@ export class Greeter {
     } catch (err) {
       logger.error(err);
       browser.whenReady().then(() => {
-        dialog.showMessageBoxSync(browser.win, {
+        dialog.showMessageBoxSync(browser.primary_window, {
           message:
             "Detected a problem that could interfere with the system login process", // Yeah, that problematic message
           detail: `LightDM: ${err}\nYou can continue without major problems, but you won't be able to log in`,
@@ -103,7 +103,9 @@ export class Greeter {
 
   _emit_signal(signal: string, ...args: unknown[]): void {
     //console.log("SIGNAL EMITTED", signal, args)
-    browser.win.webContents.send("LightDMSignal", signal, ...args);
+    for (const win of browser.windows) {
+      win.window.webContents.send("LightDMSignal", signal, ...args);
+    }
   }
 
   /**

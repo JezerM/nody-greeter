@@ -12,28 +12,30 @@ browser.whenReady().then(() => {
 
 function initLogger(): void {
   logger.debug("Javascript logger is ready");
-  browser.win.webContents.addListener(
-    "console-message",
-    (_ev, code, message, line, sourceID) => {
-      sourceID = sourceID == "" ? "console" : sourceID;
-      if (code == 3) {
-        logger.log({
-          level: "error",
-          message: message,
-          line: line,
-          source: sourceID,
-        });
-        error_prompt(message, sourceID, line);
-      } else if (code == 2) {
-        logger.log({
-          level: "warn",
-          message: message,
-          line: line,
-          source: sourceID,
-        });
+  for (const win of browser.windows) {
+    win.window.webContents.addListener(
+      "console-message",
+      (ev, code, message, line, sourceID) => {
+        sourceID = sourceID == "" ? "console" : sourceID;
+        if (code == 3) {
+          logger.log({
+            level: "error",
+            message: message,
+            line: line,
+            source: sourceID,
+          });
+          error_prompt(message, sourceID, line);
+        } else if (code == 2) {
+          logger.log({
+            level: "warn",
+            message: message,
+            line: line,
+            source: sourceID,
+          });
+        }
       }
-    }
-  );
+    );
+  }
 }
 
 /**
@@ -44,7 +46,7 @@ function initLogger(): void {
  */
 function error_prompt(message: string, source: string, line: number): void {
   if (!nody_greeter.config.greeter.detect_theme_errors) return;
-  const ind = dialog.showMessageBoxSync(browser.win, {
+  const ind = dialog.showMessageBoxSync(browser.primary_window, {
     message:
       "An error ocurred. Do you want to change to default theme? (gruvbox)",
     detail: `${source} ${line}: ${message}`,
@@ -60,7 +62,9 @@ function error_prompt(message: string, source: string, line: number): void {
       browser.load_theme();
       break;
     case 2: // Reload theme
-      browser.win.reload();
+      for (const win of browser.windows) {
+        win.window.reload();
+      }
       break;
     default:
       break;
