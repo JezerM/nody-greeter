@@ -1,4 +1,4 @@
-import { dialog } from "electron";
+import { BrowserWindow, dialog } from "electron";
 import { Browser } from "./browser";
 import { logger } from "./logger";
 import { nody_greeter } from "./config";
@@ -24,7 +24,7 @@ function initLogger(): void {
             line: line,
             source: sourceID,
           });
-          error_prompt(message, sourceID, line);
+          error_prompt(win.window, message, sourceID, line);
         } else if (code == 2) {
           logger.log({
             level: "warn",
@@ -40,13 +40,19 @@ function initLogger(): void {
 
 /**
  * Prompts to change to default theme (gruvbox) on error
+ * @param {BrowserWindow} win The browser window originating the message
  * @param {string} message Message or error to show
  * @param {string} source Source of error
  * @param {number} line Line number where error was detected
  */
-function error_prompt(message: string, source: string, line: number): void {
+function error_prompt(
+  win: BrowserWindow,
+  message: string,
+  source: string,
+  line: number
+): void {
   if (!nody_greeter.config.greeter.detect_theme_errors) return;
-  const ind = dialog.showMessageBoxSync(browser.primary_window, {
+  const ind = dialog.showMessageBoxSync(win, {
     message:
       "An error ocurred. Do you want to change to default theme? (gruvbox)",
     detail: `${source} ${line}: ${message}`,
