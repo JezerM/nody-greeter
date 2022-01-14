@@ -70,11 +70,13 @@ export const nody_greeter: nody_config = {
     fullscreen: true,
     frame: false,
     debug_mode: false,
-    theme_dir: "/usr/share/web-greeter/themes/",
+    theme_dir:
+      process.env.NODY_GREETER_THEME_DIR || "/usr/share/web-greeter/themes/",
   },
 };
 
-const path_to_config = "/etc/lightdm/web-greeter.yml";
+const path_to_config =
+  process.env.NODY_GREETER_CONFIG || "/etc/lightdm/web-greeter.yml";
 
 export function load_config(): void {
   try {
