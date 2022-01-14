@@ -18,14 +18,15 @@ Themes working in **web-greeter** should work also here. All themes shipped with
 
 - `icon_theme` configuration is not loaded, as GTK apps don't allow to set a different **X-Cursor-Theme**
 
-## Differences with `web-greeter`
-
-- As this is not made in **Python**, this should be faster.
-- No unnecessary dependencies.
-- Won't break on **Node.js** update when installed. **web-greeter** could do with **Python**.
-- Pretty build/install process
-
 ## Dependencies
+
+### Build dependencies
+
+- Node.js (v12, v14 and v16 are supported)
+- Python 3
+- base-devel (build-essentials)
+
+### Common dependencies
 
 - lightdm (as obvious)
 - gobject-introspection
@@ -34,7 +35,6 @@ Themes working in **web-greeter** should work also here. All themes shipped with
 - libcairo2
 - libxcb-dev
 - libx11-dev
-- base-devel (build-essentials)
 
 ## Installation
 
