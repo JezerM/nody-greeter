@@ -3,8 +3,9 @@ import {
   BrowserWindow,
   screen,
   session,
-  dialog,
   protocol,
+  Menu,
+  MenuItemConstructorOptions,
 } from "electron";
 import * as path from "path";
 import * as fs from "fs";
@@ -40,14 +41,14 @@ class Browser {
     });
   }
 
-  init() {
+  init(): void {
     this.set_protocol();
     this.win = this.create_window();
     this.load_theme();
     this.init_listeners();
   }
 
-  private set_priviliged() {
+  private set_priviliged(): void {
     protocol.registerSchemesAsPrivileged([
       {
         scheme: "web-greeter",
@@ -64,7 +65,7 @@ class Browser {
     ]);
   }
 
-  private set_protocol() {
+  private set_protocol(): void {
     let done = protocol.registerFileProtocol(
       "web-greeter",
       (request, callback) => {
@@ -110,9 +111,8 @@ class Browser {
     this.win.loadURL(`${theme_url}`);
     this.win.setBackgroundColor("#000000");
 
-    this.win.webContents.on("before-input-event", (event, input) => {
+    this.win.webContents.on("before-input-event", (_event, input) => {
       let value = nody_greeter.config.features.backlight.value;
-      let steps = nody_greeter.config.features.backlight.steps;
       if (input.type == "keyUp") return;
       if (input.code == "BrightnessDown") {
         Brightness.dec_brightness(value);
@@ -124,7 +124,7 @@ class Browser {
     logger.debug("Theme loaded");
   }
 
-  create_window() {
+  create_window(): BrowserWindow {
     logger.debug("Initializing Browser Window");
 
     let screen_size = screen.getPrimaryDisplay().workAreaSize;
@@ -163,16 +163,56 @@ class Browser {
     return win;
   }
 
-  init_listeners() {
+  init_listeners(): void {
     this.win.once("ready-to-show", () => {
       this.win.setFullScreen(nody_greeter.app.fullscreen);
       this.win.show();
       this.win.focus();
       logger.debug("Nody Greeter started");
     });
+    this.win.webContents.on("devtools-opened", () => {
+      this.win.webContents.devToolsWebContents.focus();
+    });
 
     app.on("quit", () => {
       reset_screensaver();
+    });
+
+    this.win.webContents.on("context-menu", (_ev, params) => {
+      if (!nody_greeter.app.debug_mode) return;
+      const position = { x: params.x, y: params.y };
+      const menu_template: MenuItemConstructorOptions[] = [
+        { role: "undo", enabled: params.editFlags.canUndo, accelerator: "U" },
+        { role: "redo", enabled: params.editFlags.canRedo, accelerator: "R" },
+        { type: "separator" },
+        { role: "cut", enabled: params.editFlags.canCut, accelerator: "C" },
+        { role: "copy", enabled: params.editFlags.canCopy, accelerator: "C" },
+        { role: "paste", enabled: params.editFlags.canPaste, accelerator: "P" },
+        {
+          role: "delete",
+          enabled: params.editFlags.canDelete,
+          accelerator: "D",
+        },
+        {
+          role: "selectAll",
+          enabled: params.editFlags.canSelectAll,
+          accelerator: "S",
+          registerAccelerator: true,
+        },
+        { type: "separator" },
+        { role: "reload", accelerator: "R", registerAccelerator: false },
+        { role: "forceReload", accelerator: "F", registerAccelerator: false },
+        { role: "toggleDevTools", accelerator: "T" },
+        {
+          label: "Inspect Element",
+          click: () => {
+            this.win.webContents.inspectElement(position.x, position.y);
+          },
+          accelerator: "I",
+        },
+      ];
+      const menu = Menu.buildFromTemplate(menu_template);
+      menu.popup();
     });
 
     session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
