@@ -1,4 +1,5 @@
 import { ipcRenderer } from "electron";
+import { CONSTS } from "./consts";
 import {
   LightDMBattery,
   LightDMLanguage,
@@ -58,7 +59,7 @@ export class PromptSignal extends Signal {
   }
 }
 
-ipcRenderer.on("LightDMSignal", (_ev, signal, ...args) => {
+ipcRenderer.on(CONSTS.channel.lightdm_signal, (_ev, signal, ...args) => {
   allSignals.forEach((v) => {
     if (v._name == signal) {
       //console.log(args)

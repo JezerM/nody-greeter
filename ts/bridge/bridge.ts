@@ -30,6 +30,7 @@ import {
   LightDMUser,
 } from "../ldm_interfaces";
 import { logger } from "../logger";
+import { CONSTS } from "../consts";
 
 export class Greeter {
   _config: web_greeter_config;
@@ -104,7 +105,11 @@ export class Greeter {
   _emit_signal(signal: string, ...args: unknown[]): void {
     //console.log("SIGNAL EMITTED", signal, args)
     for (const win of browser.windows) {
-      win.window.webContents.send("LightDMSignal", signal, ...args);
+      win.window.webContents.send(
+        CONSTS.channel.lightdm_signal,
+        signal,
+        ...args
+      );
     }
   }
 
