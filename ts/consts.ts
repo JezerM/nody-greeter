@@ -6,5 +6,6 @@
 export const CONSTS = {
   channel: {
     lightdm_signal: "LightDMSignal",
+    window_metadata: "WindowMetadata",
   },
 } as const;
