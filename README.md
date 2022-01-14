@@ -43,7 +43,7 @@ git clone https://github.com/JezerM/nody-greeter.git
 cd nody-greeter
 npm install
 npm run rebuild
-npx tsc --build
+npx --no-install tsc --build
 node make build
 sudo node make install
 ```
