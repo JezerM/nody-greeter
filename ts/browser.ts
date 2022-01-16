@@ -8,9 +8,12 @@ import {
   MenuItemConstructorOptions,
 } from "electron";
 import * as path from "path";
-import * as fs from "fs";
 
-import { nody_greeter } from "./config";
+import {
+  load_primary_theme_path,
+  load_secondary_theme_path,
+  nody_greeter,
+} from "./config";
 import { URL } from "url";
 import * as url from "url";
 import { Brightness } from "./utils/brightness";
@@ -82,37 +85,25 @@ class Browser {
   }
 
   load_theme(): void {
-    const theme = nody_greeter.config.greeter.theme;
-    const dir = nody_greeter.app.theme_dir;
-    let path_to_theme = path.join(dir, theme, "index.html");
-    const def_theme = "gruvbox";
+    const primary_html = load_primary_theme_path();
+    const secondary_html = load_secondary_theme_path();
 
-    if (theme.startsWith("/")) path_to_theme = theme;
-    else if (theme.includes(".") || theme.includes("/"))
-      path_to_theme = path.join(process.cwd(), theme);
-
-    if (!path_to_theme.endsWith(".html"))
-      path_to_theme = path.join(path_to_theme, "index.html");
-
-    if (!fs.existsSync(path_to_theme)) {
-      logger.warn(
-        `"${theme}" theme does not exists. Using "${def_theme}" theme`
-      );
-      path_to_theme = path.join(dir, def_theme, "index.html");
-    }
-
-    nody_greeter.config.greeter.theme = path_to_theme;
-
-    //this.win.loadFile(path_to_theme);
-    const theme_url = url.format({
-      pathname: path_to_theme,
+    const primary_url = url.format({
+      pathname: primary_html,
       host: "app",
       hostname: "app",
       protocol: "web-greeter:",
     });
-    //console.log({ theme_url, url: new URL(theme_url) });
+    const secondary_url = url.format({
+      pathname: secondary_html,
+      host: "app",
+      hostname: "app",
+      protocol: "web-greeter:",
+    });
+    //console.log({ primary_url, secondary_url });
     for (const w of this.windows) {
-      w.window.loadURL(`${theme_url}`);
+      if (w.is_primary) w.window.loadURL(`${primary_url}`);
+      else w.window.loadURL(`${secondary_url}`);
       w.window.setBackgroundColor("#000000");
 
       w.window.webContents.on("before-input-event", (_event, input) => {
