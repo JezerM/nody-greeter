@@ -11,6 +11,17 @@ class Backgrounds {
     this._backgroundImages = null;
     this._backgroundImagesDir = null;
     this._backgroundPath = "";
+
+    /**
+     * Background change requests are handled via broadcast events so that all
+     * windows correctly update.
+     */
+    window.addEventListener('NodyBroadcastEvent', (ev) => {
+        if (ev.data.type == 'change-background') {
+          this._backgroundPath = ev.data.path;
+          this._updateBackgroundImages();
+        }
+    })
   }
 
   _createImage(path) {
@@ -57,8 +68,10 @@ class Backgrounds {
       const path = this._backgroundImages[i];
       let button = this._createImage(path);
       button.addEventListener("click", () => {
-        this._backgroundPath = path;
-        this._updateBackgroundImages();
+        nody_greeter.broadcast({
+          type: 'change-background',
+          path
+        });
       });
       this._backgroundsList.appendChild(button);
     }
