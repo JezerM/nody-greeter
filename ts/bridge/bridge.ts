@@ -749,6 +749,22 @@ ipcMain.on(CONSTS.channel.window_metadata, (ev) => {
   }
 });
 
+ipcMain.on(CONSTS.channel.window_broadcast, (ev, data: unknown) => {
+  const sendingWindow = browser.windows.find(
+    (w) => w.window.webContents === ev.sender
+  );
+  if (!sendingWindow) {
+    throw new Error(`Unable to find window for event ${ev}`);
+  }
+  for (const window of browser.windows) {
+    window.window.webContents.send(
+      CONSTS.channel.window_broadcast,
+      sendingWindow.meta,
+      data
+    );
+  }
+});
+
 browser.whenReady().then(() => {
   new Greeter(nody_greeter.config);
   new GreeterConfig(nody_greeter.config);

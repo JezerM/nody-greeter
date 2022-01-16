@@ -37,6 +37,21 @@ export interface WindowMetadata {
 }
 
 /**
+ * An event that is fired and dispatched when one browser window of a theme
+ * sends a broadcast to all windows (which happens for multi-monitor setups)
+ */
+export class NodyBroadcastEvent extends Event {
+  constructor(
+    /** Metadata for the window that originated the request */
+    public readonly window: WindowMetadata,
+    /** Data sent in the broadcast */
+    public readonly data: unknown
+  ) {
+    super("NodyBroadcastEvent");
+  }
+}
+
+/**
  * A class that exposes functionality that is unique to `nody-greeter` and not
  * present in `web-greeter`
  */
@@ -63,6 +78,11 @@ export class Nody {
     // Send initial request for metadata
     ipcRenderer.send(CONSTS.channel.window_metadata);
 
+    ipcRenderer.on(CONSTS.channel.window_broadcast, (_ev, metadata, data) => {
+      const event = new NodyBroadcastEvent(metadata, data);
+      window.dispatchEvent(event);
+    });
+
     this._ready_promise = new Promise((resolve) => (this._ready = resolve));
 
     return globalThis.nody_greeter;
@@ -79,6 +99,15 @@ export class Nody {
 
   /** Resolves when we have received WindowMetadata */
   public whenReady = (): Promise<void> => this._ready_promise;
+
+  /**
+   * Send a message to all windows currently open for the greeter.
+   *
+   * This is primarily for themes that are runing in multi-monitor environments
+   */
+  public broadcast(data: unknown): void {
+    ipcRenderer.send(CONSTS.channel.window_broadcast, data);
+  }
 }
 
 const allSignals = [];
