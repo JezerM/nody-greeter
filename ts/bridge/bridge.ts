@@ -734,6 +734,21 @@ ipcMain.on("lightdm", (ev, ...args) => {
   handler(globalThis.lightdm, ev, ...args);
 });
 
+ipcMain.on(CONSTS.channel.window_metadata, (ev) => {
+  /**
+   * A request on this channel simply means that a browser window is ready to
+   * receive metadata (i.e. on initial load or a refresh)
+   */
+  for (const window of browser.windows) {
+    if (window.window.webContents === ev.sender) {
+      window.window.webContents.send(
+        CONSTS.channel.window_metadata,
+        window.meta
+      );
+    }
+  }
+});
+
 browser.whenReady().then(() => {
   new Greeter(nody_greeter.config);
   new GreeterConfig(nody_greeter.config);

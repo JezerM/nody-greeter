@@ -17,12 +17,12 @@ import { Brightness } from "./utils/brightness";
 import { logger } from "./logger";
 import { set_screensaver, reset_screensaver } from "./utils/screensaver";
 import { WindowMetadata } from "./preload";
-import { CONSTS } from "./consts";
 
 interface NodyWindow {
   is_primary: boolean;
   display: Electron.Display;
   window: BrowserWindow;
+  meta: WindowMetadata;
 }
 class Browser {
   ready = false;
@@ -135,26 +135,64 @@ class Browser {
     const displays = screen.getAllDisplays();
     const primaryDisplay = screen.getPrimaryDisplay();
 
-    const windows: NodyWindow[] = displays.map((display) => ({
-      is_primary: display.id === primaryDisplay.id,
-      display,
-      window: new BrowserWindow({
-        height: display.workAreaSize.height,
-        width: display.workAreaSize.width,
-        x: display.bounds.x,
-        y: display.bounds.y,
-        backgroundColor: "#000000",
-        frame: nody_greeter.app.frame,
-        show: false,
-        webPreferences: {
-          preload: path.join(__dirname, "preload.js"),
-          nodeIntegration: false,
-          contextIsolation: false,
-          allowRunningInsecureContent: !nody_greeter.config.greeter.secure_mode, // Should set option
-          devTools: nody_greeter.app.debug_mode, // Should set option
+    // Calculate the total display area
+    const overallBoundary: WindowMetadata["overallBoundary"] = {
+      minX: Infinity,
+      maxX: -Infinity,
+      minY: Infinity,
+      maxY: -Infinity,
+    };
+
+    for (const display of displays) {
+      overallBoundary.minX = Math.min(overallBoundary.minX, display.bounds.x);
+      overallBoundary.minY = Math.min(overallBoundary.minY, display.bounds.y);
+      overallBoundary.maxX = Math.max(
+        overallBoundary.maxX,
+        display.bounds.x + display.bounds.width
+      );
+      overallBoundary.maxY = Math.max(
+        overallBoundary.maxY,
+        display.bounds.y + display.bounds.height
+      );
+    }
+
+    const windows: NodyWindow[] = displays.map((display) => {
+      const is_primary = display.id === primaryDisplay.id;
+      return {
+        is_primary,
+        display,
+        window: new BrowserWindow({
+          height: display.workAreaSize.height,
+          width: display.workAreaSize.width,
+          x: display.bounds.x,
+          y: display.bounds.y,
+          backgroundColor: "#000000",
+          frame: nody_greeter.app.frame,
+          show: false,
+          webPreferences: {
+            preload: path.join(__dirname, "preload.js"),
+            nodeIntegration: false,
+            contextIsolation: false,
+            allowRunningInsecureContent:
+              !nody_greeter.config.greeter.secure_mode, // Should set option
+            devTools: nody_greeter.app.debug_mode, // Should set option
+          },
+        }),
+        meta: {
+          id: display.id,
+          is_primary,
+          size: {
+            width: display.workAreaSize.width,
+            height: display.workAreaSize.height,
+          },
+          position: {
+            x: display.bounds.x,
+            y: display.bounds.y,
+          },
+          overallBoundary,
         },
-      }),
-    }));
+      };
+    });
 
     logger.debug("Browser Window created");
 
@@ -176,27 +214,6 @@ class Browser {
   }
 
   init_listeners(): void {
-    // Calculate the total display area
-    const overallBoundary: WindowMetadata["overallBoundary"] = {
-      minX: Infinity,
-      maxX: -Infinity,
-      minY: Infinity,
-      maxY: -Infinity,
-    };
-
-    for (const w of this.windows) {
-      overallBoundary.minX = Math.min(overallBoundary.minX, w.display.bounds.x);
-      overallBoundary.minY = Math.min(overallBoundary.minY, w.display.bounds.y);
-      overallBoundary.maxX = Math.max(
-        overallBoundary.maxX,
-        w.display.bounds.x + w.display.bounds.width
-      );
-      overallBoundary.maxY = Math.max(
-        overallBoundary.maxY,
-        w.display.bounds.y + w.display.bounds.height
-      );
-    }
-
     for (const w of this.windows) {
       w.window.once("ready-to-show", () => {
         w.window.setFullScreen(nody_greeter.app.fullscreen);
@@ -204,20 +221,6 @@ class Browser {
         if (w.is_primary) {
           w.window.focus();
         }
-        const metadata: WindowMetadata = {
-          id: w.display.id,
-          is_primary: w.is_primary,
-          size: {
-            width: w.display.workAreaSize.width,
-            height: w.display.workAreaSize.height,
-          },
-          position: {
-            x: w.display.bounds.x,
-            y: w.display.bounds.y,
-          },
-          overallBoundary,
-        };
-        w.window.webContents.send(CONSTS.channel.window_metadata, metadata);
         logger.debug("Nody Greeter started win");
       });
       w.window.webContents.on("devtools-opened", () => {

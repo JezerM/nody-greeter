@@ -60,6 +60,9 @@ export class Nody {
       this._ready();
     });
 
+    // Send initial request for metadata
+    ipcRenderer.send(CONSTS.channel.window_metadata);
+
     this._ready_promise = new Promise((resolve) => (this._ready = resolve));
 
     return globalThis.nody_greeter;
