@@ -5,7 +5,6 @@ class Backgrounds {
       "assets/dracula.png",
       "assets/window-blurred.png",
     ];
-    this._sidebar = document.querySelector("#sidebar");
     this._backgroundsList = document.querySelector("#background-selector");
     this._background = document.querySelector("#background");
     this._backgroundImages = null;
@@ -16,12 +15,12 @@ class Backgrounds {
      * Background change requests are handled via broadcast events so that all
      * windows correctly update.
      */
-    window.addEventListener('NodyBroadcastEvent', (ev) => {
-        if (ev.data.type == 'change-background') {
-          this._backgroundPath = ev.data.path;
-          this._updateBackgroundImages();
-        }
-    })
+    window.addEventListener("NodyBroadcastEvent", (ev) => {
+      if (ev.data.type == "change-background") {
+        this._backgroundPath = ev.data.path;
+        this._updateBackgroundImages();
+      }
+    });
   }
 
   _createImage(path) {
@@ -69,8 +68,8 @@ class Backgrounds {
       let button = this._createImage(path);
       button.addEventListener("click", () => {
         nody_greeter.broadcast({
-          type: 'change-background',
-          path
+          type: "change-background",
+          path,
         });
       });
       this._backgroundsList.appendChild(button);
