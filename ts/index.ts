@@ -2,7 +2,7 @@ import * as yargs from "yargs";
 import * as fs from "fs";
 import * as path from "path";
 
-import { nody_greeter } from "./config";
+import { ensure_theme, load_theme_config, nody_greeter } from "./config";
 
 const res = yargs
   .scriptName("nody-greeter")
@@ -60,6 +60,9 @@ if (nody_greeter.config.greeter.debug_mode == true) {
 }
 
 // Import browser and bridge to initialize nody-greeter
+
+load_theme_config();
+ensure_theme();
 
 import "./browser";
 

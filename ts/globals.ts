@@ -1,4 +1,4 @@
-import { dialog } from "electron";
+import { BrowserWindow, dialog } from "electron";
 import { Browser } from "./browser";
 import { logger } from "./logger";
 import { nody_greeter } from "./config";
@@ -12,39 +12,47 @@ browser.whenReady().then(() => {
 
 function initLogger(): void {
   logger.debug("Javascript logger is ready");
-  browser.win.webContents.addListener(
-    "console-message",
-    (_ev, code, message, line, sourceID) => {
-      sourceID = sourceID == "" ? "console" : sourceID;
-      if (code == 3) {
-        logger.log({
-          level: "error",
-          message: message,
-          line: line,
-          source: sourceID,
-        });
-        error_prompt(message, sourceID, line);
-      } else if (code == 2) {
-        logger.log({
-          level: "warn",
-          message: message,
-          line: line,
-          source: sourceID,
-        });
+  for (const win of browser.windows) {
+    win.window.webContents.addListener(
+      "console-message",
+      (ev, code, message, line, sourceID) => {
+        sourceID = sourceID == "" ? "console" : sourceID;
+        if (code == 3) {
+          logger.log({
+            level: "error",
+            message: message,
+            line: line,
+            source: sourceID,
+          });
+          error_prompt(win.window, message, sourceID, line);
+        } else if (code == 2) {
+          logger.log({
+            level: "warn",
+            message: message,
+            line: line,
+            source: sourceID,
+          });
+        }
       }
-    }
-  );
+    );
+  }
 }
 
 /**
  * Prompts to change to default theme (gruvbox) on error
+ * @param {BrowserWindow} win The browser window originating the message
  * @param {string} message Message or error to show
  * @param {string} source Source of error
  * @param {number} line Line number where error was detected
  */
-function error_prompt(message: string, source: string, line: number): void {
+function error_prompt(
+  win: BrowserWindow,
+  message: string,
+  source: string,
+  line: number
+): void {
   if (!nody_greeter.config.greeter.detect_theme_errors) return;
-  const ind = dialog.showMessageBoxSync(browser.win, {
+  const ind = dialog.showMessageBoxSync(win, {
     message:
       "An error ocurred. Do you want to change to default theme? (gruvbox)",
     detail: `${source} ${line}: ${message}`,
@@ -60,7 +68,9 @@ function error_prompt(message: string, source: string, line: number): void {
       browser.load_theme();
       break;
     case 2: // Reload theme
-      browser.win.reload();
+      for (const win of browser.windows) {
+        win.window.reload();
+      }
       break;
     default:
       break;

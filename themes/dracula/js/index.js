@@ -46,11 +46,11 @@ async function initGreeter() {
   battery = new Battery();
 
   brightness = new Brightness();
-}
 
-if (window._ready_event === undefined) {
-  _ready_event = new Event("GreeterReady");
-  window.dispatchEvent(_ready_event);
+  if (window.nody_greeter && !window.nody_greeter.window_metadata.is_primary) {
+    // Hide login elements on non-primary screen
+    document.querySelector("#screen").classList.add("hide");
+  }
 }
 
 window.addEventListener("GreeterReady", initGreeter);

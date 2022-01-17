@@ -1,4 +1,5 @@
 import { ipcRenderer } from "electron";
+import { CONSTS } from "./consts";
 import {
   LightDMBattery,
   LightDMLanguage,
@@ -6,6 +7,108 @@ import {
   LightDMSession,
   LightDMUser,
 } from "./ldm_interfaces";
+
+/**
+ * Metadata that is sent to each window to handle more interesting multi-monitor
+ * functionality / themes.
+ */
+export interface WindowMetadata {
+  id: number;
+  is_primary: boolean;
+  position: {
+    x: number;
+    y: number;
+  };
+  size: {
+    width: number;
+    height: number;
+  };
+  /**
+   * The total real-estate across all screens,
+   * this can be used to assist in, for example,
+   * correctly positioning multi-monitor backgrounds.
+   */
+  overallBoundary: {
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
+  };
+}
+
+/**
+ * An event that is fired and dispatched when one browser window of a theme
+ * sends a broadcast to all windows (which happens for multi-monitor setups)
+ */
+export class NodyBroadcastEvent extends Event {
+  constructor(
+    /** Metadata for the window that originated the request */
+    public readonly window: WindowMetadata,
+    /** Data sent in the broadcast */
+    public readonly data: unknown
+  ) {
+    super("NodyBroadcastEvent");
+  }
+}
+
+/**
+ * A class that exposes functionality that is unique to `nody-greeter` and not
+ * present in `web-greeter`
+ */
+export class Nody {
+  private _window_metadata: WindowMetadata | null = null;
+  /**
+   * callback that should be called when the metadata is received
+   */
+  private _ready: (() => void) | null = null;
+  private readonly _ready_promise: Promise<void>;
+
+  constructor() {
+    if ("nody_greeter" in globalThis) {
+      return globalThis.nody_greeter;
+    }
+
+    globalThis.nody_greeter = this;
+
+    ipcRenderer.on(CONSTS.channel.window_metadata, (_ev, metadata) => {
+      this._window_metadata = metadata;
+      this._ready();
+    });
+
+    // Send initial request for metadata
+    ipcRenderer.send(CONSTS.channel.window_metadata);
+
+    ipcRenderer.on(CONSTS.channel.window_broadcast, (_ev, metadata, data) => {
+      const event = new NodyBroadcastEvent(metadata, data);
+      window.dispatchEvent(event);
+    });
+
+    this._ready_promise = new Promise((resolve) => (this._ready = resolve));
+
+    return globalThis.nody_greeter;
+  }
+
+  public get window_metadata(): WindowMetadata {
+    if (this._window_metadata) {
+      return this._window_metadata;
+    }
+    throw new Error(
+      `window_metadata not available, did you wait for the GreeterReady event?`
+    );
+  }
+
+  /** Resolves when we have received WindowMetadata */
+  public whenReady = (): Promise<void> => this._ready_promise;
+
+  /**
+   * Send a message to all windows currently open for the greeter.
+   *
+   * This is primarily for themes that are runing in multi-monitor environments
+   */
+  public broadcast(data: unknown): void {
+    ipcRenderer.send(CONSTS.channel.window_broadcast, data);
+  }
+}
 
 const allSignals = [];
 
@@ -58,7 +161,7 @@ export class PromptSignal extends Signal {
   }
 }
 
-ipcRenderer.on("LightDMSignal", (_ev, signal, ...args) => {
+ipcRenderer.on(CONSTS.channel.lightdm_signal, (_ev, signal, ...args) => {
   allSignals.forEach((v) => {
     if (v._name == signal) {
       //console.log(args)
@@ -799,18 +902,33 @@ export class ThemeUtils {
   }
 }
 
+new Nody();
 new ThemeUtils();
 new GreeterConfig();
 new Greeter();
 
 window._ready_event = new Event("GreeterReady");
 
-window.addEventListener("DOMContentLoaded", () => {
-  setTimeout(() => {
-    window.dispatchEvent(globalThis._ready_event);
-  }, 2);
+const domLoaded = new Promise<void>((resolve) => {
+  window.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+      resolve();
+    }, 2);
+  });
 });
 
+/**
+ * Promise that fires when all initialization has completed,
+ * and the theme can start (i.e. _ready_event can be sent)
+ */
+const readyPromise = Promise.all([
+  domLoaded,
+  globalThis.nody_greeter.whenReady(),
+]);
+
+readyPromise.then(() => window.dispatchEvent(globalThis._ready_event));
+
+export declare const nody_greeter: Nody;
 export declare const lightdm: Greeter;
 export declare const greeter_config: GreeterConfig;
 export declare const theme_utils: ThemeUtils;
@@ -818,6 +936,7 @@ export declare const _ready_event: Event;
 
 declare global {
   interface Window {
+    nody_greeter: Nody | undefined;
     lightdm: Greeter | undefined;
     greeter_config: GreeterConfig | undefined;
     theme_utils: ThemeUtils | undefined;

@@ -30,6 +30,7 @@ import {
   LightDMUser,
 } from "../ldm_interfaces";
 import { logger } from "../logger";
+import { CONSTS } from "../consts";
 
 export class Greeter {
   _config: web_greeter_config;
@@ -53,7 +54,7 @@ export class Greeter {
     } catch (err) {
       logger.error(err);
       browser.whenReady().then(() => {
-        dialog.showMessageBoxSync(browser.win, {
+        dialog.showMessageBoxSync(browser.primary_window, {
           message:
             "Detected a problem that could interfere with the system login process", // Yeah, that problematic message
           detail: `LightDM: ${err}\nYou can continue without major problems, but you won't be able to log in`,
@@ -103,7 +104,13 @@ export class Greeter {
 
   _emit_signal(signal: string, ...args: unknown[]): void {
     //console.log("SIGNAL EMITTED", signal, args)
-    browser.win.webContents.send("LightDMSignal", signal, ...args);
+    for (const win of browser.windows) {
+      win.window.webContents.send(
+        CONSTS.channel.lightdm_signal,
+        signal,
+        ...args
+      );
+    }
   }
 
   /**
@@ -725,6 +732,37 @@ ipcMain.handle("theme_utils", (ev, ...args) => {
 
 ipcMain.on("lightdm", (ev, ...args) => {
   handler(globalThis.lightdm, ev, ...args);
+});
+
+ipcMain.on(CONSTS.channel.window_metadata, (ev) => {
+  /**
+   * A request on this channel simply means that a browser window is ready to
+   * receive metadata (i.e. on initial load or a refresh)
+   */
+  for (const window of browser.windows) {
+    if (window.window.webContents === ev.sender) {
+      window.window.webContents.send(
+        CONSTS.channel.window_metadata,
+        window.meta
+      );
+    }
+  }
+});
+
+ipcMain.on(CONSTS.channel.window_broadcast, (ev, data: unknown) => {
+  const sendingWindow = browser.windows.find(
+    (w) => w.window.webContents === ev.sender
+  );
+  if (!sendingWindow) {
+    throw new Error(`Unable to find window for event ${ev}`);
+  }
+  for (const window of browser.windows) {
+    window.window.webContents.send(
+      CONSTS.channel.window_broadcast,
+      sendingWindow.meta,
+      data
+    );
+  }
 });
 
 browser.whenReady().then(() => {

@@ -8,15 +8,25 @@ import {
   MenuItemConstructorOptions,
 } from "electron";
 import * as path from "path";
-import * as fs from "fs";
 
-import { nody_greeter } from "./config";
+import {
+  load_primary_theme_path,
+  load_secondary_theme_path,
+  nody_greeter,
+} from "./config";
 import { URL } from "url";
 import * as url from "url";
 import { Brightness } from "./utils/brightness";
 import { logger } from "./logger";
 import { set_screensaver, reset_screensaver } from "./utils/screensaver";
+import { WindowMetadata } from "./preload";
 
+interface NodyWindow {
+  is_primary: boolean;
+  display: Electron.Display;
+  window: BrowserWindow;
+  meta: WindowMetadata;
+}
 class Browser {
   ready = false;
 
@@ -27,8 +37,7 @@ class Browser {
     });
   }
 
-  // @ts-ignore
-  win: BrowserWindow;
+  windows: NodyWindow[];
 
   whenReady(): Promise<void> {
     return new Promise((resolve) => {
@@ -43,7 +52,7 @@ class Browser {
 
   init(): void {
     this.set_protocol();
-    this.win = this.create_window();
+    this.windows = this.create_windows();
     this.load_theme();
     this.init_listeners();
   }
@@ -76,69 +85,104 @@ class Browser {
   }
 
   load_theme(): void {
-    const theme = nody_greeter.config.greeter.theme;
-    const dir = nody_greeter.app.theme_dir;
-    let path_to_theme = path.join(dir, theme, "index.html");
-    const def_theme = "gruvbox";
+    const primary_html = load_primary_theme_path();
+    const secondary_html = load_secondary_theme_path();
 
-    if (theme.startsWith("/")) path_to_theme = theme;
-    else if (theme.includes(".") || theme.includes("/"))
-      path_to_theme = path.join(process.cwd(), theme);
-
-    if (!path_to_theme.endsWith(".html"))
-      path_to_theme = path.join(path_to_theme, "index.html");
-
-    if (!fs.existsSync(path_to_theme)) {
-      logger.warn(
-        `"${theme}" theme does not exists. Using "${def_theme}" theme`
-      );
-      path_to_theme = path.join(dir, def_theme, "index.html");
-    }
-
-    nody_greeter.config.greeter.theme = path_to_theme;
-
-    //this.win.loadFile(path_to_theme);
-    const theme_url = url.format({
-      pathname: path_to_theme,
+    const primary_url = url.format({
+      pathname: primary_html,
       host: "app",
       hostname: "app",
       protocol: "web-greeter:",
     });
-    //console.log({ theme_url, url: new URL(theme_url) });
-    this.win.loadURL(`${theme_url}`);
-    this.win.setBackgroundColor("#000000");
-
-    this.win.webContents.on("before-input-event", (_event, input) => {
-      const value = nody_greeter.config.features.backlight.value;
-      if (input.type == "keyUp") return;
-      if (input.code == "BrightnessDown") {
-        Brightness.dec_brightness(value);
-      } else if (input.code == "BrightnessUp") {
-        Brightness.inc_brightness(value);
-      }
+    const secondary_url = url.format({
+      pathname: secondary_html,
+      host: "app",
+      hostname: "app",
+      protocol: "web-greeter:",
     });
+    //console.log({ primary_url, secondary_url });
+    for (const w of this.windows) {
+      if (w.is_primary) w.window.loadURL(`${primary_url}`);
+      else w.window.loadURL(`${secondary_url}`);
+      w.window.setBackgroundColor("#000000");
+
+      w.window.webContents.on("before-input-event", (_event, input) => {
+        const value = nody_greeter.config.features.backlight.value;
+        if (input.type == "keyUp") return;
+        if (input.code == "BrightnessDown") {
+          Brightness.dec_brightness(value);
+        } else if (input.code == "BrightnessUp") {
+          Brightness.inc_brightness(value);
+        }
+      });
+    }
 
     logger.debug("Theme loaded");
   }
 
-  create_window(): BrowserWindow {
+  create_windows(): NodyWindow[] {
     logger.debug("Initializing Browser Window");
 
-    const screen_size = screen.getPrimaryDisplay().workAreaSize;
+    const displays = screen.getAllDisplays();
+    const primaryDisplay = screen.getPrimaryDisplay();
 
-    const win = new BrowserWindow({
-      height: screen_size.height,
-      width: screen_size.width,
-      backgroundColor: "#000000",
-      frame: nody_greeter.app.frame,
-      show: false,
-      webPreferences: {
-        preload: path.join(__dirname, "preload.js"),
-        nodeIntegration: false,
-        contextIsolation: false,
-        allowRunningInsecureContent: !nody_greeter.config.greeter.secure_mode, // Should set option
-        devTools: nody_greeter.app.debug_mode, // Should set option
-      },
+    // Calculate the total display area
+    const overallBoundary: WindowMetadata["overallBoundary"] = {
+      minX: Infinity,
+      maxX: -Infinity,
+      minY: Infinity,
+      maxY: -Infinity,
+    };
+
+    for (const display of displays) {
+      overallBoundary.minX = Math.min(overallBoundary.minX, display.bounds.x);
+      overallBoundary.minY = Math.min(overallBoundary.minY, display.bounds.y);
+      overallBoundary.maxX = Math.max(
+        overallBoundary.maxX,
+        display.bounds.x + display.bounds.width
+      );
+      overallBoundary.maxY = Math.max(
+        overallBoundary.maxY,
+        display.bounds.y + display.bounds.height
+      );
+    }
+
+    const windows: NodyWindow[] = displays.map((display) => {
+      const is_primary = display.id === primaryDisplay.id;
+      return {
+        is_primary,
+        display,
+        window: new BrowserWindow({
+          height: display.workAreaSize.height,
+          width: display.workAreaSize.width,
+          x: display.bounds.x,
+          y: display.bounds.y,
+          backgroundColor: "#000000",
+          frame: nody_greeter.app.frame,
+          show: false,
+          webPreferences: {
+            preload: path.join(__dirname, "preload.js"),
+            nodeIntegration: false,
+            contextIsolation: false,
+            allowRunningInsecureContent:
+              !nody_greeter.config.greeter.secure_mode, // Should set option
+            devTools: nody_greeter.app.debug_mode, // Should set option
+          },
+        }),
+        meta: {
+          id: display.id,
+          is_primary,
+          size: {
+            width: display.workAreaSize.width,
+            height: display.workAreaSize.height,
+          },
+          position: {
+            x: display.bounds.x,
+            y: display.bounds.y,
+          },
+          overallBoundary,
+        },
+      };
     });
 
     logger.debug("Browser Window created");
@@ -157,59 +201,67 @@ class Browser {
 
     this.ready = true;
 
-    return win;
+    return windows;
   }
 
   init_listeners(): void {
-    this.win.once("ready-to-show", () => {
-      this.win.setFullScreen(nody_greeter.app.fullscreen);
-      this.win.show();
-      this.win.focus();
-      logger.debug("Nody Greeter started");
-    });
-    this.win.webContents.on("devtools-opened", () => {
-      this.win.webContents.devToolsWebContents.focus();
-    });
+    for (const w of this.windows) {
+      w.window.once("ready-to-show", () => {
+        w.window.setFullScreen(nody_greeter.app.fullscreen);
+        w.window.show();
+        if (w.is_primary) {
+          w.window.focus();
+        }
+        logger.debug("Nody Greeter started win: " + w.meta.id);
+      });
+      w.window.webContents.on("devtools-opened", () => {
+        w.window.webContents.devToolsWebContents.focus();
+      });
+
+      w.window.webContents.on("context-menu", (_ev, params) => {
+        if (!nody_greeter.app.debug_mode) return;
+        const position = { x: params.x, y: params.y };
+        const menu_template: MenuItemConstructorOptions[] = [
+          { role: "undo", enabled: params.editFlags.canUndo, accelerator: "U" },
+          { role: "redo", enabled: params.editFlags.canRedo, accelerator: "R" },
+          { type: "separator" },
+          { role: "cut", enabled: params.editFlags.canCut, accelerator: "C" },
+          { role: "copy", enabled: params.editFlags.canCopy, accelerator: "C" },
+          {
+            role: "paste",
+            enabled: params.editFlags.canPaste,
+            accelerator: "P",
+          },
+          {
+            role: "delete",
+            enabled: params.editFlags.canDelete,
+            accelerator: "D",
+          },
+          {
+            role: "selectAll",
+            enabled: params.editFlags.canSelectAll,
+            accelerator: "S",
+            registerAccelerator: true,
+          },
+          { type: "separator" },
+          { role: "reload", accelerator: "R", registerAccelerator: false },
+          { role: "forceReload", accelerator: "F", registerAccelerator: false },
+          { role: "toggleDevTools", accelerator: "T" },
+          {
+            label: "Inspect Element",
+            click: (): void => {
+              w.window.webContents.inspectElement(position.x, position.y);
+            },
+            accelerator: "I",
+          },
+        ];
+        const menu = Menu.buildFromTemplate(menu_template);
+        menu.popup();
+      });
+    }
 
     app.on("quit", () => {
       reset_screensaver();
-    });
-
-    this.win.webContents.on("context-menu", (_ev, params) => {
-      if (!nody_greeter.app.debug_mode) return;
-      const position = { x: params.x, y: params.y };
-      const menu_template: MenuItemConstructorOptions[] = [
-        { role: "undo", enabled: params.editFlags.canUndo, accelerator: "U" },
-        { role: "redo", enabled: params.editFlags.canRedo, accelerator: "R" },
-        { type: "separator" },
-        { role: "cut", enabled: params.editFlags.canCut, accelerator: "C" },
-        { role: "copy", enabled: params.editFlags.canCopy, accelerator: "C" },
-        { role: "paste", enabled: params.editFlags.canPaste, accelerator: "P" },
-        {
-          role: "delete",
-          enabled: params.editFlags.canDelete,
-          accelerator: "D",
-        },
-        {
-          role: "selectAll",
-          enabled: params.editFlags.canSelectAll,
-          accelerator: "S",
-          registerAccelerator: true,
-        },
-        { type: "separator" },
-        { role: "reload", accelerator: "R", registerAccelerator: false },
-        { role: "forceReload", accelerator: "F", registerAccelerator: false },
-        { role: "toggleDevTools", accelerator: "T" },
-        {
-          label: "Inspect Element",
-          click: (): void => {
-            this.win.webContents.inspectElement(position.x, position.y);
-          },
-          accelerator: "I",
-        },
-      ];
-      const menu = Menu.buildFromTemplate(menu_template);
-      menu.popup();
     });
 
     session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
@@ -223,6 +275,15 @@ class Browser {
         ) && nody_greeter.config.greeter.secure_mode;
       callback({ cancel: block });
     });
+  }
+
+  public get primary_window(): BrowserWindow {
+    for (const w of this.windows) {
+      if (w.is_primary) {
+        return w.window;
+      }
+    }
+    throw new Error("No primary window initialized");
   }
 }
 
