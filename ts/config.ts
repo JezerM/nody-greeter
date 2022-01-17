@@ -18,8 +18,8 @@ export const WEB_GREETER_CONFIG = io_ts.type({
     screensaver_timeout: io_ts.number,
     secure_mode: io_ts.boolean,
     theme: io_ts.string,
-    icon_theme: io_ts.union([io_ts.string, io_ts.null]),
-    time_language: io_ts.union([io_ts.string, io_ts.null]),
+    icon_theme: io_ts.union([io_ts.string, io_ts.null, io_ts.undefined]),
+    time_language: io_ts.union([io_ts.string, io_ts.null, io_ts.undefined]),
   }),
   layouts: io_ts.array(io_ts.string),
   features: io_ts.type({
