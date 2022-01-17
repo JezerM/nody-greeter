@@ -16,7 +16,7 @@ import {
   session_to_obj,
   battery_to_obj,
 } from "./bridge_objects";
-import { browser } from "../globals";
+import { browser, general_error_prompt } from "../globals";
 
 import { Brightness } from "../utils/brightness.js";
 import { Battery } from "../utils/battery";
@@ -481,9 +481,20 @@ export class Greeter {
    * @returns {boolean} "true" if successful, otherwise "false"
    */
   start_session(session: string | null): boolean {
-    const started = LightDMGreeter.startSessionSync(session);
-    if (started || this.is_authenticated) reset_screensaver();
-    return started;
+    try {
+      const started = LightDMGreeter.startSessionSync(session);
+      if (started || this.is_authenticated) reset_screensaver();
+      return started;
+    } catch (err) {
+      console.log(err);
+      general_error_prompt(
+        browser.primary_window,
+        "LightDM couldn't start session",
+        `The provided session: "${session}" couldn't be started\n${err.message}`,
+        "An error ocurred"
+      );
+      return false;
+    }
   }
 
   /**

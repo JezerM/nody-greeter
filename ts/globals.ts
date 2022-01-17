@@ -52,12 +52,25 @@ function error_prompt(
   line: number
 ): void {
   if (!nody_greeter.config.greeter.detect_theme_errors) return;
+  general_error_prompt(
+    win,
+    "An error ocurred. Do you want to change to default theme? (gruvbox)",
+    `${source} ${line}: ${message}`,
+    "An error ocurred"
+  );
+}
+
+function general_error_prompt(
+  win: BrowserWindow,
+  message: string,
+  detail: string,
+  title: string
+): void {
   const ind = dialog.showMessageBoxSync(win, {
-    message:
-      "An error ocurred. Do you want to change to default theme? (gruvbox)",
-    detail: `${source} ${line}: ${message}`,
+    message: message,
+    detail: detail,
     type: "error",
-    title: "An error ocurred",
+    title: title,
     buttons: ["Cancel", "Use default theme", "Reload theme"],
   });
   switch (ind) {
@@ -77,4 +90,4 @@ function error_prompt(
   }
 }
 
-export { browser, logger, error_prompt };
+export { browser, logger, error_prompt, general_error_prompt };
