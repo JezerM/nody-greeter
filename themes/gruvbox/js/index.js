@@ -49,17 +49,12 @@ async function initGreeter() {
     document.querySelector("#lock-label").classList.remove("hide");
   }
 
-  if (!nody_greeter.window_metadata.is_primary) {
+  if (window.nody_greeter && !window.nody_greeter.window_metadata.is_primary) {
     // Hide login elements on non-primary screen
     document.querySelector("#screen").classList.add("hide");
   }
 }
 
 const notGreeter = false;
-
-if (window._ready_event === undefined) {
-  _ready_event = new Event("GreeterReady");
-  window.dispatchEvent(_ready_event);
-}
 
 window.addEventListener("GreeterReady", initGreeter);

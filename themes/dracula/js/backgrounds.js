@@ -67,10 +67,15 @@ class Backgrounds {
       const path = this._backgroundImages[i];
       let button = this._createImage(path);
       button.addEventListener("click", () => {
-        nody_greeter.broadcast({
-          type: "change-background",
-          path,
-        });
+        if (window.nody_greeter) {
+          nody_greeter.broadcast({
+            type: "change-background",
+            path,
+          });
+        } else {
+          this._backgroundPath = path;
+          this._updateBackgroundImages();
+        }
       });
       this._backgroundsList.appendChild(button);
     }

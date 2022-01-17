@@ -212,7 +212,7 @@ class Browser {
         if (w.is_primary) {
           w.window.focus();
         }
-        logger.debug("Nody Greeter started win");
+        logger.debug("Nody Greeter started win: " + w.meta.id);
       });
       w.window.webContents.on("devtools-opened", () => {
         w.window.webContents.devToolsWebContents.focus();
