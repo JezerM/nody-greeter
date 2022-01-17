@@ -1,33 +1,65 @@
-import * as yaml from "js-yaml";
+import { fold } from "fp-ts/Either";
+import { pipe } from "fp-ts/function";
+import * as util from "util";
 import * as fs from "fs";
+import * as io_ts from "io-ts";
+import * as yaml from "js-yaml";
 import * as path from "path";
 import { logger } from "./logger";
 
-export interface web_greeter_config {
-  branding: {
-    background_images_dir: string;
-    logo_image: string;
-    user_image: string;
-  };
-  greeter: {
-    debug_mode: boolean;
-    detect_theme_errors: boolean;
-    screensaver_timeout: number;
-    secure_mode: boolean;
-    theme: string;
-    icon_theme: string | undefined;
-    time_language: string | undefined;
-  };
-  layouts: string[];
-  features: {
-    battery: boolean;
-    backlight: {
-      enabled: boolean;
-      value: number;
-      steps: number;
-    };
-  };
-}
+export const WEB_GREETER_CONFIG = io_ts.type({
+  branding: io_ts.type({
+    background_images_dir: io_ts.string,
+    logo_image: io_ts.string,
+    user_image: io_ts.string,
+  }),
+  greeter: io_ts.type({
+    debug_mode: io_ts.boolean,
+    detect_theme_errors: io_ts.boolean,
+    screensaver_timeout: io_ts.number,
+    secure_mode: io_ts.boolean,
+    theme: io_ts.string,
+    icon_theme: io_ts.union([io_ts.string, io_ts.null]),
+    time_language: io_ts.union([io_ts.string, io_ts.null]),
+  }),
+  layouts: io_ts.array(io_ts.string),
+  features: io_ts.type({
+    battery: io_ts.boolean,
+    backlight: io_ts.type({
+      enabled: io_ts.boolean,
+      value: io_ts.number,
+      steps: io_ts.number,
+    }),
+  }),
+});
+
+export const THEME_CONFIG = io_ts.intersection([
+  io_ts.type({
+    /**
+     * HTML file to use in main monitor
+     * @example primary_html: "index.html"
+     */
+    primary_html: io_ts.string,
+  }),
+  io_ts.partial({
+    /**
+     * HTML file to use in non-main (secondary) monitors
+     * If the file does not exists or it's not set, `primary_html` will be used
+     * @example secondary_html: "secondary.html"
+     * @example secondary_html: ""
+     */
+    secondary_html: io_ts.string,
+  }),
+]);
+
+/**
+ * web-greeter's config inside `/etc/lightdm/web-greeter.yml`
+ */
+export type web_greeter_config = io_ts.TypeOf<typeof WEB_GREETER_CONFIG>;
+/**
+ * Theme's config inside `$THEME/index.yml`
+ */
+export type theme_config = io_ts.TypeOf<typeof THEME_CONFIG>;
 
 export interface app_config {
   fullscreen: boolean;
@@ -40,24 +72,6 @@ export interface nody_config {
   config: web_greeter_config;
   app: app_config;
   theme: theme_config;
-}
-
-/**
- * Theme's config inside `$THEME/index.yml`
- */
-export interface theme_config {
-  /**
-   * HTML file to use in main monitor
-   * @example primary_html: "index.html"
-   */
-  primary_html: string;
-  /**
-   * HTML file to use in non-main (secondary) monitors
-   * If the file does not exists or it's not set, `primary_html` will be used
-   * @example secondary_html: "secondary.html"
-   * @example secondary_html: ""
-   */
-  secondary_html?: string;
 }
 
 export const nody_greeter: nody_config = {
@@ -163,21 +177,53 @@ export function load_secondary_theme_path(): string {
   return path_to_theme;
 }
 
+function validate_config(
+  decoder: io_ts.Type<typeof obj>,
+  obj: unknown
+): string {
+  const onLeft = (errors: io_ts.Errors): string => {
+    let message = "";
+    const fm_errors: { key: string; value: string; type: string }[] = [];
+    for (let i = 0; i < errors.length; i++) {
+      const context = errors[i].context;
+      const type = context[context.length - 1].type.name;
+      const key = context[context.length - 2].key;
+      const value = errors[i].value;
+      const can_color = process.stdout.isTTY && process.stdout.hasColors();
+      const fm_value = util.inspect(value, { colors: can_color });
+
+      const ind = fm_errors.findIndex((e) => e.key === key);
+      if (ind == -1) {
+        fm_errors.push({ key, value: fm_value, type });
+      } else {
+        fm_errors[ind].type += "|" + type;
+      }
+    }
+    for (const err of fm_errors) {
+      message += `{ ${err.key}: ${err.value} } couldn't be validated as (${err.type})\n`;
+    }
+    return message;
+  };
+  const onRight = (): string => "";
+  return pipe(decoder.decode(obj), fold(onLeft, onRight));
+}
+
 export function load_theme_config(): void {
   if (!theme_dir) load_theme_dir();
   const path_to_theme_config = path.join(theme_dir, "index.yml");
+  let error_message = "";
   try {
     const file = fs.readFileSync(path_to_theme_config, "utf-8");
-    const theme_config = yaml.load(file) as theme_config;
+    const theme_config = yaml.load(file);
 
-    if (!theme_config.primary_html.endsWith(".html"))
-      theme_config.primary_html = "index.html";
-    if (!theme_config.secondary_html.endsWith(".html"))
-      theme_config.secondary_html = "";
+    if (!THEME_CONFIG.is(theme_config)) {
+      error_message = validate_config(THEME_CONFIG, theme_config);
+      throw new Error("Invalid config");
+    }
 
     nody_greeter.theme = theme_config;
   } catch (err) {
-    logger.warn(`Theme config was not loaded:\n\t${err}`);
+    logger.warn(`Theme config was not loaded:\n\t${err}\n${error_message}`);
     logger.debug("Using default theme config");
   }
 }
@@ -198,11 +244,20 @@ export function ensure_theme(): void {
 }
 
 export function load_config(): void {
+  let error_message = "";
   try {
     const file = fs.readFileSync(path_to_config, "utf-8");
-    nody_greeter.config = yaml.load(file) as web_greeter_config;
+    const webg_config = yaml.load(file);
+
+    if (!WEB_GREETER_CONFIG.is(webg_config)) {
+      error_message = validate_config(WEB_GREETER_CONFIG, webg_config);
+      throw new Error("Invalid config");
+    }
+
+    nody_greeter.config = webg_config;
   } catch (err) {
-    logger.error(`Config was not loaded:\n\t${err}`);
+    logger.error(`Config was not loaded:\n\t${err}\n${error_message}`);
+    logger.warn("Using default config");
   }
 }
 
