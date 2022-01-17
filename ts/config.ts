@@ -1,5 +1,4 @@
-import { fold } from "fp-ts/Either";
-import { pipe } from "fp-ts/function";
+import { isRight } from "fp-ts/Either";
 import * as util from "util";
 import * as fs from "fs";
 import * as io_ts from "io-ts";
@@ -177,11 +176,15 @@ export function load_secondary_theme_path(): string {
   return path_to_theme;
 }
 
-function validate_config(
-  decoder: io_ts.Type<typeof obj>,
+function validate_config<T>(
+  decoder: io_ts.Type<T>,
   obj: unknown
-): string {
-  const onLeft = (errors: io_ts.Errors): string => {
+): T {
+  const decoded = decoder.decode(obj);
+  if (isRight(decoded)) {
+    return decoded.right;
+  } else {
+    const errors = decoded.left;
     let message = "";
     const fm_errors: { key: string; value: string; type: string }[] = [];
     for (let i = 0; i < errors.length; i++) {
@@ -202,28 +205,20 @@ function validate_config(
     for (const err of fm_errors) {
       message += `{ ${err.key}: ${err.value} } couldn't be validated as (${err.type})\n`;
     }
-    return message;
-  };
-  const onRight = (): string => "";
-  return pipe(decoder.decode(obj), fold(onLeft, onRight));
+    throw new Error(`Invalid config: ${message}`);
+  }
 }
 
 export function load_theme_config(): void {
   if (!theme_dir) load_theme_dir();
   const path_to_theme_config = path.join(theme_dir, "index.yml");
-  let error_message = "";
   try {
     const file = fs.readFileSync(path_to_theme_config, "utf-8");
     const theme_config = yaml.load(file);
 
-    if (!THEME_CONFIG.is(theme_config)) {
-      error_message = validate_config(THEME_CONFIG, theme_config);
-      throw new Error("Invalid config");
-    }
-
-    nody_greeter.theme = theme_config;
+    nody_greeter.theme = validate_config(THEME_CONFIG, theme_config);
   } catch (err) {
-    logger.warn(`Theme config was not loaded:\n\t${err}\n${error_message}`);
+    logger.warn(`Theme config was not loaded:\n\t${err}`);
     logger.debug("Using default theme config");
   }
 }
@@ -244,19 +239,13 @@ export function ensure_theme(): void {
 }
 
 export function load_config(): void {
-  let error_message = "";
   try {
     const file = fs.readFileSync(path_to_config, "utf-8");
     const webg_config = yaml.load(file);
 
-    if (!WEB_GREETER_CONFIG.is(webg_config)) {
-      error_message = validate_config(WEB_GREETER_CONFIG, webg_config);
-      throw new Error("Invalid config");
-    }
-
-    nody_greeter.config = webg_config;
+    nody_greeter.config = validate_config(WEB_GREETER_CONFIG, webg_config);
   } catch (err) {
-    logger.error(`Config was not loaded:\n\t${err}\n${error_message}`);
+    logger.error(`Config was not loaded:\n\t${err}`);
     logger.warn("Using default config");
   }
 }
