@@ -43,7 +43,7 @@ export interface nody_config {
 }
 
 /**
- * Theme's config inside `$THEME/index.theme`
+ * Theme's config inside `$THEME/index.yml`
  */
 export interface theme_config {
   /**
@@ -57,7 +57,7 @@ export interface theme_config {
    * @example secondary_html: "secondary.html"
    * @example secondary_html: ""
    */
-  secondary_html: string;
+  secondary_html?: string;
 }
 
 export const nody_greeter: nody_config = {
@@ -165,17 +165,14 @@ export function load_secondary_theme_path(): string {
 
 export function load_theme_config(): void {
   if (!theme_dir) load_theme_dir();
-  const path_to_theme_config = path.join(theme_dir, "index.theme");
+  const path_to_theme_config = path.join(theme_dir, "index.yml");
   try {
-    if (!fs.existsSync(path_to_theme_config))
-      throw new Error("Theme config not found");
-
     const file = fs.readFileSync(path_to_theme_config, "utf-8");
     const theme_config = yaml.load(file) as theme_config;
 
-    if (!theme_config.primary_html.match(/.*.html/))
+    if (!theme_config.primary_html.endsWith(".html"))
       theme_config.primary_html = "index.html";
-    if (!theme_config.secondary_html.match(/.*.html/))
+    if (!theme_config.secondary_html.endsWith(".html"))
       theme_config.secondary_html = "";
 
     nody_greeter.theme = theme_config;
@@ -196,17 +193,12 @@ export function ensure_theme(): void {
 
   if (!primary_exists) {
     theme_dir = path.join(dir, def_theme);
-
-    if (fs.existsSync(path.join(theme_dir, "index.theme"))) {
-      load_theme_config();
-    }
+    load_theme_config();
   }
 }
 
 export function load_config(): void {
   try {
-    if (!fs.existsSync(path_to_config))
-      throw new Error("Config file not found");
     const file = fs.readFileSync(path_to_config, "utf-8");
     nody_greeter.config = yaml.load(file) as web_greeter_config;
   } catch (err) {
