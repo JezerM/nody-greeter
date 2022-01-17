@@ -8,7 +8,9 @@
     "rebuild": "electron-rebuild -w node-gtk",
     "build": "tsc --build && node make build",
     "lint": "eslint \"ts/**\"",
-    "prettier": "prettier --write ts/",
+    "lint:fix": "eslint \"ts/**\" --fix",
+    "prettier": "prettier --check ts/",
+    "prettier:fix": "prettier --write ts/",
     "do_install": "node install.js"
   },
   "author": {

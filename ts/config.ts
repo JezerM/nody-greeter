@@ -176,10 +176,7 @@ export function load_secondary_theme_path(): string {
   return path_to_theme;
 }
 
-function validate_config<T>(
-  decoder: io_ts.Type<T>,
-  obj: unknown
-): T {
+function validate_config<T>(decoder: io_ts.Type<T>, obj: unknown): T {
   const decoded = decoder.decode(obj);
   if (isRight(decoded)) {
     return decoded.right;
