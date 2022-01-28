@@ -11,6 +11,7 @@ This is a LightDM Greeter made with [Electron.js][Electron] and [node-gtk][node-
 - JavaScript error handling, allowing to load the default theme.
 - Themes could be simple, or very complex.
 - Battery and brightness control.
+- Multi-monitor support, thanks to [s0](https://github.com/s0)
 
 ## Considerations
 
@@ -77,6 +78,21 @@ You can enable it inside `/etc/lightdm/web-greeter.yml`
 `acpi` and `acpi_listen` are the only tools you need (and a battery). This functionality is based on ["bat" widget][bat_widget] from ["lain" awesome-wm library][lain].
 
 You can enable it inside `/etc/lightdm/web-greeter.yml`.
+
+## Debugging
+You can run the greeter from within your desktop session if you add the following line to the desktop file for your session located in `/usr/share/xsessions/`: `X-LightDM-Allow-Greeter=true`.
+
+You have to log out and log back in after adding that line. Then you can run the greeter from command line.
+
+Themes can be opened with a debug console if you set `debug_mode` as `true` inside `/etc/lightdm/web-greeter.yml`. Or, you could run the `nody-greeter` with the parameter `--debug`. I recommend to use the last one, as it is easier and handy.
+
+```sh
+nody-greeter --debug
+```
+
+Check `nody-greeter --help` for more commands.
+
+> ***Note:*** Do not use `lightdm --test-mode` as it is not supported.
 
 ## Troubleshooting
 
