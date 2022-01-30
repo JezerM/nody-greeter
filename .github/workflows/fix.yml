@@ -1,0 +1,43 @@
+name: Fix errors and code formatting
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  fix:
+
+    name: Apply ESLint and Prettier
+    runs-on: ubuntu-latest
+
+    steps:
+    -
+      name: Checkout
+      uses: actions/checkout@v2
+    -
+      name: Setup node
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14
+        cache: npm
+    -
+      name: Install npm dependencies
+      run: npm install
+    -
+      name: Run ESLint
+      run: npm run lint:fix
+    -
+      name: Run Prettier
+      run: npm run prettier:fix
+    -
+      run: |
+        git restore package-lock.json
+    -
+      name: Commit and pull request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        title: "[GitHub Actions] ESLint and Prettier fixes"
+        commit-message: Fix errors and code formatting with ESLint and Prettier
+        add-paths: |
+          ts/*
+        delete-branch: true
