@@ -3,6 +3,8 @@ name: ESLint and Prettier
 on:
   push:
     branches: [ master ]
+    paths:
+      - "ts/**"
   pull_request:
     branches: [ master ]
   workflow_dispatch:
