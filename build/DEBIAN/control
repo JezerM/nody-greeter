@@ -1,5 +1,5 @@
 Package: nody-greeter
-Version: 1.3.0
+Version: 1.4.0
 Provides: lightdm-greeter
 Replaces: lightdm-webkit-greeter
 Section: x11

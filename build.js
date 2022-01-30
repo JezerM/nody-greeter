@@ -13,6 +13,8 @@ const ora = require("ora");
 
 let DEST_DIR = "/";
 let PREFIX = "/usr";
+let INSTALL_ZSH_COMPLETION = true;
+let INSTALL_BASH_COMPLETION = true;
 let ARCH = process.arch;
 let INSTALL_ROOT = path.resolve(__dirname, "./build/unpacked/");
 let ASAR_ROOT = path.resolve(__dirname, "./build/nody-asar/");
@@ -44,6 +46,16 @@ let argv = yargs
     describe: "Architecture to build for",
     default: ARCH,
   })
+  .option("INSTALL_ZSH_COMPLETION", {
+    type: "boolean",
+    describe: "Wheter to install zsh completion",
+    default: INSTALL_ZSH_COMPLETION,
+  })
+  .option("INSTALL_BASH_COMPLETION", {
+    type: "boolean",
+    describe: "Wheter to install bash completion",
+    default: INSTALL_BASH_COMPLETION,
+  })
   .help("h")
   .alias("h", "help")
   .version(false).argv;
@@ -51,6 +63,8 @@ let argv = yargs
 DEST_DIR = argv.DEST_DIR;
 PREFIX = argv.PREFIX;
 ARCH = argv.ARCH;
+INSTALL_ZSH_COMPLETION = argv.INSTALL_ZSH_COMPLETION;
+INSTALL_BASH_COMPLETION = argv.INSTALL_BASH_COMPLETION;
 
 // Some global variables
 
@@ -230,8 +244,10 @@ function create_install_root() {
   fs.mkdirsSync(xdg_ldm_path, { recursive: true });
   fs.mkdirsSync(xgreeters_path, { recursive: true });
   fs.mkdirsSync(applications_path, { recursive: true });
-  if (check_program("bash")) fs.mkdirsSync(bash_c_path, { recursive: true });
-  if (check_program("zsh")) fs.mkdirsSync(zsh_c_path, { recursive: true });
+  if (check_program("bash") && INSTALL_BASH_COMPLETION)
+    fs.mkdirsSync(bash_c_path, { recursive: true });
+  if (check_program("zsh") && INSTALL_ZSH_COMPLETION)
+    fs.mkdirsSync(zsh_c_path, { recursive: true });
 }
 
 let copies_prepare = [
@@ -267,12 +283,12 @@ let copies_prepare = [
 
 async function prepare_install() {
   create_install_root();
-  if (check_program("bash"))
+  if (check_program("bash") && INSTALL_BASH_COMPLETION)
     copies_prepare.push({
       from: "./dist/nody-greeter-bash",
       to: path.join(bash_c_path, "nody-greeter"),
     });
-  if (check_program("zsh"))
+  if (check_program("zsh") && INSTALL_ZSH_COMPLETION)
     copies_prepare.push({
       from: "./dist/nody-greeter-zsh",
       to: path.join(zsh_c_path, "_nody-greeter"),

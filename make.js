@@ -4,6 +4,8 @@ const yargs = require("yargs");
 
 let DEST_DIR = "/";
 let PREFIX = "/usr";
+let INSTALL_ZSH_COMPLETION = true;
+let INSTALL_BASH_COMPLETION = true;
 let ARCH = process.arch;
 let INSTALL_ROOT = path.resolve(__dirname, "./build/unpacked/");
 
@@ -37,6 +39,16 @@ let argv = yargs
     type: "string",
     describe: "Architecture to build for",
     default: ARCH,
+  })
+  .option("INSTALL_ZSH_COMPLETION", {
+    type: "boolean",
+    describe: "Wheter to install zsh completion",
+    default: INSTALL_ZSH_COMPLETION,
+  })
+  .option("INSTALL_BASH_COMPLETION", {
+    type: "boolean",
+    describe: "Wheter to install bash completion",
+    default: INSTALL_BASH_COMPLETION,
   })
   .help("h")
   .alias("h", "help")

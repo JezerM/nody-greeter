@@ -33,7 +33,9 @@ Themes working in **web-greeter** should work also here. All themes shipped with
 - gobject-introspection
 - liblightdm-gobject
 - liblightdm-gobject-dev
+- libgirepository1.0-dev
 - libcairo2
+- libcairo2-dev
 - libxcb-dev
 - libx11-dev
 
