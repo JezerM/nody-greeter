@@ -37,7 +37,7 @@ class Browser {
     });
   }
 
-  windows: NodyWindow[];
+  windows: NodyWindow[] = [];
 
   whenReady(): Promise<void> {
     return new Promise((resolve) => {
@@ -215,7 +215,7 @@ class Browser {
         logger.debug("Nody Greeter started win: " + w.meta.id);
       });
       w.window.webContents.on("devtools-opened", () => {
-        w.window.webContents.devToolsWebContents.focus();
+        w.window.webContents.devToolsWebContents?.focus();
       });
 
       w.window.webContents.on("context-menu", (_ev, params) => {

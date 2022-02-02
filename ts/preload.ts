@@ -64,15 +64,11 @@ export class Nody {
   private readonly _ready_promise: Promise<void>;
 
   constructor() {
-    if ("nody_greeter" in globalThis) {
-      return globalThis.nody_greeter;
-    }
-
-    globalThis.nody_greeter = this;
+    window.nody_greeter = this;
 
     ipcRenderer.on(CONSTS.channel.window_metadata, (_ev, metadata) => {
       this._window_metadata = metadata;
-      this._ready();
+      if (this._ready) this._ready();
     });
 
     // Send initial request for metadata
@@ -85,7 +81,7 @@ export class Nody {
 
     this._ready_promise = new Promise((resolve) => (this._ready = resolve));
 
-    return globalThis.nody_greeter;
+    return window.nody_greeter;
   }
 
   public get window_metadata(): WindowMetadata {
@@ -110,10 +106,10 @@ export class Nody {
   }
 }
 
-const allSignals = [];
+const allSignals: Signal[] = [];
 
 export class Signal {
-  private _name: string;
+  public _name: string;
   private _callbacks: ((...args: unknown[]) => void)[];
 
   constructor(name: string) {
@@ -126,7 +122,9 @@ export class Signal {
    * Connects a callback to the signal.
    * @param {() => void} callback The callback to attach.
    */
-  public connect(callback: (...args: unknown[]) => void): void {
+  // @ts-ignore
+  // eslint-disable-next-line
+  public connect(callback: (...args: any[]) => void): void {
     if (typeof callback !== "function") return;
     this._callbacks.push(callback);
   }
@@ -172,13 +170,13 @@ ipcRenderer.on(CONSTS.channel.lightdm_signal, (_ev, signal, ...args) => {
 
 export class Greeter {
   constructor() {
-    if ("lightdm" in globalThis) {
-      return globalThis.lightdm;
+    if ("lightdm" in window && window.lightdm) {
+      return window.lightdm;
     }
 
-    globalThis.lightdm = this;
+    window.lightdm = this;
 
-    return globalThis.lightdm;
+    return window.lightdm;
   }
 
   authentication_complete = new Signal("authentication-complete");
@@ -569,6 +567,7 @@ export class Greeter {
     if (this.is_authenticated) {
       return ipcRenderer.sendSync("lightdm", "set_language", language);
     }
+    return false;
   }
 
   /**
@@ -663,10 +662,10 @@ interface gc_features {
 
 export class GreeterConfig {
   constructor() {
-    if ("greeter_config" in globalThis) {
-      return globalThis.greeter_config;
+    if ("greeter_config" in window && window.greeter_config) {
+      return window.greeter_config;
     }
-    globalThis.greeter_config = this;
+    window.greeter_config = this;
   }
 
   /**
@@ -723,15 +722,15 @@ export class GreeterConfig {
   }
 }
 
-let time_language = null;
+let time_language: string | null = null;
 
 export class ThemeUtils {
   constructor() {
-    if ("theme_utils" in globalThis) {
-      return globalThis.theme_utils;
+    if ("theme_utils" in window && window.theme_utils) {
+      return window.theme_utils;
     }
 
-    globalThis.theme_utils = this;
+    window.theme_utils = this;
   }
 
   /**
@@ -749,6 +748,7 @@ export class ThemeUtils {
           excluded_methods.findIndex(
             (excluded_method) => _method === excluded_method
           ) > -1,
+        // @ts-ignore Just for now
         is_method = "function" === typeof _context[_method];
 
       return is_method && !is_excluded;
@@ -762,6 +762,7 @@ export class ThemeUtils {
 
       for (const method of Object.getOwnPropertyNames(obj)) {
         if (not_excluded(method, context)) {
+          // @ts-ignore Just for now
           context[method] = context[method].bind(context);
         }
       }
@@ -845,12 +846,12 @@ export class ThemeUtils {
    * 	 * `language` defaults to the system's language, but can be set manually in the config file.
    */
   get_current_localized_date(): string {
-    const config = globalThis.greeter_config.greeter;
+    const config = window.greeter_config?.greeter;
 
     const locale = [];
 
     if (time_language === null) {
-      time_language = config.time_language || "";
+      time_language = config?.time_language || "";
     }
 
     if (time_language != "") {
@@ -876,12 +877,12 @@ export class ThemeUtils {
    * 	 * `language` defaults to the system's language, but can be set manually in the config file.
    */
   get_current_localized_time(): string {
-    const config = globalThis.greeter_config.greeter;
+    const config = window.greeter_config?.greeter;
 
     const locale = [];
 
     if (time_language === null) {
-      time_language = config.time_language || "";
+      time_language = config?.time_language || "";
     }
 
     if (time_language != "") {
@@ -921,12 +922,11 @@ const domLoaded = new Promise<void>((resolve) => {
  * Promise that fires when all initialization has completed,
  * and the theme can start (i.e. _ready_event can be sent)
  */
-const readyPromise = Promise.all([
-  domLoaded,
-  globalThis.nody_greeter.whenReady(),
-]);
+const readyPromise = Promise.all([domLoaded, window.nody_greeter?.whenReady()]);
 
-readyPromise.then(() => window.dispatchEvent(globalThis._ready_event));
+readyPromise.then(() => {
+  if (window._ready_event) window.dispatchEvent(window._ready_event);
+});
 
 export declare const nody_greeter: Nody;
 export declare const lightdm: Greeter;

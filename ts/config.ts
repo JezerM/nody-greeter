@@ -138,7 +138,7 @@ export function load_theme_dir(): string {
 }
 
 export function load_primary_theme_path(): string {
-  if (!theme_dir) load_theme_dir();
+  if (!theme_dir) theme_dir = load_theme_dir();
   const dir = nody_greeter.app.theme_dir;
   const def_theme = "gruvbox";
   const primary = nody_greeter.theme.primary_html;
@@ -158,10 +158,10 @@ export function load_primary_theme_path(): string {
   return path_to_theme;
 }
 export function load_secondary_theme_path(): string {
-  if (!theme_dir) load_theme_dir();
+  if (!theme_dir) theme_dir = load_theme_dir();
   const primary = nody_greeter.theme.primary_html;
   const secondary = nody_greeter.theme.secondary_html;
-  let path_to_theme = path.join(theme_dir, secondary);
+  let path_to_theme = path.join(theme_dir, secondary || primary);
 
   if (!path_to_theme.endsWith(".html"))
     path_to_theme = path.join(path_to_theme, "index.html");
@@ -207,7 +207,7 @@ function validate_config<T>(decoder: io_ts.Type<T>, obj: unknown): T {
 }
 
 export function load_theme_config(): void {
-  if (!theme_dir) load_theme_dir();
+  if (!theme_dir) theme_dir = load_theme_dir();
   const path_to_theme_config = path.join(theme_dir, "index.yml");
   try {
     const file = fs.readFileSync(path_to_theme_config, "utf-8");
@@ -221,7 +221,7 @@ export function load_theme_config(): void {
 }
 
 export function ensure_theme(): void {
-  if (!theme_dir) load_theme_dir();
+  if (!theme_dir) theme_dir = load_theme_dir();
 
   const primary = nody_greeter.theme.primary_html;
   const dir = nody_greeter.app.theme_dir;

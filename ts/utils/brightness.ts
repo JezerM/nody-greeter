@@ -35,12 +35,12 @@ function get_controllers(): string[] {
  * @class
  */
 class BrightnessController {
-  private _brightness_path: string;
-  private _max_brightness_path: string;
-  private _controllers: string[];
-  private steps: number;
-  private delay: number;
-  private _available: boolean;
+  private _brightness_path = "";
+  private _max_brightness_path = "";
+  private _controllers: string[] = [];
+  private steps = 0;
+  private delay = 200;
+  private _available = false;
 
   constructor() {
     this._controllers = get_controllers();
@@ -100,12 +100,11 @@ class BrightnessController {
   private watch_brightness(): void {
     if (!this._available) return;
     fs.watch(this._brightness_path, () => {
-      if (globalThis.lightdm)
-        globalThis.lightdm._emit_signal("brightness_update");
+      if (global.lightdm) global.lightdm._emit_signal("brightness_update");
     });
   }
 
-  private _max_brightness: number;
+  private _max_brightness = 0;
   public get max_brightness(): number {
     return this._max_brightness;
   }
@@ -145,7 +144,7 @@ class BrightnessController {
     }
 
     let i = 0;
-    const interval = setInterval(async () => {
+    const interval: NodeJS.Timeout = setInterval(async () => {
       if (i > steps) return clearInterval(interval);
       const brigh = current + ((value - current) * i) / steps;
       this.brightness = brigh;

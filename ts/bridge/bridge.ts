@@ -1,4 +1,5 @@
 import { dialog, ipcMain } from "electron";
+// @ts-ignore Until there's a @types/node-gtk
 import * as gi from "node-gtk";
 import * as fs from "fs";
 import * as os from "os";
@@ -33,20 +34,15 @@ import { logger } from "../logger";
 import { CONSTS } from "../consts";
 
 export class Greeter {
-  _config: web_greeter_config;
-  _battery: Battery;
-  _shared_data_directory: string;
+  public _config: web_greeter_config;
+  public _battery: Battery;
+  public _shared_data_directory: string;
+  public static _instance: Greeter;
 
-  constructor(config: web_greeter_config) {
-    if ("lightdm" in globalThis) {
-      return globalThis.lightdm;
-    }
-
+  private constructor(config: web_greeter_config) {
     this._config = config;
 
-    if (this._config.features.battery) {
-      this._battery = new Battery();
-    }
+    this._battery = new Battery();
 
     try {
       //LightDMGreeter.setResettable(true);
@@ -75,10 +71,6 @@ export class Greeter {
     );
 
     logger.debug("LightDM API connected");
-
-    globalThis.lightdm = this;
-
-    return globalThis.lightdm;
   }
 
   _connect_signals(): void {
@@ -111,6 +103,10 @@ export class Greeter {
         ...args
       );
     }
+  }
+
+  public static getInstance(config: web_greeter_config): Greeter {
+    return this._instance || (this._instance = new this(config));
   }
 
   /**
@@ -524,16 +520,15 @@ function get_layouts(config_layouts: string[]): LightDMLayout[] {
 }
 
 export class GreeterConfig {
-  _config: web_greeter_config;
+  public _config: web_greeter_config;
+  public static _instance: GreeterConfig;
 
-  constructor(config: web_greeter_config) {
-    if ("greeter_config" in globalThis) {
-      return globalThis.greeter_config;
-    }
-
+  private constructor(config: web_greeter_config) {
     this._config = config;
+  }
 
-    globalThis.greeter_config = this;
+  public static getInstance(config: web_greeter_config): GreeterConfig {
+    return this._instance || (this._instance = new this(config));
   }
 
   /**
@@ -595,25 +590,24 @@ export class GreeterConfig {
 }
 
 export class ThemeUtils {
-  _config: web_greeter_config;
-  _allowed_dirs: string[];
+  public _config: web_greeter_config;
+  public _allowed_dirs: string[];
+  public static _instance: ThemeUtils;
 
-  constructor(config: web_greeter_config) {
-    if ("theme_utils" in globalThis) {
-      return globalThis.theme_utils;
-    }
-
+  private constructor(config: web_greeter_config) {
     this._config = config;
 
     this._allowed_dirs = [
       nody_greeter.app.theme_dir,
       nody_greeter.config.branding.background_images_dir,
-      globalThis.lightdm.shared_data_directory,
+      global.lightdm.shared_data_directory,
       path.dirname(fs.realpathSync(nody_greeter.config.greeter.theme)),
       os.tmpdir(),
     ];
+  }
 
-    globalThis.theme_utils = this;
+  public static getInstance(config: web_greeter_config): ThemeUtils {
+    return this._instance || (this._instance = new this(config));
   }
 
   /**
@@ -660,7 +654,7 @@ export class ThemeUtils {
     let result = [];
 
     if (only_images) {
-      result = files.reduce((cb, v) => {
+      result = files.reduce((cb: string[], v) => {
         // This only returns files inside path, not recursively
         if (v.isFile() && v.name.match(/.+\.(jpe?g|png|gif|bmp|webp)/)) {
           cb.push(path.join(dir_path, v.name));
@@ -668,7 +662,7 @@ export class ThemeUtils {
         return cb;
       }, []);
     } else {
-      result = files.reduce((cb, v) => {
+      result = files.reduce((cb: string[], v) => {
         cb.push(path.join(dir_path, v.name));
         return cb;
       }, []);
@@ -690,7 +684,7 @@ function reduceArray(
     (arg0: any): object;
   }
 ): any[] {
-  if (!Array.isArray(arr)) return;
+  if (!Array.isArray(arr)) return [];
   return arr.reduce((acc, val) => {
     const v = func(val);
     acc.push(v);
@@ -699,24 +693,33 @@ function reduceArray(
 }
 /* eslint-enable */ //
 
+function hasKey<T>(obj: T, key: PropertyKey): key is keyof T {
+  return key in obj;
+}
+
 function handler(
-  accesor: object,
+  accesor: Greeter | GreeterConfig | ThemeUtils,
   ev: Electron.IpcMainInvokeEvent,
   ...args: string[]
-): object {
+): unknown {
   if (args.length == 0) return (ev.returnValue = undefined);
   const descriptors = Object.getOwnPropertyDescriptors(
     Object.getPrototypeOf(accesor)
   );
   const param = args[0];
   args.shift();
+  if (!hasKey(accesor, param)) return (ev.returnValue = undefined);
   const pr = accesor[param];
   const ac = descriptors[param];
+  global.lightdm["respond"];
 
   let value = undefined;
 
   if (typeof pr === "function") {
-    value = accesor[param](...args);
+    // @ts-ignore
+    // eslint-disable-next-line
+    const func: (...v: unknown[]) => any = Object.bind(pr, accesor);
+    value = func(...args);
   } else {
     if (args.length > 0 && ac && ac.set) {
       ac.set(args[0]);
@@ -729,20 +732,22 @@ function handler(
 
 ipcMain.on("greeter_config", (ev, ...args) => {
   if (args.length == 0) return (ev.returnValue = undefined);
-  const pr = globalThis.greeter_config[args[0]];
+  if (!hasKey(global.greeter_config, args[0]))
+    return (ev.returnValue = undefined);
+  const pr = global.greeter_config[args[0]];
   ev.returnValue = pr || undefined;
 });
 
 ipcMain.on("theme_utils", (ev, ...args) => {
-  handler(globalThis.theme_utils, ev, ...args);
+  handler(global.theme_utils, ev, ...args);
 });
 
 ipcMain.handle("theme_utils", (ev, ...args) => {
-  return handler(globalThis.theme_utils, ev, ...args);
+  return handler(global.theme_utils, ev, ...args);
 });
 
 ipcMain.on("lightdm", (ev, ...args) => {
-  handler(globalThis.lightdm, ev, ...args);
+  handler(global.lightdm, ev, ...args);
 });
 
 ipcMain.on(CONSTS.channel.window_metadata, (ev) => {
@@ -777,7 +782,7 @@ ipcMain.on(CONSTS.channel.window_broadcast, (ev, data: unknown) => {
 });
 
 browser.whenReady().then(() => {
-  new Greeter(nody_greeter.config);
-  new GreeterConfig(nody_greeter.config);
-  new ThemeUtils(nody_greeter.config);
+  global.lightdm = Greeter.getInstance(nody_greeter.config);
+  global.greeter_config = GreeterConfig.getInstance(nody_greeter.config);
+  global.theme_utils = ThemeUtils.getInstance(nody_greeter.config);
 });

@@ -211,7 +211,7 @@ class Battery {
     }
     this._perc = this._perc == null ? 0 : this._perc;
 
-    if (globalThis.lightdm) globalThis.lightdm._emit_signal("battery_update");
+    if (global.lightdm) global.lightdm._emit_signal("battery_update");
 
     running_update = false;
   }
@@ -241,7 +241,7 @@ function read_first_line(file_path: string): Promise<string> {
       .on("close", () =>
         resolve(val.slice((val.charCodeAt(0) === 0xfeff && 1) || 0, pos))
       )
-      .on("error", () => resolve(undefined));
+      .on("error", () => resolve(""));
   });
 }
 

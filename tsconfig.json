@@ -12,7 +12,7 @@
     // "jsx": "preserve",                     /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
     // "declaration": true,                   /* Generates corresponding '.d.ts' file. */
     // "declarationMap": true,                /* Generates a sourcemap for each corresponding '.d.ts' file. */
-    // "sourceMap": true,                     /* Generates corresponding '.map' file. */
+    "sourceMap": true,                     /* Generates corresponding '.map' file. */
     // "outFile": "./",                       /* Concatenate and emit output to single file. */
     "outDir": "./js",                        /* Redirect output structure to the directory. */
     "rootDir": "./ts",                       /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
@@ -25,8 +25,8 @@
     // "isolatedModules": true,               /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
 
     /* Strict Type-Checking Options */
-    "strict": false,                           /* Enable all strict type-checking options. */
-    "noImplicitUseStrict": true,
+    "strict": true,                           /* Enable all strict type-checking options. */
+    //"noImplicitUseStrict": true,
     // "noImplicitAny": true,                 /* Raise error on expressions and declarations with an implied 'any' type. */
     // "strictNullChecks": true,              /* Enable strict null checks. */
     // "strictFunctionTypes": true,           /* Enable strict checking of function types. */

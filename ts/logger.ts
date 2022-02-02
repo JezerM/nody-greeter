@@ -25,8 +25,8 @@ Object.defineProperty(global, "__line", {
 Object.defineProperty(global, "__source", {
   get: function (): string {
     const stack: NodeJS.CallSite[] = __stack;
-    if (stack[2]) return stack[2].getFileName();
-    return stack[1].getFileName();
+    if (stack[2]) return stack[2].getFileName() || "";
+    return stack[1].getFileName() || "";
   },
 });
 
