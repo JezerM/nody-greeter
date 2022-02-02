@@ -21,7 +21,7 @@ import { browser, general_error_prompt } from "../globals";
 
 import { Brightness } from "../utils/brightness.js";
 import { Battery } from "../utils/battery";
-import { reset_screensaver } from "../utils/screensaver.js";
+import { force_screensaver, reset_screensaver } from "../utils/screensaver.js";
 import * as path from "path";
 import {
   LightDMBattery,
@@ -69,6 +69,8 @@ export class Greeter {
       0,
       user_data_dir.lastIndexOf("/")
     );
+
+    if (LightDMGreeter.getLockHint()) force_screensaver(true);
 
     logger.debug("LightDM API connected");
   }

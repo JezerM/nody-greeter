@@ -107,9 +107,40 @@ void SetScreenSaver(const FunctionCallbackInfo<Value>& args) {
   XCloseDisplay(display);
 }
 
+void ForceScreenSaver(const FunctionCallbackInfo<Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+  Local<Context> context = isolate->GetCurrentContext();
+
+  if (args.Length() != 1) {
+    isolate->ThrowException(
+        Exception::TypeError(
+          String::NewFromUtf8(isolate,
+            "Wrong number of arguments").ToLocalChecked()));
+    return;
+  }
+  if (!args[0]->IsBoolean() && !args[0]->IsUndefined()) {
+
+      isolate->ThrowException(Exception::TypeError(
+            String::NewFromUtf8(isolate,
+              "Wrong argument").ToLocalChecked()));
+      return;
+  }
+
+  Display *display = OpenDisplay(isolate);
+  if (display == NULL) return;
+
+  if (args[0].As<Boolean>()->Value() == true)
+    XForceScreenSaver(display, ScreenSaverActive);
+  else
+    XForceScreenSaver(display, ScreenSaverReset);
+
+  XCloseDisplay(display);
+}
+
 void Initialize(Local<Object> exports) {
   NODE_SET_METHOD(exports, "getScreenSaver", GetScreenSaver);
   NODE_SET_METHOD(exports, "setScreenSaver", SetScreenSaver);
+  NODE_SET_METHOD(exports, "forceScreenSaver", ForceScreenSaver);
 }
 
 NODE_MODULE(NODE_GYP_MODULE_NAME, Initialize)

@@ -1,7 +1,11 @@
 import { nody_greeter } from "../config";
 import { logger } from "../logger";
 
-import { getScreenSaver, setScreenSaver } from "../bindings/screensaver";
+import {
+  forceScreenSaver,
+  getScreenSaver,
+  setScreenSaver,
+} from "../bindings/screensaver";
 
 let initial_timeout = -1;
 let taken = false;
@@ -47,4 +51,13 @@ function reset_screensaver(): void {
   logger.debug("Screensaver reset");
 }
 
-export { get_screensaver, set_screensaver, reset_screensaver };
+function force_screensaver(value: boolean): void {
+  forceScreenSaver(value);
+}
+
+export {
+  get_screensaver,
+  set_screensaver,
+  reset_screensaver,
+  force_screensaver,
+};
