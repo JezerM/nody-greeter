@@ -79,7 +79,7 @@ class Browser {
       const req_url = request.url;
       const url = new URL(req_url);
       const res = decodeURI(url.pathname);
-      //console.log({ url, res });
+      //console.error("Protocol:", { url, res });
       callback(res);
     });
   }
@@ -266,13 +266,17 @@ class Browser {
 
     session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
       const url = new URL(details.url);
-      //console.log({ origin: details.url, url });
       const block =
         !(
           url.protocol.includes("web-greeter") ||
           url.protocol.includes("file") ||
           url.protocol.includes("devtools")
         ) && nody_greeter.config.greeter.secure_mode;
+      //console.error("BeforeRequest:", {
+      //origin: details.url,
+      //url,
+      //blocked: block,
+      //});
       callback({ cancel: block });
     });
   }

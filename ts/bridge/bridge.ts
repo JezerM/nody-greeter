@@ -524,7 +524,7 @@ export class Greeter {
       if (started || this.is_authenticated) reset_screensaver();
       return started;
     } catch (err) {
-      console.log(err);
+      logger.error(err);
       general_error_prompt(
         browser.primary_window,
         "LightDM couldn't start session",
@@ -738,14 +738,13 @@ function handler(
   const param = args[0];
   args.shift();
   if (!hasKey(accesor, param)) return (ev.returnValue = undefined);
-  const pr = accesor[param];
+  const pr: unknown = accesor[param];
   const ac = descriptors[param];
-  global.lightdm["respond"];
 
   let value = undefined;
 
   if (typeof pr === "function") {
-    const func: (...v: unknown[]) => unknown = Object.bind(pr, accesor);
+    const func: (...v: unknown[]) => unknown = pr.bind(accesor);
     value = func(...args);
   } else {
     if (args.length > 0 && ac && ac.set) {
@@ -754,6 +753,12 @@ function handler(
       value = pr || undefined;
     }
   }
+  //console.log({
+  //accesor: accesor.constructor.name,
+  //result: value,
+  //args,
+  //param,
+  //});
   return (ev.returnValue = value);
 }
 
