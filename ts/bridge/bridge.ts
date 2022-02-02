@@ -146,8 +146,17 @@ export class Greeter {
   /**
    * Gets the battery data.
    * @readonly
+   * @deprecated Use `battery_data`
    */
   get batteryData(): LightDMBattery | object {
+    return battery_to_obj(this._battery);
+  }
+
+  /**
+   * Gets the battery data.
+   * @readonly
+   */
+  get battery_data(): LightDMBattery | object {
     return battery_to_obj(this._battery);
   }
 
@@ -274,7 +283,10 @@ export class Greeter {
    * @readonly
    */
   get languages(): LightDMLanguage[] {
-    return reduceArray(LightDM.getLanguages(), language_to_obj);
+    return reduceArray(
+      LightDM.getLanguages(),
+      language_to_obj
+    ) as LightDMLanguage[];
   }
 
   /**
@@ -294,7 +306,7 @@ export class Greeter {
    * @readonly
    */
   get layouts(): LightDMLayout[] {
-    return reduceArray(LightDM.getLayouts(), layout_to_obj);
+    return reduceArray(LightDM.getLayouts(), layout_to_obj) as LightDMLayout[];
   }
 
   /**
@@ -310,7 +322,10 @@ export class Greeter {
    * @readonly
    */
   get remote_sessions(): LightDMSession[] {
-    return reduceArray(LightDM.getRemoteSessions(), session_to_obj);
+    return reduceArray(
+      LightDM.getRemoteSessions(),
+      session_to_obj
+    ) as LightDMSession[];
   }
 
   /**
@@ -334,7 +349,10 @@ export class Greeter {
    * @readonly
    */
   get sessions(): LightDMSession[] {
-    return reduceArray(LightDM.getSessions(), session_to_obj);
+    return reduceArray(
+      LightDM.getSessions(),
+      session_to_obj
+    ) as LightDMSession[];
   }
 
   /**
@@ -370,7 +388,7 @@ export class Greeter {
    * @readonly
    */
   get users(): LightDMUser[] {
-    return reduceArray(LightDMUsers.getUsers(), user_to_obj);
+    return reduceArray(LightDMUsers.getUsers(), user_to_obj) as LightDMUser[];
   }
 
   /**
@@ -391,24 +409,48 @@ export class Greeter {
   /**
    * Set the brightness to quantity
    * @param {number} quantity The quantity to set
+   * @deprecated Use `brightness_set`
    */
   brightnessSet(quantity: number): void {
+    return Brightness.set_brightness(quantity);
+  }
+  /**
+   * Set the brightness to quantity
+   * @param {number} quantity The quantity to set
+   */
+  brightness_set(quantity: number): void {
     return Brightness.set_brightness(quantity);
   }
 
   /**
    * Increase the brightness by quantity
    * @param {number} quantity The quantity to increase
+   * @deprecated Use `brightness_increase`
    */
   brightnessIncrease(quantity: number): void {
+    return Brightness.inc_brightness(quantity);
+  }
+  /**
+   * Increase the brightness by quantity
+   * @param {number} quantity The quantity to increase
+   */
+  brightness_increase(quantity: number): void {
     return Brightness.inc_brightness(quantity);
   }
 
   /**
    * Decrease the brightness by quantity
    * @param {number} quantity The quantity to decrease
+   * @deprecated Use `brightness_decrease`
    */
   brightnessDecrease(quantity: number): void {
+    return Brightness.dec_brightness(quantity);
+  }
+  /**
+   * Decrease the brightness by quantity
+   * @param {number} quantity The quantity to decrease
+   */
+  brightness_decrease(quantity: number): void {
     return Brightness.dec_brightness(quantity);
   }
 
@@ -509,10 +551,9 @@ function get_layouts(config_layouts: string[]): LightDMLayout[] {
     for (let conf_lay of config_layouts) {
       conf_lay = conf_lay.replace(/\s/g, "\t");
       if (ldm_lay.getName() == conf_lay) {
-        const leys = layout_to_obj(ldm_lay);
-        if (Object.keys(leys).length == 0) continue;
-        // @ts-ignore
-        final.push(leys);
+        const lays_chips = layout_to_obj(ldm_lay) as LightDMLayout;
+        if (Object.keys(lays_chips).length == 0) continue;
+        final.push(lays_chips);
       }
     }
   }
@@ -672,26 +713,14 @@ export class ThemeUtils {
   }
 }
 
-/* eslint-disable */ //
-function reduceArray(
-  arr: any[],
-  func: {
-    (lang: any): object | LightDMLanguage;
-    (layout: any): object | LightDMLayout;
-    (session: any): object | LightDMSession;
-    (session: any): object | LightDMSession;
-    (user: any): object | LightDMUser;
-    (arg0: any): object;
-  }
-): any[] {
+function reduceArray<T>(arr: unknown[], func: (arg: unknown) => T): T[] {
   if (!Array.isArray(arr)) return [];
-  return arr.reduce((acc, val) => {
+  return arr.reduce((acc: T[], val) => {
     const v = func(val);
     acc.push(v);
     return acc;
   }, []);
 }
-/* eslint-enable */ //
 
 function hasKey<T>(obj: T, key: PropertyKey): key is keyof T {
   return key in obj;
@@ -716,9 +745,7 @@ function handler(
   let value = undefined;
 
   if (typeof pr === "function") {
-    // @ts-ignore
-    // eslint-disable-next-line
-    const func: (...v: unknown[]) => any = Object.bind(pr, accesor);
+    const func: (...v: unknown[]) => unknown = Object.bind(pr, accesor);
     value = func(...args);
   } else {
     if (args.length > 0 && ac && ac.set) {
