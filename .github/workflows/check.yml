@@ -1,4 +1,4 @@
-name: ESLint and Prettier
+name: CI Checks
 
 on:
   push:
