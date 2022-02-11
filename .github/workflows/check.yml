@@ -15,6 +15,31 @@ on:
 
 jobs:
 
+  typescript:
+
+    name: Type-Check node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [ 12, 14, 16 ]
+
+    steps:
+    -
+      name: Checkout
+      uses: actions/checkout@v2
+    -
+      name: Setup node
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node }}
+        cache: npm
+    -
+      name: Install npm dependencies
+      run: npm install
+    -
+      name: Run Typescript Compiler
+      run: npm run type-check
+
   eslint:
 
     name: ESLint node ${{ matrix.node }}
