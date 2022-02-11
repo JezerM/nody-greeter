@@ -1,15 +1,44 @@
-name: ESLint and Prettier
+name: CI Checks
 
 on:
   push:
-    branches: [ master ]
     paths:
+        # rerun when typescript files change
       - "ts/**"
+        # rerun when workflow is changed
+      - ".github/workflows/check.yml"
+        # rerun when packages change
+      - "package.json"
+      - "package-lock.json"
   pull_request:
-    branches: [ master ]
   workflow_dispatch:
 
 jobs:
+
+  typescript:
+
+    name: Type-Check node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [ 12, 14, 16 ]
+
+    steps:
+    -
+      name: Checkout
+      uses: actions/checkout@v2
+    -
+      name: Setup node
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node }}
+        cache: npm
+    -
+      name: Install npm dependencies
+      run: npm install
+    -
+      name: Run Typescript Compiler
+      run: npm run type-check
 
   eslint:
 
@@ -60,3 +89,30 @@ jobs:
     -
       name: Run Prettier
       run: npm run prettier
+
+  package-lock:
+
+    name: package-lock.json node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [ 16 ]
+
+    steps:
+    -
+      name: Checkout
+      uses: actions/checkout@v2
+    -
+      name: Setup node
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node }}
+        cache: npm
+    -
+      name: Install npm dependencies
+      run: npm install
+    -
+      name: Check package-lock.json is unchanged
+      # Fail if package-lock.json is changed when installing packages,
+      # indicating that it wasn't updated when packages were last changed
+      run: git diff --exit-code --color HEAD -- package-lock.json

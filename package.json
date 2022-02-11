@@ -6,6 +6,7 @@
   "scripts": {
     "start": "electron .",
     "rebuild": "electron-rebuild -w node-gtk",
+    "type-check": "tsc --noEmit",
     "build": "tsc --build && node make build",
     "lint": "eslint \"ts/**\"",
     "lint:fix": "eslint \"ts/**\" --fix",
