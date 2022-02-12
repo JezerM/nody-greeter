@@ -6,9 +6,14 @@ import {
   LightDMUser,
 } from "../ldm_interfaces";
 
+import { LightDM } from "node-gtk";
+import { Battery } from "../utils/battery";
+
 // eslint-disable-next-line
-function session_to_obj(session: any): LightDMSession | object {
-  if (!session) return {};
+function session_to_obj(
+  session: LightDM.LightDMSession
+): LightDMSession | null {
+  if (!session) return null;
   return {
     comment: session.getComment(),
     key: session.getKey(),
@@ -18,8 +23,8 @@ function session_to_obj(session: any): LightDMSession | object {
 }
 
 // eslint-disable-next-line
-function user_to_obj(user: any): LightDMUser | object {
-  if (!user) return {};
+function user_to_obj(user: LightDM.LightDMUser): LightDMUser | null {
+  if (!user) return null;
   return {
     background: user.getBackground(),
     display_name: user.getDisplayName(),
@@ -35,8 +40,10 @@ function user_to_obj(user: any): LightDMUser | object {
 }
 
 // eslint-disable-next-line
-function language_to_obj(lang: any): LightDMLanguage | object {
-  if (!lang) return {};
+function language_to_obj(
+  lang: LightDM.LightDMLanguage
+): LightDMLanguage | null {
+  if (!lang) return null;
   return {
     code: lang.getCode(),
     name: lang.getName(),
@@ -45,8 +52,8 @@ function language_to_obj(lang: any): LightDMLanguage | object {
 }
 
 // eslint-disable-next-line
-function layout_to_obj(layout: any): LightDMLayout | object {
-  if (!layout) return {};
+function layout_to_obj(layout: LightDM.LightDMLayout): LightDMLayout | null {
+  if (!layout) return null;
   return {
     description: layout.getDescription(),
     name: layout.getName(),
@@ -55,9 +62,9 @@ function layout_to_obj(layout: any): LightDMLayout | object {
 }
 
 // eslint-disable-next-line
-function battery_to_obj(battery: any): LightDMBattery | object {
-  if (!battery) return {};
-  if (battery._batteries.length == 0) return {};
+function battery_to_obj(battery: Battery): LightDMBattery | null {
+  if (!battery) return null;
+  if (battery._batteries.length == 0) return null;
   return {
     name: battery.name,
     level: battery.level,
