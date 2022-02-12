@@ -30,13 +30,13 @@ class Battery {
 
   private _init(): void {
     if (this._batteries.length == 0) {
-      scandir_line(this.ps_path, this._update_batteries.bind(this));
+      scandir_line(this.ps_path, this._update_batteries);
     }
     this.acpi_listen();
     this.full_update();
   }
 
-  private _update_batteries(line: string): void {
+  private _update_batteries = (line: string): void => {
     const match = line.match(/BAT\w+/);
     if (match) {
       this._batteries.push({
@@ -49,7 +49,7 @@ class Battery {
       const ac = line.match(/A\w+/);
       this._ac = ac ? ac[0] : this._ac;
     }
-  }
+  };
 
   get name(): string {
     return this._batteries[0].name;
