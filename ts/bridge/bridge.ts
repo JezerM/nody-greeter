@@ -75,7 +75,7 @@ export class Greeter {
     logger.debug("LightDM API connected");
   }
 
-  _connect_signals(): void {
+  _connect_signals = (): void => {
     LightDMGreeter.connect("authentication-complete", () => {
       this._emit_signal("authentication-complete");
     });
@@ -94,9 +94,9 @@ export class Greeter {
     LightDMGreeter.connect("reset", () => {
       this._emit_signal("reset");
     });
-  }
+  };
 
-  _emit_signal(signal: string, ...args: unknown[]): void {
+  _emit_signal = (signal: string, ...args: unknown[]): void => {
     //console.log("SIGNAL EMITTED", signal, args)
     for (const win of browser.windows) {
       win.window.webContents.send(
@@ -105,7 +105,7 @@ export class Greeter {
         ...args
       );
     }
-  }
+  };
 
   public static getInstance(config: web_greeter_config): Greeter {
     return this._instance || (this._instance = new this(config));
@@ -397,102 +397,102 @@ export class Greeter {
    * Starts the authentication procedure for a user.
    * @param {string|null} username A username or "null" to prompt for a username.
    */
-  authenticate(username: string | null): boolean {
+  authenticate = (username: string | null): boolean => {
     return LightDMGreeter.authenticate(username);
-  }
+  };
 
   /**
    * Starts the authentication procedure for the guest user.
    */
-  authenticate_as_guest(): boolean {
+  authenticate_as_guest = (): boolean => {
     return LightDMGreeter.authenticateAsGuest();
-  }
+  };
 
   /**
    * Set the brightness to quantity
    * @param {number} quantity The quantity to set
    * @deprecated Use `brightness_set`
    */
-  brightnessSet(quantity: number): void {
+  brightnessSet = (quantity: number): void => {
     return Brightness.set_brightness(quantity);
-  }
+  };
   /**
    * Set the brightness to quantity
    * @param {number} quantity The quantity to set
    */
-  brightness_set(quantity: number): void {
+  brightness_set = (quantity: number): void => {
     return Brightness.set_brightness(quantity);
-  }
+  };
 
   /**
    * Increase the brightness by quantity
    * @param {number} quantity The quantity to increase
    * @deprecated Use `brightness_increase`
    */
-  brightnessIncrease(quantity: number): void {
+  brightnessIncrease = (quantity: number): void => {
     return Brightness.inc_brightness(quantity);
-  }
+  };
   /**
    * Increase the brightness by quantity
    * @param {number} quantity The quantity to increase
    */
-  brightness_increase(quantity: number): void {
+  brightness_increase = (quantity: number): void => {
     return Brightness.inc_brightness(quantity);
-  }
+  };
 
   /**
    * Decrease the brightness by quantity
    * @param {number} quantity The quantity to decrease
    * @deprecated Use `brightness_decrease`
    */
-  brightnessDecrease(quantity: number): void {
+  brightnessDecrease = (quantity: number): void => {
     return Brightness.dec_brightness(quantity);
-  }
+  };
   /**
    * Decrease the brightness by quantity
    * @param {number} quantity The quantity to decrease
    */
-  brightness_decrease(quantity: number): void {
+  brightness_decrease = (quantity: number): void => {
     return Brightness.dec_brightness(quantity);
-  }
+  };
 
   /**
    * Cancel user authentication that is currently in progress.
    */
-  cancel_authentication(): boolean {
+  cancel_authentication = (): boolean => {
     return LightDMGreeter.cancelAuthentication();
-  }
+  };
 
   /**
    * Cancel the automatic login.
    */
-  cancel_autologin(): boolean {
+  cancel_autologin = (): boolean => {
     return LightDMGreeter.cancelAutologin();
-  }
+  };
 
   /**
    * Triggers the system to hibernate.
    * @returns {boolean} "true" if hibernation initiated, otherwise "false"
    */
-  hibernate(): boolean {
+  hibernate = (): boolean => {
     return LightDM.hibernate();
-  }
+  };
 
   /**
    * Provide a response to a prompt.
    * @param {string} response
    */
-  respond(response: string): boolean {
+  respond = (response: string): boolean => {
     return LightDMGreeter.respond(response);
-  }
+  };
 
   /**
    * Triggers the system to restart.
    * @returns {boolean} "true" if restart initiated, otherwise "false"
    */
-  restart(): boolean {
+  restart = (): boolean => {
     return LightDM.restart();
-  }
+  };
 
   /**
    * Set the language for the currently authenticated user.
@@ -500,27 +500,27 @@ export class Greeter {
    *     'de_DE.UTF-8')
    * @returns {boolean} "true" if successful, otherwise "false"
    */
-  set_language(language: string): boolean {
+  set_language = (language: string): boolean => {
     if (this.is_authenticated) {
       return LightDMGreeter.setLanguage(language);
     }
     return false;
-  }
+  };
 
   /**
    * Triggers the system to shutdown.
    * @returns {boolean} "true" if shutdown initiated, otherwise "false"
    */
-  shutdown(): boolean {
+  shutdown = (): boolean => {
     return LightDM.shutdown();
-  }
+  };
 
   /**
    * Start a session for the authenticated user.
    * @param {string|null} session The session to log into or "null" to use the default.
    * @returns {boolean} "true" if successful, otherwise "false"
    */
-  start_session(session: string | null): boolean {
+  start_session = (session: string | null): boolean => {
     try {
       const started = LightDMGreeter.startSessionSync(session);
       if (started || this.is_authenticated) reset_screensaver();
@@ -535,15 +535,15 @@ export class Greeter {
       );
       return false;
     }
-  }
+  };
 
   /**
    * Triggers the system to suspend/sleep.
    * @returns {boolean} "true" if suspend/sleep initiated, otherwise "false"
    */
-  suspend(): boolean {
+  suspend = (): boolean => {
     return LightDM.suspend();
-  }
+  };
 }
 
 function get_layouts(config_layouts: string[]): LightDMLayout[] {
@@ -665,7 +665,7 @@ export class ThemeUtils {
    * @param {Boolean}             only_images Include only images in the results. Default `true`.
    * @param {function(String[])}  callback    Callback function to be called with the result.
    */
-  dirlist(dir_path: string, only_images = true): string[] {
+  dirlist = (dir_path: string, only_images = true): string[] => {
     if (!dir_path || typeof dir_path !== "string" || dir_path === "/") {
       return [];
     }
@@ -712,7 +712,7 @@ export class ThemeUtils {
     }
     //console.log(dir_path, result);
     return result;
-  }
+  };
 }
 
 function reduceArray<T>(arr: unknown[], func: (arg: unknown) => T): T[] {
@@ -746,8 +746,7 @@ function handler(
   let value = undefined;
 
   if (typeof pr === "function") {
-    const func: (...v: unknown[]) => unknown = pr.bind(accesor);
-    value = func(...args);
+    value = pr(...args);
   } else {
     if (args.length > 0 && ac && ac.set) {
       ac.set(args[0]);
