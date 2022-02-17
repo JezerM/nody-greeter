@@ -14,8 +14,33 @@ declare module "node-gtk" {
    */
   export namespace LightDM {
     class LightDMGreeter {
-      connectToDaemonSync(): void;
+      connectToDaemon(
+        cancellable?: Gio.Cancellable | null,
+        callback?:
+          | ((
+              object: GObject.Object,
+              res: Gio.AsyncResult,
+              user_data: unknown
+            ) => void)
+          | null,
+        user_data?: unknown
+      ): void;
+      connectToDaemonFinish(result: Gio.AsyncResult): boolean;
+      connectToDaemonSync(): boolean;
+      ensureSharedDataDir(
+        name: string,
+        cancellable?: Gio.Cancellable | null,
+        callback?:
+          | ((
+              object: GObject.Object,
+              res: Gio.AsyncResult,
+              user_data: unknown
+            ) => void)
+          | null,
+        user_data?: unknown
+      ): void;
       ensureSharedDataDirSync(name: string): string;
+      ensureSharedDataDirFinish(result: Gio.AsyncResult): boolean;
       getLockHint(): boolean;
       getAuthenticationUser(): string | undefined;
       getAutologinGuestHint(): boolean;
@@ -47,38 +72,86 @@ declare module "node-gtk" {
       cancelAutologin(): boolean;
       respond(prompt: string);
       setLanguage(language: string);
+      setResettable(resettable: boolean): void;
+      startSession(
+        session: string | null,
+        cancellable?: Gio.Cancellable | null,
+        callback?:
+          | ((
+              object: GObject.Object,
+              res: Gio.AsyncResult,
+              user_data: unknown
+            ) => void)
+          | null,
+        user_data?: unknown
+      ): boolean;
       startSessionSync(session: string | null): boolean;
     }
 
     export type { LightDMGreeter };
 
     export interface LightDMUser {
+      background: string;
+      displayName: string;
+      hasMessages: boolean;
+      homeDirectory: string;
+      image: string;
+      language: string;
+      layout: string;
+      layouts: string[];
+      loggedIn: boolean;
       name: string;
+      realName: string;
+      session: string;
+      uid: number;
+
       getBackground(): string;
       getDisplayName(): string;
+      getHasMessages(): boolean;
       getHomeDirectory(): string;
       getImage(): string;
       getLanguage(): string;
       getLayout(): string;
       getLayouts(): string[];
       getLoggedIn(): boolean;
-      getSession(): string;
       getName(): string;
+      getRealName(): string;
+      getSession(): string;
+      getUid(): number;
     }
 
     class LightDMUserList {
+      length: number;
+
       getUsers(): LightDMUser[];
+      getLength(): number;
+      getUserByName(username: string): LightDMUser | null;
+      connect(ev: "user-added", handler: (user: LightDMUser) => void);
+      connect(ev: "user-changed", handler: (user: LightDMUser) => void);
+      connect(ev: "user-removed", handler: (user: LightDMUser) => void);
     }
 
     export type { LightDMUserList };
 
-    export interface LightDMLanguage {
+    class LightDMLanguage {
+      constructor(language: { code: string });
+      code: string;
+      name: string;
+      territory: string;
+
       getCode(): string;
       getName(): string;
       getTerritory(): string;
+      matches(code: string): boolean;
     }
 
+    export type { LightDMLanguage };
+
     export interface LightDMSession {
+      comment: string;
+      key: string;
+      name: string;
+
       getComment(): string;
       getKey(): string;
       getName(): string;
@@ -91,6 +164,10 @@ declare module "node-gtk" {
         description: string;
         short_description: string;
       });
+      name: string;
+      description: string;
+      short_description: string;
+
       getDescription(): string;
       getName(): string;
       getShortDescription(): string;
@@ -112,6 +189,12 @@ declare module "node-gtk" {
       getLayout(): LightDMLayout;
       getLayouts(): LightDMLayout[];
       setLayout(layout: LightDMLayout): void;
+      getMotd(): string | null;
+      getOsName(): string | null;
+      getOsId(): string | null;
+      getOsPrettyName(): string | null;
+      getOsVersion(): string | null;
+      getOsVersionId(): string | null;
       getRemoteSessions(): LightDMSession[];
       getSessions(): LightDMSession[];
       hibernate(): boolean;
@@ -122,5 +205,4 @@ declare module "node-gtk" {
   }
 
   export function require(name: "LightDM", version: "1"): LightDM.LightDM;
-  export function require(name: "LightDM2", version: "1"): LightDM.LightDM;
 }
