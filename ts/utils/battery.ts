@@ -30,7 +30,7 @@ class Battery {
 
   private _init(): void {
     if (this._batteries.length == 0) {
-      scandir_line(this.ps_path, this._update_batteries.bind(this));
+      scandir_line(this.ps_path, (lines) => this._update_batteries(lines));
     }
     this.acpi_listen();
     this.full_update();
