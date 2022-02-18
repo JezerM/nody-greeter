@@ -498,25 +498,49 @@ export class Greeter {
   /**
    * Set the brightness to quantity
    * @param {number} quantity The quantity to set
+   * @deprecated Use `brightness_set`
    */
   brightnessSet(quantity: number): void {
     return ipcRenderer.sendSync("lightdm", "brightnessSet", quantity);
+  }
+  /**
+   * Set the brightness to quantity
+   * @param {number} quantity The quantity to set
+   */
+  brightness_set(quantity: number): void {
+    return ipcRenderer.sendSync("lightdm", "brightness_set", quantity);
   }
 
   /**
    * Increase the brightness by quantity
    * @param {number} quantity The quantity to increase
+   * @deprecated Use `brightness_increase`
    */
   brightnessIncrease(quantity: number): void {
     return ipcRenderer.sendSync("lightdm", "brightnessIncrease", quantity);
+  }
+  /**
+   * Increase the brightness by quantity
+   * @param {number} quantity The quantity to increase
+   */
+  brightness_increase(quantity: number): void {
+    return ipcRenderer.sendSync("lightdm", "brightness_increase", quantity);
   }
 
   /**
    * Decrease the brightness by quantity
    * @param {number} quantity The quantity to decrease
+   * @deprecated Use `brightness_decrease`
    */
   brightnessDecrease(quantity: number): void {
     return ipcRenderer.sendSync("lightdm", "brightnessDecrease", quantity);
+  }
+  /**
+   * Decrease the brightness by quantity
+   * @param {number} quantity The quantity to decrease
+   */
+  brightness_decrease(quantity: number): void {
+    return ipcRenderer.sendSync("lightdm", "brightness_decrease", quantity);
   }
 
   /**
@@ -739,6 +763,7 @@ export class ThemeUtils {
    * @arg {object} context An ES6 class instance with at least one method.
    *
    * @return {object} `context` with `this` bound to it for all of its methods.
+   * @deprecated This method has no usage and will be removed on future versions
    */
   bind_this(context: object): object {
     const excluded_methods = ["constructor"];
