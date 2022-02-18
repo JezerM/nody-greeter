@@ -8,7 +8,7 @@ Object.defineProperty(global, "__stack", {
       return stack;
     };
     const err = new Error();
-    Error.captureStackTrace(err, arguments.callee);
+    //Error.captureStackTrace(err, arguments.callee);
     const stack: NodeJS.CallSite[] = err.stack as unknown as NodeJS.CallSite[];
     Error.prepareStackTrace = orig;
     return stack;
@@ -18,15 +18,15 @@ Object.defineProperty(global, "__stack", {
 Object.defineProperty(global, "__line", {
   get: function () {
     const stack: NodeJS.CallSite[] = __stack;
-    if (stack[2]) return stack[2].getLineNumber();
-    return stack[1].getLineNumber();
+    if (stack[3]) return stack[3].getLineNumber();
+    return stack[2].getLineNumber();
   },
 });
 Object.defineProperty(global, "__source", {
   get: function (): string {
     const stack: NodeJS.CallSite[] = __stack;
-    if (stack[2]) return stack[2].getFileName() || "";
-    return stack[1].getFileName() || "";
+    if (stack[3]) return stack[3].getFileName() || "";
+    return stack[2].getFileName() || "";
   },
 });
 
