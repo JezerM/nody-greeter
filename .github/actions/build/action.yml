@@ -41,7 +41,7 @@ runs:
     -
       name: Prepare deb build (for Debian)
       shell: bash
-      if: inputs.target-distro == "debian"
+      if: ${{ inputs.target-distro == 'debian' }}
       run: |
         sed -i "s/liblightdm-gobject-1-dev/liblightdm-gobject-dev/g" build/unpacked/DEBIAN/control
     -
@@ -55,6 +55,6 @@ runs:
       name: 'Upload Artifact'
       uses: actions/upload-artifact@v2
       with:
-        name: nody-greeter-${{ input.target-distro }}
+        name: nody-greeter-${{ inputs.target-distro }}
         path: ./build/nody-greeter.deb
         retention-days: 7
