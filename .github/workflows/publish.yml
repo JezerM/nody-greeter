@@ -7,44 +7,83 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Publish binaries
-    runs-on: ubuntu-latest
 
+  publish-ubuntu:
+    name: Publish binaries (Ubuntu)
+    runs-on: ubuntu-latest
     steps:
-    -
-      name: Checkout
-      uses: actions/checkout@v2
-    -
-      name: Install dependencies
-      run: |
-          sudo apt update
-          sudo apt install python3 build-essential gobject-introspection liblightdm-gobject-1-dev libgirepository1.0-dev libcairo2-dev libxcb1-dev libx11-dev
-          sudo apt install dpkg
-    -
-      name: Setup node
-      uses: actions/setup-node@v2
-      with:
-        node-version: 14
-        cache: npm
-    -
-      name: Install npm dependencies
-      run: npm install
-    -
-      name: Build nody-greeter
-      run: npm run build
-    -
-      name: Build deb package
-      run: |
-        cd build/
-        cp -r DEBIAN/ unpacked/
-        dpkg-deb --root-owner-group --build unpacked "nody-greeter.deb"
-        dpkg --info "./nody-greeter.deb"
-    - name: Upload binaries to release
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: build/nody-greeter.deb
-        asset_name: nody-greeter-$tag.deb
-        tag: ${{ github.ref }}
-        overwrite: true
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Run build action
+        uses: "./.github/actions/build"
+        with:
+          target-distro: ubuntu
+      -
+        name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/nody-greeter.deb
+          asset_name: nody-greeter-$tag-ubuntu.deb
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  publish-debian:
+    name: Publish binaries (Debian)
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Run build action
+        uses: "./.github/actions/build"
+        with:
+          target-distro: debian
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/nody-greeter.deb
+          asset_name: nody-greeter-$tag-debian.deb
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  # This may be rewritten to not use external workflows
+  publish-void:
+    name: Publish binaries (Void)
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Dispatch void-linux build
+        uses: aurelien-baudet/workflow-dispatch@v2
+        with:
+          workflow: build.yml
+          repo: JezerM/nody-greeter-void
+          ref: master
+          token: ${{ secrets.PERSONAL_TOKEN }}
+          inputs: "{}"
+          wait-for-completion: true
+      -
+        name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          repo: JezerM/nody-greeter-void
+          github_token: ${{ secrets.PERSONAL_TOKEN }}
+          workflow: build.yml
+          branch: master
+          path: artifacts/
+      -
+        name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+          file: artifacts/**/*.xbps
+          file_glob: true
+          overwrite: true
