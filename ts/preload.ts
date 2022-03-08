@@ -198,7 +198,7 @@ export class Greeter {
   /**
    * The username of the user being authenticated or "null"
    * if no authentication is in progress
-   * @type {string|Null}
+   * @type {string|null}
    * @readonly
    */
   get authentication_user(): string | null {
@@ -237,9 +237,19 @@ export class Greeter {
    * Gets the battery data.
    * @type {LightDMBattery}
    * @readonly
+   * @deprecated Use `battery_data`
    */
   get batteryData(): LightDMBattery {
     return ipcRenderer.sendSync("lightdm", "batteryData");
+  }
+
+  /**
+   * Gets the battery data.
+   * @type {LightDMBattery}
+   * @readonly
+   */
+  get battery_data(): LightDMBattery {
+    return ipcRenderer.sendSync("lightdm", "battery_data");
   }
 
   /**
