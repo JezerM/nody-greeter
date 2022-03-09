@@ -218,6 +218,12 @@ class Browser {
         w.window.webContents.devToolsWebContents?.focus();
       });
 
+      w.window.on("closed", () => {
+        this.windows = this.windows.filter((value) => {
+          return value.window !== w.window;
+        });
+      });
+
       w.window.webContents.on("context-menu", (_ev, params) => {
         if (!nody_greeter.app.debug_mode) return;
         const position = { x: params.x, y: params.y };
