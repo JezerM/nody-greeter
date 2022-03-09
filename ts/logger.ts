@@ -8,7 +8,7 @@ Object.defineProperty(global, "__stack", {
       return stack;
     };
     const err = new Error();
-    Error.captureStackTrace(err, arguments.callee);
+    //Error.captureStackTrace(err, arguments.callee);
     const stack: NodeJS.CallSite[] = err.stack as unknown as NodeJS.CallSite[];
     Error.prepareStackTrace = orig;
     return stack;
@@ -18,15 +18,15 @@ Object.defineProperty(global, "__stack", {
 Object.defineProperty(global, "__line", {
   get: function () {
     const stack: NodeJS.CallSite[] = __stack;
-    if (stack[2]) return stack[2].getLineNumber();
-    return stack[1].getLineNumber();
+    if (stack[3]) return stack[3].getLineNumber();
+    return stack[2].getLineNumber();
   },
 });
 Object.defineProperty(global, "__source", {
   get: function (): string {
     const stack: NodeJS.CallSite[] = __stack;
-    if (stack[2]) return stack[2].getFileName() || "";
-    return stack[1].getFileName() || "";
+    if (stack[3]) return stack[3].getFileName() || "";
+    return stack[2].getFileName() || "";
   },
 });
 
@@ -59,11 +59,11 @@ const winston_logger = winston.createLogger({
 
 class Logger {
   private winston_logger: winston.Logger;
-  constructor() {
+  public constructor() {
     this.winston_logger = winston_logger;
   }
 
-  debug(message: string): void {
+  public debug(message: string): void {
     this.winston_logger.log({
       level: "debug",
       message: message,
@@ -71,7 +71,7 @@ class Logger {
       source: path.basename(__source),
     });
   }
-  warn(message: string): void {
+  public warn(message: string): void {
     this.winston_logger.log({
       level: "warn",
       message: message,
@@ -79,7 +79,7 @@ class Logger {
       source: path.basename(__source),
     });
   }
-  error(message: string): void {
+  public error(message: string): void {
     this.winston_logger.log({
       level: "error",
       message: message,
@@ -87,7 +87,7 @@ class Logger {
       source: path.basename(__source),
     });
   }
-  log({
+  public log({
     level,
     message,
     line,

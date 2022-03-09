@@ -117,6 +117,9 @@ const path_to_config =
 
 let theme_dir: string | undefined;
 
+/**
+ * Loads the theme directory
+ */
 export function load_theme_dir(): string {
   const theme = nody_greeter.config.greeter.theme;
   const dir = nody_greeter.app.theme_dir;
@@ -137,10 +140,20 @@ export function load_theme_dir(): string {
   return theme_dir;
 }
 
+/**
+ * Loads the primary theme path
+ * The provided theme with `--theme` flag is preferred over index.yml
+ */
 export function load_primary_theme_path(): string {
   if (!theme_dir) theme_dir = load_theme_dir();
+  const abs_theme = nody_greeter.config.greeter.theme;
+  const abs_theme_name = abs_theme.split("/").pop();
   const dir = nody_greeter.app.theme_dir;
   const def_theme = "gruvbox";
+
+  if (abs_theme_name?.endsWith(".html"))
+    nody_greeter.theme.primary_html = abs_theme_name;
+
   const primary = nody_greeter.theme.primary_html;
   let path_to_theme = path.join(theme_dir, primary);
 
@@ -157,6 +170,10 @@ export function load_primary_theme_path(): string {
   nody_greeter.config.greeter.theme = path_to_theme;
   return path_to_theme;
 }
+/**
+ * Loads the secondary theme path
+ * This can only be set with index.yml, either it defaults to primary html
+ */
 export function load_secondary_theme_path(): string {
   if (!theme_dir) theme_dir = load_theme_dir();
   const primary = nody_greeter.theme.primary_html;
@@ -206,6 +223,9 @@ function validate_config<T>(decoder: io_ts.Type<T>, obj: unknown): T {
   }
 }
 
+/**
+ * Loads the theme config inside "index.yml"
+ */
 export function load_theme_config(): void {
   if (!theme_dir) theme_dir = load_theme_dir();
   const path_to_theme_config = path.join(theme_dir, "index.yml");
@@ -220,6 +240,10 @@ export function load_theme_config(): void {
   }
 }
 
+/**
+ * Ensures that the theme does exists
+ * If it doesn't, default theme (gruvbox) is used
+ */
 export function ensure_theme(): void {
   if (!theme_dir) theme_dir = load_theme_dir();
 
@@ -235,6 +259,9 @@ export function ensure_theme(): void {
   }
 }
 
+/**
+ * Load web-greeter.yml config
+ */
 export function load_config(): void {
   try {
     const file = fs.readFileSync(path_to_config, "utf-8");

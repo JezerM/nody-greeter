@@ -41,7 +41,7 @@ export interface WindowMetadata {
  * sends a broadcast to all windows (which happens for multi-monitor setups)
  */
 export class NodyBroadcastEvent extends Event {
-  constructor(
+  public constructor(
     /** Metadata for the window that originated the request */
     public readonly window: WindowMetadata,
     /** Data sent in the broadcast */
@@ -63,7 +63,7 @@ export class Nody {
   private _ready: (() => void) | null = null;
   private readonly _ready_promise: Promise<void>;
 
-  constructor() {
+  public constructor() {
     window.nody_greeter = this;
 
     ipcRenderer.on(CONSTS.channel.window_metadata, (_ev, metadata) => {
@@ -112,7 +112,7 @@ export class Signal {
   public _name: string;
   private _callbacks: ((...args: unknown[]) => void)[];
 
-  constructor(name: string) {
+  public constructor(name: string) {
     this._name = name;
     this._callbacks = [];
     allSignals.push(this);
@@ -140,7 +140,7 @@ export class Signal {
     this._callbacks.splice(ind, 1);
   }
 
-  _emit(...args: unknown[]): void {
+  public _emit(...args: unknown[]): void {
     this._callbacks.forEach((cb) => {
       if (typeof cb !== "function") return;
       cb(...args);
@@ -169,7 +169,7 @@ ipcRenderer.on(CONSTS.channel.lightdm_signal, (_ev, signal, ...args) => {
 });
 
 export class Greeter {
-  constructor() {
+  public constructor() {
     if ("lightdm" in window && window.lightdm) {
       return window.lightdm;
     }
@@ -179,29 +179,29 @@ export class Greeter {
     return window.lightdm;
   }
 
-  authentication_complete = new Signal("authentication-complete");
+  public authentication_complete = new Signal("authentication-complete");
 
-  autologin_timer_expired = new Signal("autologin_timer-expired");
+  public autologin_timer_expired = new Signal("autologin_timer-expired");
 
-  idle = new Signal("idle");
+  public idle = new Signal("idle");
 
-  reset = new Signal("reset");
+  public reset = new Signal("reset");
 
-  show_message = new MessageSignal("show-message");
+  public show_message = new MessageSignal("show-message");
 
-  show_prompt = new PromptSignal("show-prompt");
+  public show_prompt = new PromptSignal("show-prompt");
 
-  brightness_update = new Signal("brightness_update");
+  public brightness_update = new Signal("brightness_update");
 
-  battery_update = new Signal("battery_update");
+  public battery_update = new Signal("battery_update");
 
   /**
    * The username of the user being authenticated or "null"
    * if no authentication is in progress
-   * @type {string|Null}
+   * @type {string|null}
    * @readonly
    */
-  get authentication_user(): string | null {
+  public get authentication_user(): string | null {
     return ipcRenderer.sendSync("lightdm", "authentication_user");
   }
 
@@ -211,7 +211,7 @@ export class Greeter {
    * @type {boolean}
    * @readonly
    */
-  get autologin_guest(): boolean {
+  public get autologin_guest(): boolean {
     return ipcRenderer.sendSync("lightdm", "autologin_guest");
   }
 
@@ -220,7 +220,7 @@ export class Greeter {
    * @type {number}
    * @readonly
    */
-  get autologin_timeout(): number {
+  public get autologin_timeout(): number {
     return ipcRenderer.sendSync("lightdm", "autologin_timeout");
   }
 
@@ -229,7 +229,7 @@ export class Greeter {
    * @type {string}
    * @readonly
    */
-  get autologin_user(): string {
+  public get autologin_user(): string {
     return ipcRenderer.sendSync("lightdm", "autologin_user");
   }
 
@@ -237,22 +237,32 @@ export class Greeter {
    * Gets the battery data.
    * @type {LightDMBattery}
    * @readonly
+   * @deprecated Use `battery_data`
    */
-  get batteryData(): LightDMBattery {
+  public get batteryData(): LightDMBattery {
     return ipcRenderer.sendSync("lightdm", "batteryData");
+  }
+
+  /**
+   * Gets the battery data.
+   * @type {LightDMBattery}
+   * @readonly
+   */
+  public get battery_data(): LightDMBattery {
+    return ipcRenderer.sendSync("lightdm", "battery_data");
   }
 
   /**
    * Gets the brightness
    */
-  get brightness(): number {
+  public get brightness(): number {
     return ipcRenderer.sendSync("lightdm", "brightness");
   }
   /**
    * Sets the brightness
    * @param {number} quantity The quantity to set
    */
-  set brightness(quantity: number) {
+  public set brightness(quantity: number) {
     ipcRenderer.sendSync("lightdm", "brightness", quantity);
   }
 
@@ -261,7 +271,7 @@ export class Greeter {
    * @type {boolean}
    * @readonly
    */
-  get can_access_battery(): boolean {
+  public get can_access_battery(): boolean {
     return ipcRenderer.sendSync("lightdm", "can_access_battery");
   }
 
@@ -270,7 +280,7 @@ export class Greeter {
    * @type {boolean}
    * @readonly
    */
-  get can_access_brightness(): boolean {
+  public get can_access_brightness(): boolean {
     return ipcRenderer.sendSync("lightdm", "can_access_brightness");
   }
 
@@ -279,7 +289,7 @@ export class Greeter {
    * @type {boolean}
    * @readonly
    */
-  get can_hibernate(): boolean {
+  public get can_hibernate(): boolean {
     return ipcRenderer.sendSync("lightdm", "can_hibernate");
   }
 
@@ -288,7 +298,7 @@ export class Greeter {
    * @type {boolean}
    * @readonly
    */
-  get can_restart(): boolean {
+  public get can_restart(): boolean {
     return ipcRenderer.sendSync("lightdm", "can_restart");
   }
 
@@ -297,7 +307,7 @@ export class Greeter {
    * @type {boolean}
    * @readonly
    */
-  get can_shutdown(): boolean {
+  public get can_shutdown(): boolean {
     return ipcRenderer.sendSync("lightdm", "can_shutdown");
   }
 
@@ -306,7 +316,7 @@ export class Greeter {
    * @type {boolean}
    * @readonly
    */
-  get can_suspend(): boolean {
+  public get can_suspend(): boolean {
     return ipcRenderer.sendSync("lightdm", "can_suspend");
   }
 
@@ -315,7 +325,7 @@ export class Greeter {
    * @type {string}
    * @readonly
    */
-  get default_session(): string {
+  public get default_session(): string {
     return ipcRenderer.sendSync("lightdm", "default_session");
   }
 
@@ -324,7 +334,7 @@ export class Greeter {
    * @type {boolean}
    * @readonly
    */
-  get has_guest_account(): boolean {
+  public get has_guest_account(): boolean {
     return ipcRenderer.sendSync("lightdm", "has_guest_account");
   }
 
@@ -333,7 +343,7 @@ export class Greeter {
    * @type {boolean}
    * @readonly
    */
-  get hide_users_hint(): boolean {
+  public get hide_users_hint(): boolean {
     return ipcRenderer.sendSync("lightdm", "hide_users_hint");
   }
 
@@ -342,7 +352,7 @@ export class Greeter {
    * @type {string}
    * @readonly
    */
-  get hostname(): string {
+  public get hostname(): string {
     return ipcRenderer.sendSync("lightdm", "hostname");
   }
 
@@ -351,7 +361,7 @@ export class Greeter {
    * @type {boolean}
    * @readonly
    */
-  get in_authentication(): boolean {
+  public get in_authentication(): boolean {
     return ipcRenderer.sendSync("lightdm", "in_authentication");
   }
 
@@ -360,7 +370,7 @@ export class Greeter {
    * @type {boolean}
    * @readonly
    */
-  get is_authenticated(): boolean {
+  public get is_authenticated(): boolean {
     return ipcRenderer.sendSync("lightdm", "is_authenticated");
   }
 
@@ -369,7 +379,7 @@ export class Greeter {
    * @type {LightDMLanguage|null}
    * @readonly
    */
-  get language(): LightDMLanguage | null {
+  public get language(): LightDMLanguage | null {
     return ipcRenderer.sendSync("lightdm", "language");
   }
 
@@ -378,7 +388,7 @@ export class Greeter {
    * @type {LightDMLanguage[]}
    * @readonly
    */
-  get languages(): LightDMLanguage[] {
+  public get languages(): LightDMLanguage[] {
     return ipcRenderer.sendSync("lightdm", "languages");
   }
 
@@ -386,11 +396,11 @@ export class Greeter {
    * The currently active layout for the selected user.
    * @type {LightDMLayout}
    */
-  get layout(): LightDMLayout {
+  public get layout(): LightDMLayout {
     return ipcRenderer.sendSync("lightdm", "layout");
   }
 
-  set layout(layout: LightDMLayout) {
+  public set layout(layout: LightDMLayout) {
     ipcRenderer.sendSync("lightdm", "layout", layout);
   }
 
@@ -399,7 +409,7 @@ export class Greeter {
    * @type {LightDMLayout[]}
    * @readonly
    */
-  get layouts(): LightDMLayout[] {
+  public get layouts(): LightDMLayout[] {
     return ipcRenderer.sendSync("lightdm", "layouts");
   }
 
@@ -408,7 +418,7 @@ export class Greeter {
    * @type {boolean}
    * @readonly
    */
-  get lock_hint(): boolean {
+  public get lock_hint(): boolean {
     return ipcRenderer.sendSync("lightdm", "lock_hint");
   }
 
@@ -417,7 +427,7 @@ export class Greeter {
    * @type {LightDMSession[]}
    * @readonly
    */
-  get remote_sessions(): LightDMSession[] {
+  public get remote_sessions(): LightDMSession[] {
     return ipcRenderer.sendSync("lightdm", "remote_sessions");
   }
 
@@ -426,7 +436,7 @@ export class Greeter {
    * @type {boolean}
    * @readonly
    */
-  get select_guest_hint(): boolean {
+  public get select_guest_hint(): boolean {
     return ipcRenderer.sendSync("lightdm", "select_guest_hint");
   }
 
@@ -435,7 +445,7 @@ export class Greeter {
    * @type {string|undefined}
    * @readonly
    */
-  get select_user_hint(): string | undefined {
+  public get select_user_hint(): string | undefined {
     return ipcRenderer.sendSync("lightdm", "select_user_hint");
   }
 
@@ -444,7 +454,7 @@ export class Greeter {
    * @type {LightDMSession[]}
    * @readonly
    */
-  get sessions(): LightDMSession[] {
+  public get sessions(): LightDMSession[] {
     return ipcRenderer.sendSync("lightdm", "sessions");
   }
 
@@ -455,7 +465,7 @@ export class Greeter {
    * @type {boolean}
    * @readonly
    */
-  get show_manual_login_hint(): boolean {
+  public get show_manual_login_hint(): boolean {
     return ipcRenderer.sendSync("lightdm", "show_manual_login_hint");
   }
 
@@ -466,7 +476,7 @@ export class Greeter {
    * @readonly
    * @internal
    */
-  get show_remote_login_hint(): boolean {
+  public get show_remote_login_hint(): boolean {
     return ipcRenderer.sendSync("lightdm", "show_remote_login_hint");
   }
 
@@ -475,7 +485,7 @@ export class Greeter {
    * @type {LightDMUser[]}
    * @readonly
    */
-  get users(): LightDMUser[] {
+  public get users(): LightDMUser[] {
     return ipcRenderer.sendSync("lightdm", "users");
   }
 
@@ -484,52 +494,76 @@ export class Greeter {
    *
    * @param {string|null} username A username or "null" to prompt for a username.
    */
-  authenticate(username: string | null): boolean {
+  public authenticate(username: string | null): boolean {
     return ipcRenderer.sendSync("lightdm", "authenticate", username);
   }
 
   /**
    * Starts the authentication procedure for the guest user.
    */
-  authenticate_as_guest(): boolean {
+  public authenticate_as_guest(): boolean {
     return ipcRenderer.sendSync("lightdm", "authenticate_as_guest");
   }
 
   /**
    * Set the brightness to quantity
    * @param {number} quantity The quantity to set
+   * @deprecated Use `brightness_set`
    */
-  brightnessSet(quantity: number): void {
+  public brightnessSet(quantity: number): void {
     return ipcRenderer.sendSync("lightdm", "brightnessSet", quantity);
+  }
+  /**
+   * Set the brightness to quantity
+   * @param {number} quantity The quantity to set
+   */
+  public brightness_set(quantity: number): void {
+    return ipcRenderer.sendSync("lightdm", "brightness_set", quantity);
   }
 
   /**
    * Increase the brightness by quantity
    * @param {number} quantity The quantity to increase
+   * @deprecated Use `brightness_increase`
    */
-  brightnessIncrease(quantity: number): void {
+  public brightnessIncrease(quantity: number): void {
     return ipcRenderer.sendSync("lightdm", "brightnessIncrease", quantity);
+  }
+  /**
+   * Increase the brightness by quantity
+   * @param {number} quantity The quantity to increase
+   */
+  public brightness_increase(quantity: number): void {
+    return ipcRenderer.sendSync("lightdm", "brightness_increase", quantity);
   }
 
   /**
    * Decrease the brightness by quantity
    * @param {number} quantity The quantity to decrease
+   * @deprecated Use `brightness_decrease`
    */
-  brightnessDecrease(quantity: number): void {
+  public brightnessDecrease(quantity: number): void {
     return ipcRenderer.sendSync("lightdm", "brightnessDecrease", quantity);
+  }
+  /**
+   * Decrease the brightness by quantity
+   * @param {number} quantity The quantity to decrease
+   */
+  public brightness_decrease(quantity: number): void {
+    return ipcRenderer.sendSync("lightdm", "brightness_decrease", quantity);
   }
 
   /**
    * Cancel user authentication that is currently in progress.
    */
-  cancel_authentication(): boolean {
+  public cancel_authentication(): boolean {
     return ipcRenderer.sendSync("lightdm", "cancel_authentication");
   }
 
   /**
    * Cancel the automatic login.
    */
-  cancel_autologin(): boolean {
+  public cancel_autologin(): boolean {
     return ipcRenderer.sendSync("lightdm", "cancel_autologin");
   }
 
@@ -537,7 +571,7 @@ export class Greeter {
    * Triggers the system to hibernate.
    * @returns {boolean} "true" if hibernation initiated, otherwise "false"
    */
-  hibernate(): boolean {
+  public hibernate(): boolean {
     return ipcRenderer.sendSync("lightdm", "hibernate");
   }
 
@@ -545,7 +579,7 @@ export class Greeter {
    * Provide a response to a prompt.
    * @param {string} response
    */
-  respond(response: string): boolean {
+  public respond(response: string): boolean {
     return ipcRenderer.sendSync("lightdm", "respond", response);
   }
 
@@ -553,7 +587,7 @@ export class Greeter {
    * Triggers the system to restart.
    * @returns {boolean} "true" if restart initiated, otherwise "false"
    */
-  restart(): boolean {
+  public restart(): boolean {
     return ipcRenderer.sendSync("lightdm", "restart");
   }
 
@@ -563,7 +597,7 @@ export class Greeter {
    *     'de_DE.UTF-8')
    * @returns {boolean} "true" if successful, otherwise "false"
    */
-  set_language(language: string): boolean {
+  public set_language(language: string): boolean {
     if (this.is_authenticated) {
       return ipcRenderer.sendSync("lightdm", "set_language", language);
     }
@@ -574,7 +608,7 @@ export class Greeter {
    * Triggers the system to shutdown.
    * @returns {boolean} "true" if shutdown initiated, otherwise "false"
    */
-  shutdown(): boolean {
+  public shutdown(): boolean {
     return ipcRenderer.sendSync("lightdm", "shutdown");
   }
 
@@ -583,7 +617,7 @@ export class Greeter {
    * @param {string|null} session The session to log into or "null" to use the default.
    * @returns {boolean} "true" if successful, otherwise "false"
    */
-  start_session(session: string | null): boolean {
+  public start_session(session: string | null): boolean {
     return ipcRenderer.sendSync("lightdm", "start_session", session);
   }
 
@@ -591,7 +625,7 @@ export class Greeter {
    * Triggers the system to suspend/sleep.
    * @returns {boolean} "true" if suspend/sleep initiated, otherwise "false"
    */
-  suspend(): boolean {
+  public suspend(): boolean {
     return ipcRenderer.sendSync("lightdm", "suspend");
   }
 }
@@ -661,7 +695,7 @@ interface gc_features {
 }
 
 export class GreeterConfig {
-  constructor() {
+  public constructor() {
     if ("greeter_config" in window && window.greeter_config) {
       return window.greeter_config;
     }
@@ -677,7 +711,7 @@ export class GreeterConfig {
    * @property {string} user_image Default user image/avatar. This is used by greeter themes for users that have not configured a `.face` image.
    * @readonly
    */
-  get branding(): gc_branding {
+  public get branding(): gc_branding {
     return ipcRenderer.sendSync("greeter_config", "branding");
   }
 
@@ -693,7 +727,7 @@ export class GreeterConfig {
    * @property {string}  theme The name of the theme to be used by the greeter.
    * @readonly
    */
-  get greeter(): gc_greeter {
+  public get greeter(): gc_greeter {
     return ipcRenderer.sendSync("greeter_config", "greeter");
   }
 
@@ -708,7 +742,7 @@ export class GreeterConfig {
    * @property {number}  backlight.steps How many steps are needed to do the change.
    * @readonly
    */
-  get features(): gc_features {
+  public get features(): gc_features {
     return ipcRenderer.sendSync("greeter_config", "features");
   }
 
@@ -717,7 +751,7 @@ export class GreeterConfig {
    * @type {LightDMLayout[]} layouts
    * @readonly
    */
-  get layouts(): LightDMLayout[] {
+  public get layouts(): LightDMLayout[] {
     return ipcRenderer.sendSync("greeter_config", "layouts");
   }
 }
@@ -725,7 +759,7 @@ export class GreeterConfig {
 let time_language: string | null = null;
 
 export class ThemeUtils {
-  constructor() {
+  public constructor() {
     if ("theme_utils" in window && window.theme_utils) {
       return window.theme_utils;
     }
@@ -739,8 +773,9 @@ export class ThemeUtils {
    * @arg {object} context An ES6 class instance with at least one method.
    *
    * @return {object} `context` with `this` bound to it for all of its methods.
+   * @deprecated This method has no usage and will be removed on future versions
    */
-  bind_this(context: object): object {
+  public bind_this(context: object): object {
     const excluded_methods = ["constructor"];
 
     function not_excluded(_method: string, _context: object): boolean {
@@ -779,11 +814,11 @@ export class ThemeUtils {
    *   * Is located within the greeter's shared data directory (`/var/lib/lightdm-data`).
    *   * Is located in `/tmp`.
    *
-   * @param {string}              path        The abs path to desired directory.
-   * @param {boolean}             only_images Include only images in the results. Default `true`.
-   * @param {function(string[])}  callback    Callback function to be called with the result.
+   * @param path        The abs path to desired directory.
+   * @param only_images Include only images in the results. Default `true`.
+   * @param callback    Callback function to be called with the result.
    */
-  dirlist(
+  public dirlist(
     path: string,
     only_images = true,
     callback: (args: string[]) => void
@@ -819,12 +854,12 @@ export class ThemeUtils {
    *   * Is located within the greeter's shared data directory (`/var/lib/lightdm-data`).
    *   * Is located in `/tmp`.
    *
-   * @param {string}              path        The abs path to desired directory.
-   * @param {boolean}             only_images Include only images in the results. Default `true`.
-   * @param {function(string[])}  callback    Callback function to be called with the result.
+   * @param path        The abs path to desired directory.
+   * @param only_images Include only images in the results. Default `true`.
+   * @param callback    Callback function to be called with the result.
    * @experimental Available only for nody-greeter. DO NOT use it if you want compatibility between web-greeter and nody-greeter
    */
-  dirlist_sync(path: string, only_images = true): string[] {
+  public dirlist_sync(path: string, only_images = true): string[] {
     if ("" === path || "string" !== typeof path) {
       console.error(`theme_utils.dirlist(): path must be a non-empty string!`);
       return [];
@@ -843,9 +878,8 @@ export class ThemeUtils {
 
   /**
    * Get the current date in a localized format. Local language is autodetected by default, but can be set manually in the greeter config file.
-   * 	 * `language` defaults to the system's language, but can be set manually in the config file.
    */
-  get_current_localized_date(): string {
+  public get_current_localized_date(): string {
     const config = window.greeter_config?.greeter;
 
     const locale = [];
@@ -874,9 +908,8 @@ export class ThemeUtils {
 
   /**
    * Get the current time in a localized format. Local language is autodetected by default, but can be set manually in the greeter config file.
-   * 	 * `language` defaults to the system's language, but can be set manually in the config file.
    */
-  get_current_localized_time(): string {
+  public get_current_localized_time(): string {
     const config = window.greeter_config?.greeter;
 
     const locale = [];

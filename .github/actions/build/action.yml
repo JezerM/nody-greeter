@@ -1,0 +1,60 @@
+# Action based on @MateuszStudiosCompany's web-greeter action
+name: "Build nody-greeter"
+description: "Builds nody-greeter"
+inputs:
+  target-distro:
+    required: true
+    description: "Target distro"
+
+runs:
+  using: "composite"
+  steps:
+    -
+      name: Checkout
+      uses: actions/checkout@v2
+    -
+      name: Install dependencies
+      shell: bash
+      run: |
+        sudo apt update
+        sudo apt install python3 build-essential gobject-introspection liblightdm-gobject-1-dev libgirepository1.0-dev libcairo2-dev libxcb1-dev libx11-dev
+        sudo apt install dpkg
+    -
+      name: Setup node
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14
+        cache: npm
+    -
+      name: Install npm dependencies
+      shell: bash
+      run: npm install
+    -
+      name: Build nody-greeter
+      shell: bash
+      run: npm run build
+    -
+      name: Prepare deb build (common)
+      shell: bash
+      run: |
+        cp -r build/DEBIAN/ build/unpacked/
+    -
+      name: Prepare deb build (for Debian)
+      shell: bash
+      if: ${{ inputs.target-distro == 'debian' }}
+      run: |
+        sed -i "s/liblightdm-gobject-1-dev/liblightdm-gobject-dev/g" build/unpacked/DEBIAN/control
+    -
+      name: Build deb
+      shell: bash
+      run: |
+        cd build/
+        dpkg-deb --root-owner-group --build unpacked "nody-greeter.deb"
+        dpkg --info "./nody-greeter.deb"
+    -
+      name: 'Upload Artifact'
+      uses: actions/upload-artifact@v2
+      with:
+        name: nody-greeter-${{ inputs.target-distro }}
+        path: ./build/nody-greeter.deb
+        retention-days: 7

@@ -28,18 +28,17 @@ interface NodyWindow {
   meta: WindowMetadata;
 }
 class Browser {
-  ready = false;
+  public ready = false;
+  public windows: NodyWindow[] = [];
 
-  constructor() {
+  public constructor() {
     this.set_priviliged();
     app.whenReady().then(() => {
       this.init();
     });
   }
 
-  windows: NodyWindow[] = [];
-
-  whenReady(): Promise<void> {
+  public whenReady(): Promise<void> {
     return new Promise((resolve) => {
       const interval = setInterval(() => {
         if (this.ready) {
@@ -50,7 +49,7 @@ class Browser {
     });
   }
 
-  init(): void {
+  private init(): void {
     this.set_protocol();
     this.windows = this.create_windows();
     this.load_theme();
@@ -84,7 +83,7 @@ class Browser {
     });
   }
 
-  load_theme(): void {
+  public load_theme(): void {
     const primary_html = load_primary_theme_path();
     const secondary_html = load_secondary_theme_path();
 
@@ -120,7 +119,7 @@ class Browser {
     logger.debug("Theme loaded");
   }
 
-  create_windows(): NodyWindow[] {
+  public create_windows(): NodyWindow[] {
     logger.debug("Initializing Browser Window");
 
     const displays = screen.getAllDisplays();
@@ -204,7 +203,7 @@ class Browser {
     return windows;
   }
 
-  init_listeners(): void {
+  private init_listeners(): void {
     for (const w of this.windows) {
       w.window.once("ready-to-show", () => {
         w.window.setFullScreen(nody_greeter.app.fullscreen);
@@ -216,6 +215,12 @@ class Browser {
       });
       w.window.webContents.on("devtools-opened", () => {
         w.window.webContents.devToolsWebContents?.focus();
+      });
+
+      w.window.on("closed", () => {
+        this.windows = this.windows.filter((value) => {
+          return value.window !== w.window;
+        });
       });
 
       w.window.webContents.on("context-menu", (_ev, params) => {
