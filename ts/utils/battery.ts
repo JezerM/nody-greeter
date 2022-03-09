@@ -14,17 +14,17 @@ interface battery {
 let running_update = false;
 
 class Battery {
-  _batteries: battery[] = [];
-  _ac = "AC0";
-  ps_path = "/sys/class/power_supply/";
-  _perc = -1;
-  _status = "N/A";
-  _ac_status = false;
-  _capacity = 0;
-  _time = "";
-  _watt = 0;
+  private _batteries: battery[] = [];
+  private _ac = "AC0";
+  public ps_path = "/sys/class/power_supply/";
+  private _perc = -1;
+  private _status = "N/A";
+  private _ac_status = false;
+  private _capacity = 0;
+  private _time = "";
+  private _watt = 0;
 
-  constructor() {
+  public constructor() {
     if (nody_greeter.config.features.battery == true) this._init();
   }
 
@@ -36,6 +36,9 @@ class Battery {
     this.full_update();
   }
 
+  /**
+   * Update available batteries and AC
+   */
   private _update_batteries(line: string): void {
     const match = line.match(/BAT\w+/);
     if (match) {
@@ -50,31 +53,25 @@ class Battery {
       this._ac = ac ? ac[0] : this._ac;
     }
   }
-
-  get name(): string {
+  public get name(): string {
     return this._batteries[0].name;
   }
-
-  get level(): number {
+  public get level(): number {
     return this._perc;
   }
-
-  get status(): string {
+  public get status(): string {
     return this._status;
   }
-
-  get ac_status(): boolean {
+  public get ac_status(): boolean {
     return this._ac_status;
   }
-
-  get capacity(): number {
+  public get capacity(): number {
     return this._capacity;
   }
-
-  get time(): string {
+  public get time(): string {
     return this._time;
   }
-  get watt(): number {
+  public get watt(): number {
     return this._watt;
   }
 
@@ -218,11 +215,17 @@ class Battery {
   }
 }
 
+/**
+ * List a directory and run callback for each element
+ */
 function scandir_line(dir: string, callback: (lines: string) => void): void {
   const lines = fs.readdirSync(dir, { encoding: "utf8" });
   lines.forEach((l) => callback(l));
 }
 
+/**
+ * Read first line of a file asynchronously
+ */
 function read_first_line(file_path: string): Promise<string> {
   return new Promise((resolve) => {
     const rs = fs.createReadStream(file_path, { encoding: "utf8" });

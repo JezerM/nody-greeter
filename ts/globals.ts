@@ -15,7 +15,7 @@ function initLogger(): void {
   for (const win of browser.windows) {
     win.window.webContents.addListener(
       "console-message",
-      (ev, code, message, line, sourceID) => {
+      (_ev, code, message, line, sourceID) => {
         sourceID = sourceID == "" ? "console" : sourceID;
         if (code == 3) {
           logger.log({

@@ -42,7 +42,7 @@ class BrightnessController {
   private delay = 200;
   private _available = false;
 
-  constructor() {
+  public constructor() {
     this._controllers = get_controllers();
     if (
       this._controllers.length == 0 ||

@@ -75,7 +75,7 @@ export class Greeter {
     logger.debug("LightDM API connected");
   }
 
-  _connect_signals(): void {
+  private _connect_signals(): void {
     LightDMGreeter.connect("authentication-complete", () => {
       this._emit_signal("authentication-complete");
     });
@@ -96,7 +96,7 @@ export class Greeter {
     });
   }
 
-  _emit_signal(signal: string, ...args: unknown[]): void {
+  public _emit_signal(signal: string, ...args: unknown[]): void {
     //console.log("SIGNAL EMITTED", signal, args)
     for (const win of browser.windows) {
       win.window.webContents.send(
@@ -116,7 +116,7 @@ export class Greeter {
    * if no authentication is in progress
    * @readonly
    */
-  get authentication_user(): string | null {
+  public get authentication_user(): string | null {
     return LightDMGreeter.getAuthenticationUser() || null;
   }
 
@@ -125,7 +125,7 @@ export class Greeter {
    * into when the timer expires.
    * @readonly
    */
-  get autologin_guest(): boolean {
+  public get autologin_guest(): boolean {
     return LightDMGreeter.getAutologinGuestHint();
   }
 
@@ -133,7 +133,7 @@ export class Greeter {
    * The number of seconds to wait before automatically logging in.
    * @readonly
    */
-  get autologin_timeout(): number {
+  public get autologin_timeout(): number {
     return LightDMGreeter.getAutologinTimeoutHint();
   }
 
@@ -141,7 +141,7 @@ export class Greeter {
    * The username with which to automattically log in when the timer expires.
    * @readonly
    */
-  get autologin_user(): string {
+  public get autologin_user(): string {
     return LightDMGreeter.getAutologinUserHint();
   }
 
@@ -150,7 +150,7 @@ export class Greeter {
    * @readonly
    * @deprecated Use `battery_data`
    */
-  get batteryData(): LightDMBattery | object {
+  public get batteryData(): LightDMBattery | object {
     return battery_to_obj(this._battery);
   }
 
@@ -158,21 +158,21 @@ export class Greeter {
    * Gets the battery data.
    * @readonly
    */
-  get battery_data(): LightDMBattery | object {
+  public get battery_data(): LightDMBattery | object {
     return battery_to_obj(this._battery);
   }
 
   /**
    * Gets the brightness
    */
-  get brightness(): number {
+  public get brightness(): number {
     return Brightness.get_brightness();
   }
   /**
    * Sets the brightness
    * @param {number} quantity The quantity to set
    */
-  set brightness(quantity: number) {
+  public set brightness(quantity: number) {
     Brightness.set_brightness(quantity);
   }
 
@@ -180,7 +180,7 @@ export class Greeter {
    * Whether or not the greeter can access to battery data.
    * @readonly
    */
-  get can_access_battery(): boolean {
+  public get can_access_battery(): boolean {
     return this._config.features.battery;
   }
 
@@ -188,7 +188,7 @@ export class Greeter {
    * Whether or not the greeter can control display brightness.
    * @readonly
    */
-  get can_access_brightness(): boolean {
+  public get can_access_brightness(): boolean {
     return this._config.features.backlight.enabled;
   }
 
@@ -196,7 +196,7 @@ export class Greeter {
    * Whether or not the greeter can make the system hibernate.
    * @readonly
    */
-  get can_hibernate(): boolean {
+  public get can_hibernate(): boolean {
     return LightDM.getCanHibernate();
   }
 
@@ -204,7 +204,7 @@ export class Greeter {
    * Whether or not the greeter can make the system restart.
    * @readonly
    */
-  get can_restart(): boolean {
+  public get can_restart(): boolean {
     return LightDM.getCanRestart();
   }
 
@@ -212,7 +212,7 @@ export class Greeter {
    * Whether or not the greeter can make the system shutdown.
    * @readonly
    */
-  get can_shutdown(): boolean {
+  public get can_shutdown(): boolean {
     return LightDM.getCanShutdown();
   }
 
@@ -220,7 +220,7 @@ export class Greeter {
    * Whether or not the greeter can make the system suspend/sleep.
    * @readonly
    */
-  get can_suspend(): boolean {
+  public get can_suspend(): boolean {
     return LightDM.getCanSuspend();
   }
 
@@ -228,7 +228,7 @@ export class Greeter {
    * The name of the default session.
    * @readonly
    */
-  get default_session(): string {
+  public get default_session(): string {
     return LightDMGreeter.getDefaultSessionHint();
   }
 
@@ -236,7 +236,7 @@ export class Greeter {
    * Whether or not guest sessions are supported.
    * @readonly
    */
-  get has_guest_account(): boolean {
+  public get has_guest_account(): boolean {
     return LightDMGreeter.getHasGuestAccountHint();
   }
 
@@ -244,7 +244,7 @@ export class Greeter {
    * Whether or not user accounts should be hidden.
    * @readonly
    */
-  get hide_users_hint(): boolean {
+  public get hide_users_hint(): boolean {
     return LightDMGreeter.getHideUsersHint();
   }
 
@@ -252,7 +252,7 @@ export class Greeter {
    * The system's hostname.
    * @readonly
    */
-  get hostname(): string {
+  public get hostname(): string {
     return LightDM.getHostname();
   }
 
@@ -260,7 +260,7 @@ export class Greeter {
    * Whether or not the greeter is in the process of authenticating.
    * @readonly
    */
-  get in_authentication(): boolean {
+  public get in_authentication(): boolean {
     return LightDMGreeter.getInAuthentication();
   }
 
@@ -268,7 +268,7 @@ export class Greeter {
    * Whether or not the greeter has successfully authenticated.
    * @readonly
    */
-  get is_authenticated(): boolean {
+  public get is_authenticated(): boolean {
     return LightDMGreeter.getIsAuthenticated();
   }
 
@@ -276,7 +276,7 @@ export class Greeter {
    * The current language or "null" if no language.
    * @readonly
    */
-  get language(): LightDMLanguage | object {
+  public get language(): LightDMLanguage | object {
     return language_to_obj(LightDM.getLanguage());
   }
 
@@ -284,7 +284,7 @@ export class Greeter {
    * A list of languages to present to the user.
    * @readonly
    */
-  get languages(): LightDMLanguage[] {
+  public get languages(): LightDMLanguage[] {
     return reduceArray(
       LightDM.getLanguages(),
       language_to_obj
@@ -294,11 +294,11 @@ export class Greeter {
   /**
    * The currently active layout for the selected user.
    */
-  get layout(): LightDMLayout | object {
+  public get layout(): LightDMLayout | object {
     return layout_to_obj(LightDM.getLayout());
   }
 
-  set layout(layout: LightDMLayout | object) {
+  public set layout(layout: LightDMLayout | object) {
     LightDM.getLayout();
     LightDM.setLayout(new LightDM.Layout(layout));
   }
@@ -307,7 +307,7 @@ export class Greeter {
    * A list of keyboard layouts to present to the user.
    * @readonly
    */
-  get layouts(): LightDMLayout[] {
+  public get layouts(): LightDMLayout[] {
     return reduceArray(LightDM.getLayouts(), layout_to_obj) as LightDMLayout[];
   }
 
@@ -315,7 +315,7 @@ export class Greeter {
    * Whether or not the greeter was started as a lock screen.
    * @readonly
    */
-  get lock_hint(): boolean {
+  public get lock_hint(): boolean {
     return LightDMGreeter.getLockHint();
   }
 
@@ -323,7 +323,7 @@ export class Greeter {
    * A list of remote sessions.
    * @readonly
    */
-  get remote_sessions(): LightDMSession[] {
+  public get remote_sessions(): LightDMSession[] {
     return reduceArray(
       LightDM.getRemoteSessions(),
       session_to_obj
@@ -334,7 +334,7 @@ export class Greeter {
    * Whether or not the guest account should be selected by default.
    * @readonly
    */
-  get select_guest_hint(): boolean {
+  public get select_guest_hint(): boolean {
     return LightDMGreeter.getSelectGuestHint();
   }
 
@@ -342,7 +342,7 @@ export class Greeter {
    * The username to select by default.
    * @readonly
    */
-  get select_user_hint(): string {
+  public get select_user_hint(): string {
     return LightDMGreeter.getSelectUserHint();
   }
 
@@ -350,7 +350,7 @@ export class Greeter {
    * List of available sessions.
    * @readonly
    */
-  get sessions(): LightDMSession[] {
+  public get sessions(): LightDMSession[] {
     return reduceArray(
       LightDM.getSessions(),
       session_to_obj
@@ -361,7 +361,7 @@ export class Greeter {
    * LightDM shared data directory
    * @readonly
    */
-  get shared_data_directory(): string {
+  public get shared_data_directory(): string {
     return this._shared_data_directory;
   }
 
@@ -371,7 +371,7 @@ export class Greeter {
    * a user list may limit logins to only those users.
    * @readonly
    */
-  get show_manual_login_hint(): boolean {
+  public get show_manual_login_hint(): boolean {
     return LightDMGreeter.getShowManualLoginHint();
   }
 
@@ -381,7 +381,7 @@ export class Greeter {
    * @readonly
    * @internal
    */
-  get show_remote_login_hint(): boolean {
+  public get show_remote_login_hint(): boolean {
     return LightDMGreeter.getShowRemoteLoginHint();
   }
 
@@ -389,7 +389,7 @@ export class Greeter {
    * List of available users.
    * @readonly
    */
-  get users(): LightDMUser[] {
+  public get users(): LightDMUser[] {
     return reduceArray(LightDMUsers.getUsers(), user_to_obj) as LightDMUser[];
   }
 
@@ -397,14 +397,14 @@ export class Greeter {
    * Starts the authentication procedure for a user.
    * @param {string|null} username A username or "null" to prompt for a username.
    */
-  authenticate(username: string | null): boolean {
+  public authenticate(username: string | null): boolean {
     return LightDMGreeter.authenticate(username);
   }
 
   /**
    * Starts the authentication procedure for the guest user.
    */
-  authenticate_as_guest(): boolean {
+  public authenticate_as_guest(): boolean {
     return LightDMGreeter.authenticateAsGuest();
   }
 
@@ -413,14 +413,14 @@ export class Greeter {
    * @param {number} quantity The quantity to set
    * @deprecated Use `brightness_set`
    */
-  brightnessSet(quantity: number): void {
+  public brightnessSet(quantity: number): void {
     return Brightness.set_brightness(quantity);
   }
   /**
    * Set the brightness to quantity
    * @param {number} quantity The quantity to set
    */
-  brightness_set(quantity: number): void {
+  public brightness_set(quantity: number): void {
     return Brightness.set_brightness(quantity);
   }
 
@@ -429,14 +429,14 @@ export class Greeter {
    * @param {number} quantity The quantity to increase
    * @deprecated Use `brightness_increase`
    */
-  brightnessIncrease(quantity: number): void {
+  public brightnessIncrease(quantity: number): void {
     return Brightness.inc_brightness(quantity);
   }
   /**
    * Increase the brightness by quantity
    * @param {number} quantity The quantity to increase
    */
-  brightness_increase(quantity: number): void {
+  public brightness_increase(quantity: number): void {
     return Brightness.inc_brightness(quantity);
   }
 
@@ -445,28 +445,28 @@ export class Greeter {
    * @param {number} quantity The quantity to decrease
    * @deprecated Use `brightness_decrease`
    */
-  brightnessDecrease(quantity: number): void {
+  public brightnessDecrease(quantity: number): void {
     return Brightness.dec_brightness(quantity);
   }
   /**
    * Decrease the brightness by quantity
    * @param {number} quantity The quantity to decrease
    */
-  brightness_decrease(quantity: number): void {
+  public brightness_decrease(quantity: number): void {
     return Brightness.dec_brightness(quantity);
   }
 
   /**
    * Cancel user authentication that is currently in progress.
    */
-  cancel_authentication(): boolean {
+  public cancel_authentication(): boolean {
     return LightDMGreeter.cancelAuthentication();
   }
 
   /**
    * Cancel the automatic login.
    */
-  cancel_autologin(): boolean {
+  public cancel_autologin(): boolean {
     return LightDMGreeter.cancelAutologin();
   }
 
@@ -474,7 +474,7 @@ export class Greeter {
    * Triggers the system to hibernate.
    * @returns {boolean} "true" if hibernation initiated, otherwise "false"
    */
-  hibernate(): boolean {
+  public hibernate(): boolean {
     return LightDM.hibernate();
   }
 
@@ -482,7 +482,7 @@ export class Greeter {
    * Provide a response to a prompt.
    * @param {string} response
    */
-  respond(response: string): boolean {
+  public respond(response: string): boolean {
     return LightDMGreeter.respond(response);
   }
 
@@ -490,7 +490,7 @@ export class Greeter {
    * Triggers the system to restart.
    * @returns {boolean} "true" if restart initiated, otherwise "false"
    */
-  restart(): boolean {
+  public restart(): boolean {
     return LightDM.restart();
   }
 
@@ -500,7 +500,7 @@ export class Greeter {
    *     'de_DE.UTF-8')
    * @returns {boolean} "true" if successful, otherwise "false"
    */
-  set_language(language: string): boolean {
+  public set_language(language: string): boolean {
     if (this.is_authenticated) {
       return LightDMGreeter.setLanguage(language);
     }
@@ -511,7 +511,7 @@ export class Greeter {
    * Triggers the system to shutdown.
    * @returns {boolean} "true" if shutdown initiated, otherwise "false"
    */
-  shutdown(): boolean {
+  public shutdown(): boolean {
     return LightDM.shutdown();
   }
 
@@ -520,7 +520,7 @@ export class Greeter {
    * @param {string|null} session The session to log into or "null" to use the default.
    * @returns {boolean} "true" if successful, otherwise "false"
    */
-  start_session(session: string | null): boolean {
+  public start_session(session: string | null): boolean {
     try {
       const started = LightDMGreeter.startSessionSync(session);
       if (started || this.is_authenticated) reset_screensaver();
@@ -541,7 +541,7 @@ export class Greeter {
    * Triggers the system to suspend/sleep.
    * @returns {boolean} "true" if suspend/sleep initiated, otherwise "false"
    */
-  suspend(): boolean {
+  public suspend(): boolean {
     return LightDM.suspend();
   }
 }
@@ -585,7 +585,7 @@ export class GreeterConfig {
    *                                      for users that have not configured a `.face` image.
    * @readonly
    */
-  get branding(): web_greeter_config["branding"] {
+  public get branding(): web_greeter_config["branding"] {
     return this._config.branding;
   }
 
@@ -594,40 +594,37 @@ export class GreeterConfig {
    *
    * @type {object}  greeter
    * @property {boolean} debug_mode          Greeter theme debug mode.
-   * @property {boolean} detect_theme_errors Provide an option to load a fallback theme when theme
-   *                                     errors are detected.
+   * @property {boolean} detect_theme_errors Provide an option to load a fallback theme when theme errors are detected.
    * @property {number}  screensaver_timeout Blank the screen after this many seconds of inactivity.
    * @property {boolean} secure_mode         Don't allow themes to make remote http requests.
-   *                                     generate localized time for display.
-   * @property {string}  time_language       Language to use when displaying the time or ""
-   *                                     to use the system's language.
+   * @property {string}  time_language       Language to use when displaying the time or "" to use the system's language.
    * @property {string}  theme               The name of the theme to be used by the greeter.
    * @readonly
    */
-  get greeter(): web_greeter_config["greeter"] {
+  public get greeter(): web_greeter_config["greeter"] {
     return this._config.greeter;
   }
 
   /**
    * Holds keys/values from the `features` section of the config file.
    *
-   * @type {Object}      features
-   * @property {Boolean} battery				 Enable greeter and themes to ger battery status.
-   * @property {Object}  backlight
-   * @property {Boolean} enabled				 Enable greeter and themes to control display backlight.
-   * @property {Number}  value					 The amount to increase/decrease brightness by greeter.
-   * @property {Number}  steps					 How many steps are needed to do the change.
+   * @type {object}      features
+   * @property {boolean} battery    Enable greeter and themes to ger battery status.
+   * @property {object}  backlight
+   * @property {boolean} enabled    Enable greeter and themes to control display backlight.
+   * @property {number}  value      The amount to increase/decrease brightness by greeter.
+   * @property {number}  steps      How many steps are needed to do the change.
    */
-  get features(): web_greeter_config["features"] {
+  public get features(): web_greeter_config["features"] {
     return this._config.features;
   }
 
   /*
    * Holds a list of preferred layouts from the `layouts` section of the config file.
-   * @type {Array}			layouts
+   * @type {Array}      layouts
    * @readonly
    */
-  get layouts(): LightDMLayout[] {
+  public get layouts(): LightDMLayout[] {
     return get_layouts(this._config.layouts);
   }
 }
@@ -661,11 +658,10 @@ export class ThemeUtils {
    *   * Is located within the greeter's shared data directory (`/var/lib/lightdm-data`).
    *   * Is located in `/tmp`.
    *
-   * @param {String}              dir_path        The abs path to desired directory.
-   * @param {Boolean}             only_images Include only images in the results. Default `true`.
-   * @param {function(String[])}  callback    Callback function to be called with the result.
+   * @param dir_path The abs path to the desired directory.
+   * @param only_images Include only images in the results. Default `true`.
    */
-  dirlist(dir_path: string, only_images = true): string[] {
+  public dirlist(dir_path: string, only_images = true): string[] {
     if (!dir_path || typeof dir_path !== "string" || dir_path === "/") {
       return [];
     }

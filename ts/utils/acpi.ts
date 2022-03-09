@@ -4,7 +4,7 @@ import { logger } from "../logger";
 type callback = (data: string) => void;
 
 class ACPI_controller {
-  constructor() {
+  public constructor() {
     if (this.check_acpi()) this.listen();
     else logger.error("ACPI: acpi_listen does not exists");
   }

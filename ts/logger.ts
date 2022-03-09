@@ -59,11 +59,11 @@ const winston_logger = winston.createLogger({
 
 class Logger {
   private winston_logger: winston.Logger;
-  constructor() {
+  public constructor() {
     this.winston_logger = winston_logger;
   }
 
-  debug(message: string): void {
+  public debug(message: string): void {
     this.winston_logger.log({
       level: "debug",
       message: message,
@@ -71,7 +71,7 @@ class Logger {
       source: path.basename(__source),
     });
   }
-  warn(message: string): void {
+  public warn(message: string): void {
     this.winston_logger.log({
       level: "warn",
       message: message,
@@ -79,7 +79,7 @@ class Logger {
       source: path.basename(__source),
     });
   }
-  error(message: string): void {
+  public error(message: string): void {
     this.winston_logger.log({
       level: "error",
       message: message,
@@ -87,7 +87,7 @@ class Logger {
       source: path.basename(__source),
     });
   }
-  log({
+  public log({
     level,
     message,
     line,
