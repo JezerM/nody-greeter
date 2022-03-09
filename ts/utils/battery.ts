@@ -19,7 +19,7 @@ class Battery {
   ps_path = "/sys/class/power_supply/";
   _perc = -1;
   _status = "N/A";
-  _ac_status: number | string = 0;
+  _ac_status = false;
   _capacity = 0;
   _time = "";
   _watt = 0;
@@ -63,7 +63,7 @@ class Battery {
     return this._status;
   }
 
-  get ac_status(): string | number {
+  get ac_status(): boolean {
     return this._ac_status;
   }
 
@@ -165,7 +165,8 @@ class Battery {
       }
     }
     this._ac_status =
-      parseInt(await read_data(this.ps_path, this._ac, "online")) ?? "N/A";
+      Boolean(parseInt(await read_data(this.ps_path, this._ac, "online"))) ??
+      false;
 
     let rate_time: number;
     let rate_time_magnitude: number;
@@ -174,7 +175,7 @@ class Battery {
       if (
         this._status != "Full" &&
         sum_rate_power == 0 &&
-        this._ac_status == 1
+        this._ac_status == true
       ) {
         this._perc = Math.floor(
           Math.min(100, (sum_energy_now / sum_energy_full) * 100 + 0.5)
