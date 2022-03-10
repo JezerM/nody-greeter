@@ -14,9 +14,9 @@ interface battery {
 let running_update = false;
 
 class Battery {
-  private _batteries: battery[] = [];
-  private _ac = "AC0";
+  public _batteries: battery[] = [];
   public ps_path = "/sys/class/power_supply/";
+  private _ac = "AC0";
   private _perc = -1;
   private _status = "N/A";
   private _ac_status = false;

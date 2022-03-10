@@ -34,7 +34,7 @@ interface LightDMBattery {
   name: string;
   level: number;
   status: string;
-  ac_status: string | number;
+  ac_status: boolean;
   capacity: number;
   time: string;
   watt: number;

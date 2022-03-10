@@ -14,7 +14,7 @@ declare module "node-gtk" {
    */
   export namespace LightDM {
     class LightDMGreeter {
-      connectToDaemon(
+      public connectToDaemon(
         cancellable?: Gio.Cancellable | null,
         callback?:
           | ((
@@ -25,9 +25,9 @@ declare module "node-gtk" {
           | null,
         user_data?: unknown
       ): void;
-      connectToDaemonFinish(result: Gio.AsyncResult): boolean;
-      connectToDaemonSync(): boolean;
-      ensureSharedDataDir(
+      public connectToDaemonFinish(result: Gio.AsyncResult): boolean;
+      public connectToDaemonSync(): boolean;
+      public ensureSharedDataDir(
         name: string,
         cancellable?: Gio.Cancellable | null,
         callback?:
@@ -39,41 +39,44 @@ declare module "node-gtk" {
           | null,
         user_data?: unknown
       ): void;
-      ensureSharedDataDirSync(name: string): string;
-      ensureSharedDataDirFinish(result: Gio.AsyncResult): boolean;
-      getLockHint(): boolean;
-      getAuthenticationUser(): string | undefined;
-      getAutologinGuestHint(): boolean;
-      getAutologinTimeoutHint(): number;
-      getAutologinUserHint(): string;
-      getDefaultSessionHint(): string;
-      getHasGuestAccountHint(): boolean;
-      getHideUsersHint(): boolean;
-      getInAuthentication(): boolean;
-      getIsAuthenticated(): boolean;
-      getSelectGuestHint(): boolean;
-      getSelectUserHint(): string;
-      getShowManualLoginHint(): boolean;
-      getShowRemoteLoginHint(): boolean;
+      public ensureSharedDataDirSync(name: string): string;
+      public ensureSharedDataDirFinish(result: Gio.AsyncResult): boolean;
+      public getLockHint(): boolean;
+      public getAuthenticationUser(): string | undefined;
+      public getAutologinGuestHint(): boolean;
+      public getAutologinTimeoutHint(): number;
+      public getAutologinUserHint(): string;
+      public getDefaultSessionHint(): string;
+      public getHasGuestAccountHint(): boolean;
+      public getHideUsersHint(): boolean;
+      public getInAuthentication(): boolean;
+      public getIsAuthenticated(): boolean;
+      public getSelectGuestHint(): boolean;
+      public getSelectUserHint(): string;
+      public getShowManualLoginHint(): boolean;
+      public getShowRemoteLoginHint(): boolean;
 
-      connect(ev: "authentication-complete", handler: () => void);
-      connect(ev: "autologin-timer-expired", handler: () => void);
-      connect(
+      public connect(ev: "authentication-complete", handler: () => void);
+      public connect(ev: "autologin-timer-expired", handler: () => void);
+      public connect(
         ev: "show-message",
         handler: (text: string, type: number) => void
       );
-      connect(ev: "show-prompt", handler: (text: string, type: number) => void);
-      connect(ev: "idle", handler: () => void);
-      connect(ev: "reset", handler: () => void);
+      public connect(
+        ev: "show-prompt",
+        handler: (text: string, type: number) => void
+      );
+      public connect(ev: "idle", handler: () => void);
+      public connect(ev: "reset", handler: () => void);
 
-      authenticate(username: string | null): boolean;
-      authenticateAsGuest(): boolean;
-      cancelAuthentication(): boolean;
-      cancelAutologin(): boolean;
-      respond(prompt: string);
-      setLanguage(language: string);
-      setResettable(resettable: boolean): void;
-      startSession(
+      public authenticate(username: string | null): boolean;
+      public authenticateAsGuest(): boolean;
+      public cancelAuthentication(): boolean;
+      public cancelAutologin(): boolean;
+      public respond(prompt: string);
+      public setLanguage(language: string);
+      public setResettable(resettable: boolean): void;
+      public startSession(
         session: string | null,
         cancellable?: Gio.Cancellable | null,
         callback?:
@@ -85,7 +88,7 @@ declare module "node-gtk" {
           | null,
         user_data?: unknown
       ): boolean;
-      startSessionSync(session: string | null): boolean;
+      public startSessionSync(session: string | null): boolean;
     }
 
     export type { LightDMGreeter };
@@ -121,28 +124,28 @@ declare module "node-gtk" {
     }
 
     class LightDMUserList {
-      length: number;
+      public length: number;
 
-      getUsers(): LightDMUser[];
-      getLength(): number;
-      getUserByName(username: string): LightDMUser | null;
-      connect(ev: "user-added", handler: (user: LightDMUser) => void);
-      connect(ev: "user-changed", handler: (user: LightDMUser) => void);
-      connect(ev: "user-removed", handler: (user: LightDMUser) => void);
+      public getUsers(): LightDMUser[];
+      public getLength(): number;
+      public getUserByName(username: string): LightDMUser | null;
+      public connect(ev: "user-added", handler: (user: LightDMUser) => void);
+      public connect(ev: "user-changed", handler: (user: LightDMUser) => void);
+      public connect(ev: "user-removed", handler: (user: LightDMUser) => void);
     }
 
     export type { LightDMUserList };
 
     class LightDMLanguage {
-      constructor(language: { code: string });
-      code: string;
-      name: string;
-      territory: string;
+      public constructor(language: { code: string });
+      public code: string;
+      public name: string;
+      public territory: string;
 
-      getCode(): string;
-      getName(): string;
-      getTerritory(): string;
-      matches(code: string): boolean;
+      public getCode(): string;
+      public getName(): string;
+      public getTerritory(): string;
+      public matches(code: string): boolean;
     }
 
     export type { LightDMLanguage };
@@ -159,18 +162,18 @@ declare module "node-gtk" {
     }
 
     class LightDMLayout {
-      constructor(layout: {
+      public constructor(layout: {
         name: string;
         description: string;
         short_description: string;
       });
-      name: string;
-      description: string;
-      short_description: string;
+      public name: string;
+      public description: string;
+      public short_description: string;
 
-      getDescription(): string;
-      getName(): string;
-      getShortDescription(): string;
+      public getDescription(): string;
+      public getName(): string;
+      public getShortDescription(): string;
     }
 
     export type { LightDMLayout };
