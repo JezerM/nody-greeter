@@ -974,5 +974,17 @@ declare global {
     greeter_config: GreeterConfig | undefined;
     theme_utils: ThemeUtils | undefined;
     _ready_event: Event | undefined;
+
+    addEventListener(
+      type: "NodyBroadcastEvent",
+      listener: (ev: NodyBroadcastEvent) => void,
+      options?: boolean | AddEventListenerOptions | undefined
+    ): void;
+
+    addEventListener(
+      type: "GreeterReady",
+      listener: (ev: Event) => void,
+      options?: boolean | AddEventListenerOptions | undefined
+    ): void;
   }
 }
