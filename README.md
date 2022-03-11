@@ -47,7 +47,6 @@ cd nody-greeter
 npm install
 npm run rebuild
 npm run build
-npm run build:themes
 sudo node make install
 ```
 

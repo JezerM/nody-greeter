@@ -6,9 +6,10 @@
   "scripts": {
     "start": "electron .",
     "rebuild": "electron-rebuild -w node-gtk",
-    "build": "tsc --build && node make build",
 
-    "prebuild:theme:gruvbox": "tsc --build",
+    "build": "npm run build:tsc && node make build",
+    "build:tsc": "tsc --build && npm run build:themes",
+
     "build:theme:gruvbox": "tsc --build themes/gruvbox",
 
     "build:themes": "npm run build:theme:gruvbox",
