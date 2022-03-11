@@ -6,13 +6,18 @@
   "scripts": {
     "start": "electron .",
     "rebuild": "electron-rebuild -w node-gtk",
-    "type-check": "tsc --noEmit",
     "build": "tsc --build && node make build",
+
+    "prebuild:theme:gruvbox": "tsc --build",
+    "build:theme:gruvbox": "tsc --build themes/gruvbox",
+
+    "build:themes": "npm run build:theme:gruvbox",
+
+    "type-check": "tsc --noEmit",
     "lint": "eslint \"ts/**\"",
     "lint:fix": "eslint \"ts/**\" --fix",
     "prettier": "prettier --check ts/",
-    "prettier:fix": "prettier --write ts/",
-    "do_install": "node install.js"
+    "prettier:fix": "prettier --write ts/"
   },
   "author": {
     "name": "Jezer Mejía",
