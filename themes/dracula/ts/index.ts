@@ -8,6 +8,7 @@ import { Battery } from "./battery.js";
 import { Brightness } from "./brightness.js";
 import { Backgrounds } from "./backgrounds.js";
 import { Sidebar } from "./sidebar.js";
+import "./mock.js";
 
 declare global {
   interface Window {
