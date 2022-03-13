@@ -27,8 +27,14 @@ jobs:
       name: Run ESLint
       run: npm run lint:fix
     -
+      name: Run ESLint for themes
+      run: npm run lint:themes:fix
+    -
       name: Run Prettier
       run: npm run prettier:fix
+    -
+      name: Run Prettier for themes
+      run: npm run prettier:themes:fix
     -
       run: |
         git restore package-lock.json

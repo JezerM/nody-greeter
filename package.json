@@ -11,14 +11,32 @@
     "build:tsc": "tsc --build && npm run build:themes",
 
     "build:theme:gruvbox": "tsc --build themes/gruvbox",
+    "build:theme:dracula": "tsc --build themes/dracula",
 
-    "build:themes": "npm run build:theme:gruvbox",
+    "build:themes": "npm run build:theme:gruvbox && npm run build:theme:dracula",
 
     "type-check": "tsc --noEmit",
     "lint": "eslint \"ts/**\"",
     "lint:fix": "eslint \"ts/**\" --fix",
+
+    "lint:theme:gruvbox": "eslint \"themes/gruvbox/ts/**\"",
+    "lint:theme:gruvbox:fix": "eslint \"themes/gruvbox/ts/**\" --fix",
+    "lint:theme:dracula": "eslint \"themes/dracula/ts/**\"",
+    "lint:theme:dracula:fix": "eslint \"themes/dracula/ts/**\" --fix",
+
+    "lint:themes": "npm run lint:theme:gruvbox && npm run lint:theme:dracula",
+    "lint:themes:fix": "npm run lint:theme:gruvbox:fix && npm run lint:theme:dracula:fix",
+
     "prettier": "prettier --check ts/",
-    "prettier:fix": "prettier --write ts/"
+    "prettier:fix": "prettier --write ts/",
+
+    "prettier:theme:gruvbox": "prettier --check themes/gruvbox/ts/ ",
+    "prettier:theme:gruvbox:fix": "prettier --write themes/gruvbox/ts/",
+    "prettier:theme:dracula": "prettier --check themes/dracula/ts/ ",
+    "prettier:theme:dracula:fix": "prettier --write themes/dracula/ts/",
+
+    "prettier:themes": "npm run prettier:theme:gruvbox && npm run prettier:theme:dracula",
+    "prettier:themes:fix": "npm run prettier:theme:gruvbox:fix && npm run prettier:theme:dracula:fix"
   },
   "author": {
     "name": "Jezer Mejía",
