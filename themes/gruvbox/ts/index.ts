@@ -6,6 +6,7 @@ import { Layouts } from "./layouts.js";
 import { Power } from "./power.js";
 import { Battery } from "./battery.js";
 import { Brightness } from "./brightness.js";
+import "./mock.js";
 
 declare global {
   interface Window {
