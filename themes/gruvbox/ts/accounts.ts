@@ -41,7 +41,7 @@ export class Accounts {
 
   public updateOnStartup(): void {
     if (!this._usersObject) return;
-    const dfUser = window.localStorage.getItem("defaultuser");
+    const dfUser = window.localStorage.getItem("defaultUser");
     let user: LightDMUser;
     try {
       user = JSON.parse(dfUser ?? "");
