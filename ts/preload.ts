@@ -110,7 +110,7 @@ const allSignals: Signal[] = [];
 
 export class Signal {
   public _name: string;
-  private _callbacks: ((...args: unknown[]) => void)[];
+  public _callbacks: ((...args: unknown[]) => void)[];
 
   public constructor(name: string) {
     this._name = name;
