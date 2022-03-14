@@ -1,5 +1,4 @@
 import { dialog, ipcMain } from "electron";
-// @ts-ignore Until there's a @types/node-gtk
 import * as gi from "node-gtk";
 import * as fs from "fs";
 import * as os from "os";
@@ -150,7 +149,7 @@ export class Greeter {
    * @readonly
    * @deprecated Use `battery_data`
    */
-  public get batteryData(): LightDMBattery | object {
+  public get batteryData(): LightDMBattery | null {
     return battery_to_obj(this._battery);
   }
 
@@ -158,7 +157,7 @@ export class Greeter {
    * Gets the battery data.
    * @readonly
    */
-  public get battery_data(): LightDMBattery | object {
+  public get battery_data(): LightDMBattery | null {
     return battery_to_obj(this._battery);
   }
 
@@ -276,7 +275,7 @@ export class Greeter {
    * The current language or "null" if no language.
    * @readonly
    */
-  public get language(): LightDMLanguage | object {
+  public get language(): LightDMLanguage | null {
     return language_to_obj(LightDM.getLanguage());
   }
 
@@ -285,22 +284,23 @@ export class Greeter {
    * @readonly
    */
   public get languages(): LightDMLanguage[] {
-    return reduceArray(
-      LightDM.getLanguages(),
-      language_to_obj
-    ) as LightDMLanguage[];
+    return reduceArray(LightDM.getLanguages(), language_to_obj).filter(
+      isDefined
+    );
   }
 
   /**
    * The currently active layout for the selected user.
    */
-  public get layout(): LightDMLayout | object {
+  public get layout(): LightDMLayout | null {
     return layout_to_obj(LightDM.getLayout());
   }
 
-  public set layout(layout: LightDMLayout | object) {
-    LightDM.getLayout();
-    LightDM.setLayout(new LightDM.Layout(layout));
+  public set layout(layout: LightDMLayout | null) {
+    if (layout) {
+      LightDM.getLayout();
+      LightDM.setLayout(new LightDM.Layout(layout));
+    }
   }
 
   /**
@@ -308,7 +308,7 @@ export class Greeter {
    * @readonly
    */
   public get layouts(): LightDMLayout[] {
-    return reduceArray(LightDM.getLayouts(), layout_to_obj) as LightDMLayout[];
+    return reduceArray(LightDM.getLayouts(), layout_to_obj).filter(isDefined);
   }
 
   /**
@@ -324,10 +324,9 @@ export class Greeter {
    * @readonly
    */
   public get remote_sessions(): LightDMSession[] {
-    return reduceArray(
-      LightDM.getRemoteSessions(),
-      session_to_obj
-    ) as LightDMSession[];
+    return reduceArray(LightDM.getRemoteSessions(), session_to_obj).filter(
+      isDefined
+    );
   }
 
   /**
@@ -351,10 +350,7 @@ export class Greeter {
    * @readonly
    */
   public get sessions(): LightDMSession[] {
-    return reduceArray(
-      LightDM.getSessions(),
-      session_to_obj
-    ) as LightDMSession[];
+    return reduceArray(LightDM.getSessions(), session_to_obj).filter(isDefined);
   }
 
   /**
@@ -390,7 +386,7 @@ export class Greeter {
    * @readonly
    */
   public get users(): LightDMUser[] {
-    return reduceArray(LightDMUsers.getUsers(), user_to_obj) as LightDMUser[];
+    return reduceArray(LightDMUsers.getUsers(), user_to_obj).filter(isDefined);
   }
 
   /**
@@ -553,8 +549,8 @@ function get_layouts(config_layouts: string[]): LightDMLayout[] {
     for (let conf_lay of config_layouts) {
       conf_lay = conf_lay.replace(/\s/g, "\t");
       if (ldm_lay.getName() == conf_lay) {
-        const lays_chips = layout_to_obj(ldm_lay) as LightDMLayout;
-        if (Object.keys(lays_chips).length == 0) continue;
+        const lays_chips = layout_to_obj(ldm_lay);
+        if (!lays_chips) continue;
         final.push(lays_chips);
       }
     }
@@ -711,13 +707,17 @@ export class ThemeUtils {
   }
 }
 
-function reduceArray<T>(arr: unknown[], func: (arg: unknown) => T): T[] {
+function reduceArray<I, O>(arr: I[], func: (arg: I) => O): O[] {
   if (!Array.isArray(arr)) return [];
-  return arr.reduce((acc: T[], val) => {
+  return arr.reduce((acc: O[], val) => {
     const v = func(val);
     acc.push(v);
     return acc;
   }, []);
+}
+
+function isDefined<T>(val: T | null | undefined): val is T {
+  return val !== null && val !== undefined;
 }
 
 function hasKey<T>(obj: T, key: PropertyKey): key is keyof T {
