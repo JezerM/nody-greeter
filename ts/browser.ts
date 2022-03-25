@@ -12,6 +12,7 @@ import * as path from "path";
 import {
   load_primary_theme_path,
   load_secondary_theme_path,
+  load_theme_dir,
   nody_greeter,
 } from "./config";
 import { URL } from "url";
@@ -84,6 +85,9 @@ class Browser {
   }
 
   public load_theme(): void {
+    // This enforces the reload of theme_dir
+    // in case of "Load default theme" or "Reload theme"
+    load_theme_dir();
     const primary_html = load_primary_theme_path();
     const secondary_html = load_secondary_theme_path();
 
