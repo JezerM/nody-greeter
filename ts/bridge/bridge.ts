@@ -665,7 +665,11 @@ export class ThemeUtils {
       dir_path = path.join(path.dirname(this._config.greeter.theme), dir_path);
     }
 
-    dir_path = fs.realpathSync(path.normalize(dir_path));
+    try {
+      dir_path = fs.realpathSync(path.normalize(dir_path));
+    } catch (e) {
+      return [];
+    }
 
     if (!path.isAbsolute(dir_path) || !fs.lstatSync(dir_path).isDirectory()) {
       return [];
