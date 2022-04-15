@@ -12,6 +12,7 @@ This is a LightDM Greeter made with [Electron.js][Electron] and [node-gtk][node-
 - Themes could be simple, or very complex.
 - Battery and brightness control.
 - Multi-monitor support, thanks to [s0](https://github.com/s0)
+- TypeScript based.
 
 ## Considerations
 
