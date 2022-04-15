@@ -5,6 +5,9 @@ on:
     paths:
         # rerun when typescript files change
       - "ts/**"
+        # rerun when theme files change
+      - "themes/gruvbox/**"
+      - "themes/dracula/**"
         # rerun when workflow is changed
       - ".github/workflows/check.yml"
         # rerun when packages change
@@ -64,6 +67,9 @@ jobs:
     -
       name: Run ESLint
       run: npm run lint
+    -
+      name: Run ESLint for themes
+      run: npm run lint:themes
 
   prettier:
 
@@ -89,6 +95,9 @@ jobs:
     -
       name: Run Prettier
       run: npm run prettier
+    -
+      name: Run Prettier for themes
+      run: npm run prettier:themes
 
   package-lock:
 
