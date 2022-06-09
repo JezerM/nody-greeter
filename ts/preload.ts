@@ -40,14 +40,14 @@ export interface WindowMetadata {
  * An event that is fired and dispatched when one browser window of a theme
  * sends a broadcast to all windows (which happens for multi-monitor setups)
  */
-export class NodyBroadcastEvent extends Event {
+export class GreeterBroadcastEvent extends Event {
   public constructor(
     /** Metadata for the window that originated the request */
     public readonly window: WindowMetadata,
     /** Data sent in the broadcast */
     public readonly data: unknown
   ) {
-    super("NodyBroadcastEvent");
+    super("GreeterBroadcastEvent");
   }
 }
 
@@ -55,7 +55,7 @@ export class NodyBroadcastEvent extends Event {
  * A class that exposes functionality that is unique to `nody-greeter` and not
  * present in `web-greeter`
  */
-export class Nody {
+export class Comm {
   private _window_metadata: WindowMetadata | null = null;
   /**
    * callback that should be called when the metadata is received
@@ -64,7 +64,7 @@ export class Nody {
   private readonly _ready_promise: Promise<void>;
 
   public constructor() {
-    window.nody_greeter = this;
+    window.greeter_comm = this;
 
     ipcRenderer.on(CONSTS.channel.window_metadata, (_ev, metadata) => {
       this._window_metadata = metadata;
@@ -75,13 +75,13 @@ export class Nody {
     ipcRenderer.send(CONSTS.channel.window_metadata);
 
     ipcRenderer.on(CONSTS.channel.window_broadcast, (_ev, metadata, data) => {
-      const event = new NodyBroadcastEvent(metadata, data);
+      const event = new GreeterBroadcastEvent(metadata, data);
       window.dispatchEvent(event);
     });
 
     this._ready_promise = new Promise((resolve) => (this._ready = resolve));
 
-    return window.nody_greeter;
+    return window.greeter_comm;
   }
 
   public get window_metadata(): WindowMetadata {
@@ -936,7 +936,7 @@ export class ThemeUtils {
   }
 }
 
-new Nody();
+new Comm();
 new ThemeUtils();
 new GreeterConfig();
 new Greeter();
@@ -955,13 +955,13 @@ const domLoaded = new Promise<void>((resolve) => {
  * Promise that fires when all initialization has completed,
  * and the theme can start (i.e. _ready_event can be sent)
  */
-const readyPromise = Promise.all([domLoaded, window.nody_greeter?.whenReady()]);
+const readyPromise = Promise.all([domLoaded, window.greeter_comm?.whenReady()]);
 
 readyPromise.then(() => {
   if (window._ready_event) window.dispatchEvent(window._ready_event);
 });
 
-export declare const nody_greeter: Nody;
+export declare const greeter_comm: Comm;
 export declare const lightdm: Greeter;
 export declare const greeter_config: GreeterConfig;
 export declare const theme_utils: ThemeUtils;
@@ -969,15 +969,15 @@ export declare const _ready_event: Event;
 
 declare global {
   interface Window {
-    nody_greeter: Nody | undefined;
+    greeter_comm: Comm | undefined;
     lightdm: Greeter | undefined;
     greeter_config: GreeterConfig | undefined;
     theme_utils: ThemeUtils | undefined;
     _ready_event: Event | undefined;
 
     addEventListener(
-      type: "NodyBroadcastEvent",
-      listener: (ev: NodyBroadcastEvent) => void,
+      type: "GreeterBroadcastEvent",
+      listener: (ev: GreeterBroadcastEvent) => void,
       options?: boolean | AddEventListenerOptions | undefined
     ): void;
 
