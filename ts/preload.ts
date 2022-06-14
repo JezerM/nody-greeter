@@ -52,8 +52,7 @@ export class GreeterBroadcastEvent extends Event {
 }
 
 /**
- * A class that exposes functionality that is unique to `nody-greeter` and not
- * present in `web-greeter`
+ * Provides a cross-window communication system, useful for multi-monitor setups
  */
 export class Comm {
   private _window_metadata: WindowMetadata | null = null;
