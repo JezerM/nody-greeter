@@ -74,6 +74,7 @@ let lightdm_path = path.join(INSTALL_ROOT, "etc/lightdm");
 let webg_path = path.join(INSTALL_ROOT, PREFIX, "share/web-greeter");
 let xgreeters_path = path.join(INSTALL_ROOT, PREFIX, "share/xgreeters");
 let applications_path = path.join(INSTALL_ROOT, PREFIX, "share/applications");
+let icons_path = path.join(INSTALL_ROOT, PREFIX, "share/icons/hicolor");
 let xdg_ldm_path = path.join(INSTALL_ROOT, "etc/xdg/lightdm/lightdm.conf.d/");
 let bash_c_path = path.join(
   INSTALL_ROOT,
@@ -244,6 +245,8 @@ function create_install_root() {
   fs.mkdirsSync(xdg_ldm_path, { recursive: true });
   fs.mkdirsSync(xgreeters_path, { recursive: true });
   fs.mkdirsSync(applications_path, { recursive: true });
+  fs.mkdirsSync(icons_path, { recursive: true });
+  fs.mkdirsSync(path.join(icons_path, "scalable/apps"), { recursive: true });
   if (check_program("bash") && INSTALL_BASH_COMPLETION)
     fs.mkdirsSync(bash_c_path, { recursive: true });
   if (check_program("zsh") && INSTALL_ZSH_COMPLETION)
@@ -262,6 +265,13 @@ let copies_prepare = [
   {
     from: "./dist/nody-greeter.desktop",
     to: path.join(applications_path, "nody-greeter.desktop"),
+  },
+  {
+    from: "./dist/com.github.jezerm.nody-greeter.svg",
+    to: path.join(
+      icons_path,
+      "scalable/apps/com.github.jezerm.nody-greeter.svg"
+    ),
   },
   {
     from: "./dist/90-greeter-wrapper.conf",
