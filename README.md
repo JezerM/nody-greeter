@@ -1,4 +1,21 @@
-# Nody Greeter
+<div align="center">
+  <a>
+    <img
+      alt="Nody Greeter Icon"
+      width="125"
+      src="./dist/com.github.jezerm.nody-greeter.svg"
+    />
+  </a>
+  <h1><strong>Nody Greeter</strong></h1>
+  <p>
+    <strong>A LightDM greeter made with Electron.js and NodeGTK</strong>
+  </p>
+  <p>
+    <a href="#">
+      <img alt="License Information" src="https://img.shields.io/github/license/JezerM/nody-greeter.svg">
+    </a>
+  </p>
+</div>
 
 [Web Greeter][web-greeter] is created with Python... which sometimes is slow. So, I wanted to re-create it with Node.js!
 
