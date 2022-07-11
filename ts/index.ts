@@ -7,10 +7,33 @@ import { ensure_theme, load_theme_config, nody_greeter } from "./config";
 const res = yargs
   .scriptName("nody-greeter")
   .usage("$0 [args]")
-  .command("--debug", "Runs the greeter in debug mode")
-  .command("--normal", "Runs in non-debug mode")
-  .command("--list", "Lists available themes")
-  .command("--theme [name]", "Set the theme to use")
+  .option("mode", {
+    type: "string",
+    choices: ["debug", "normal"],
+    describe: "Set browser mode",
+  })
+  .option("list", {
+    type: "boolean",
+    describe: "Lists available themes",
+  })
+  .option("theme", {
+    type: "string",
+    describe: "Set the theme to use",
+    requiresArg: true,
+  })
+  .option("d", {
+    alias: "debug",
+    type: "boolean",
+    describe: "Set debug mode",
+    conflicts: ["n", "mode"],
+  })
+  .option("n", {
+    alias: "normal",
+    type: "boolean",
+    describe: "Set debug mode",
+    conflicts: ["d", "mode"],
+  })
+  .showHelpOnFail(false, "Use --help for available options")
   .help("h")
   .alias("h", "help")
   .alias("v", "version").argv;
@@ -42,9 +65,9 @@ function set_debug(mode: boolean): void {
   nody_greeter.app.debug_mode = mode;
 }
 
-if (res.debug) {
+if (res.d || res.mode == "debug") {
   set_debug(true);
-} else if (res.normal) {
+} else if (res.n || res.mode == "normal") {
   set_debug(false);
 }
 if (res.theme && typeof res.theme === "string") {
