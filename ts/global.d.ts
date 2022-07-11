@@ -1,12 +1,9 @@
 import { Greeter, GreeterConfig, ThemeUtils } from "./bridge/bridge";
 
 declare global {
-  namespace NodeJS {
-    interface Global {
-      lightdm: Greeter;
-      greeter_config: GreeterConfig;
-      theme_utils: ThemeUtils;
-    }
-  }
+  /* eslint-disable no-var */
+  var lightdmGreeter: Greeter;
+  var greeterConfigGreeter: GreeterConfig;
+  var themeUtilsGreeter: ThemeUtils;
 }
 export {};

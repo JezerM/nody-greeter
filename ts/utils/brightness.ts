@@ -100,7 +100,8 @@ class BrightnessController {
   private watch_brightness(): void {
     if (!this._available) return;
     fs.watch(this._brightness_path, () => {
-      if (global.lightdm) global.lightdm._emit_signal("brightness_update");
+      if (global.lightdmGreeter)
+        global.lightdmGreeter._emit_signal("brightness_update");
     });
   }
 

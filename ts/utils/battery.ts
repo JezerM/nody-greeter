@@ -209,7 +209,8 @@ class Battery {
     }
     this._perc = this._perc == null ? 0 : this._perc;
 
-    if (global.lightdm) global.lightdm._emit_signal("battery_update");
+    if (global.lightdmGreeter)
+      global.lightdmGreeter._emit_signal("battery_update");
 
     running_update = false;
   }

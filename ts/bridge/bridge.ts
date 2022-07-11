@@ -636,7 +636,7 @@ export class ThemeUtils {
     this._allowed_dirs = [
       nody_greeter.app.theme_dir,
       nody_greeter.config.branding.background_images_dir,
-      global.lightdm.shared_data_directory,
+      global.lightdmGreeter.shared_data_directory,
       path.dirname(fs.realpathSync(nody_greeter.config.greeter.theme)),
       os.tmpdir(),
     ];
@@ -766,22 +766,22 @@ function handler(
 
 ipcMain.on("greeter_config", (ev, ...args) => {
   if (args.length == 0) return (ev.returnValue = undefined);
-  if (!hasKey(global.greeter_config, args[0]))
+  if (!hasKey(global.greeterConfigGreeter, args[0]))
     return (ev.returnValue = undefined);
-  const pr = global.greeter_config[args[0]];
+  const pr = global.greeterConfigGreeter[args[0]];
   ev.returnValue = pr || undefined;
 });
 
 ipcMain.on("theme_utils", (ev, ...args) => {
-  handler(global.theme_utils, ev, ...args);
+  handler(global.themeUtilsGreeter, ev, ...args);
 });
 
 ipcMain.handle("theme_utils", (ev, ...args) => {
-  return handler(global.theme_utils, ev, ...args);
+  return handler(global.themeUtilsGreeter, ev, ...args);
 });
 
 ipcMain.on("lightdm", (ev, ...args) => {
-  handler(global.lightdm, ev, ...args);
+  handler(global.lightdmGreeter, ev, ...args);
 });
 
 ipcMain.on(CONSTS.channel.window_metadata, (ev) => {
@@ -816,7 +816,7 @@ ipcMain.on(CONSTS.channel.window_broadcast, (ev, data: unknown) => {
 });
 
 browser.whenReady().then(() => {
-  global.lightdm = Greeter.getInstance(nody_greeter.config);
-  global.greeter_config = GreeterConfig.getInstance(nody_greeter.config);
-  global.theme_utils = ThemeUtils.getInstance(nody_greeter.config);
+  global.lightdmGreeter = Greeter.getInstance(nody_greeter.config);
+  global.greeterConfigGreeter = GreeterConfig.getInstance(nody_greeter.config);
+  global.themeUtilsGreeter = ThemeUtils.getInstance(nody_greeter.config);
 });
