@@ -3,6 +3,7 @@
  * Then, you can package the "unpacked" folder to whatever you want~
  */
 
+const packageJson = require("./package.json");
 const asar = require("asar");
 const fs = require("fs-extra");
 const path = require("path");
@@ -165,6 +166,15 @@ async function create_build() {
 }
 
 function find_electron_binding() {
+  const electronMatch = packageJson.devDependencies.electron.match(
+    /^\^*(?<major>\d+)(?:\.(?<minor>\d+))?/
+  );
+  let electronVersion = ".*";
+  if (electronMatch && electronMatch.groups) {
+    const major = electronMatch.groups.major;
+    const minor = electronMatch.groups.minor ?? "0";
+    electronVersion = `${major}.${minor}`;
+  }
   let binding_exists = fs.pathExistsSync(
     "./node_modules/node-gtk/lib/binding/"
   );
@@ -176,7 +186,7 @@ function find_electron_binding() {
   }
   fs.removeSync("./build/nody-asar/node_modules/node-gtk/lib/binding/");
   let bindings = fs.readdirSync("./node_modules/node-gtk/lib/binding/");
-  let re = new RegExp(`electron-.*-linux-${ARCH}`);
+  let re = new RegExp(`electron-v${electronVersion}-linux-${ARCH}`);
   let electron_binding = bindings.find((v) => v.match(re));
   return electron_binding;
 }
