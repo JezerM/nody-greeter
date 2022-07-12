@@ -1,11 +1,11 @@
 Package: nody-greeter
-Version: 1.4.0
+Version: 1.5.0
 Provides: lightdm-greeter
 Replaces: lightdm-webkit-greeter
 Section: x11
 Priority: optional
 Homepage: https://github.com/JezerM/nody-greeter
-Installed-Size: 221880
+Installed-Size: 304160
 Architecture: amd64
 Maintainer: JezerM <amyuki4@gmail.com>
 Depends: gobject-introspection, liblightdm-gobject-1-0, libcairo2, liblightdm-gobject-1-dev, libc6

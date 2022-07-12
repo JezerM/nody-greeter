@@ -1,6 +1,6 @@
 {
   "name": "nody-greeter",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Node.js (electron) greeter for LightDM",
   "main": "js/index.js",
   "scripts": {
