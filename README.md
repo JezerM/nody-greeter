@@ -85,7 +85,7 @@ Also, you can install the TypeScript types definitions inside your theme with np
 npm install nody-greeter-types
 ```
 
-## Aditional features
+## Additional features
 
 ### Brightness control
 `acpi` is the only tool needed to control the brightness, besides a compatible device. This functionality is based on [acpilight][acpilight] replacement for `xbacklight`.
