@@ -75,6 +75,17 @@ Also, you can package `build/unpacked` to whatever you want, like **.deb** with:
 dpkg-deb --root-owner-group --build unpacked
 ```
 
+### Setting up with LightDM
+
+Inside `/etc/lightdm/lightdm.conf`, below a Seat configuration, add:
+```
+greeter-session=nody-greeter
+```
+
+Afterwards, restart the lightdm service.
+
+> ***Note:*** Be sure that nody-greeter works before restarting lightdm
+
 ## Theme JavaScript API
 
 To create themes for nody-greeter and web-greeter, check the documentation available at [web-greeter-docs][web-greeter-docs].
