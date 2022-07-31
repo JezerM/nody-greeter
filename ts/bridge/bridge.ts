@@ -2,7 +2,7 @@ import { dialog, ipcMain } from "electron";
 import * as gi from "node-gtk";
 import * as fs from "fs";
 import * as os from "os";
-import { globalNodyConfig, webGreterConfig } from "../config";
+import { globalNodyConfig, WebGreeterConfig } from "../config";
 
 const LightDM = gi.require("LightDM", "1");
 
@@ -36,12 +36,12 @@ export class Greeter {
   // TODO: Remove this eslint-disable comment
   /* eslint-disable @typescript-eslint/naming-convention */
 
-  public _config: webGreterConfig;
+  public _config: WebGreeterConfig;
   public _batteryController: BatteryController;
   public _sharedDataDirectory: string;
   public static _instance: Greeter;
 
-  private constructor(config: webGreterConfig) {
+  private constructor(config: WebGreeterConfig) {
     this._config = config;
 
     this._batteryController = new BatteryController();
@@ -109,7 +109,7 @@ export class Greeter {
     }
   }
 
-  public static getInstance(config: webGreterConfig): Greeter {
+  public static getInstance(config: WebGreeterConfig): Greeter {
     return this._instance || (this._instance = new this(config));
   }
 
@@ -564,14 +564,14 @@ function getLayouts(configLayouts: string[]): LightDMLayout[] {
 }
 
 export class GreeterConfig {
-  public _config: webGreterConfig;
+  public _config: WebGreeterConfig;
   public static _instance: GreeterConfig;
 
-  private constructor(config: webGreterConfig) {
+  private constructor(config: WebGreeterConfig) {
     this._config = config;
   }
 
-  public static getInstance(config: webGreterConfig): GreeterConfig {
+  public static getInstance(config: WebGreeterConfig): GreeterConfig {
     return this._instance || (this._instance = new this(config));
   }
 
@@ -586,7 +586,7 @@ export class GreeterConfig {
    *                                      for users that have not configured a `.face` image.
    * @readonly
    */
-  public get branding(): webGreterConfig["branding"] {
+  public get branding(): WebGreeterConfig["branding"] {
     return this._config.branding;
   }
 
@@ -602,7 +602,7 @@ export class GreeterConfig {
    * @property {string}  theme               The name of the theme to be used by the greeter.
    * @readonly
    */
-  public get greeter(): webGreterConfig["greeter"] {
+  public get greeter(): WebGreeterConfig["greeter"] {
     return this._config.greeter;
   }
 
@@ -616,7 +616,7 @@ export class GreeterConfig {
    * @property {number}  value      The amount to increase/decrease brightness by greeter.
    * @property {number}  steps      How many steps are needed to do the change.
    */
-  public get features(): webGreterConfig["features"] {
+  public get features(): WebGreeterConfig["features"] {
     return this._config.features;
   }
 
@@ -631,11 +631,11 @@ export class GreeterConfig {
 }
 
 export class ThemeUtils {
-  public _config: webGreterConfig;
+  public _config: WebGreeterConfig;
   public _allowedDirs: string[];
   public static _instance: ThemeUtils;
 
-  private constructor(config: webGreterConfig) {
+  private constructor(config: WebGreeterConfig) {
     this._config = config;
 
     this._allowedDirs = [
@@ -647,7 +647,7 @@ export class ThemeUtils {
     ];
   }
 
-  public static getInstance(config: webGreterConfig): ThemeUtils {
+  public static getInstance(config: WebGreeterConfig): ThemeUtils {
     return this._instance || (this._instance = new this(config));
   }
 

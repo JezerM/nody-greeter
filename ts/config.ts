@@ -54,11 +54,11 @@ export const THEME_CONFIG = io_ts.intersection([
 /**
  * web-greeter's config inside `/etc/lightdm/web-greeter.yml`
  */
-export type webGreterConfig = io_ts.TypeOf<typeof WEB_GREETER_CONFIG>;
+export type WebGreeterConfig = io_ts.TypeOf<typeof WEB_GREETER_CONFIG>;
 /**
  * Theme's config inside `$THEME/index.yml`
  */
-export type themeConfig = io_ts.TypeOf<typeof THEME_CONFIG>;
+export type ThemeConfig = io_ts.TypeOf<typeof THEME_CONFIG>;
 
 export interface AppConfig {
   fullscreen: boolean;
@@ -68,9 +68,9 @@ export interface AppConfig {
 }
 
 export interface NodyConfig {
-  config: webGreterConfig;
+  config: WebGreeterConfig;
   app: AppConfig;
-  theme: themeConfig;
+  theme: ThemeConfig;
 }
 
 export const globalNodyConfig: NodyConfig = {

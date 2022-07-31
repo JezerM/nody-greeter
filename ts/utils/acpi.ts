@@ -1,7 +1,7 @@
 import * as child_process from "child_process";
 import { logger } from "../logger";
 
-type callback = (data: string) => void;
+type Callback = (data: string) => void;
 
 class ACPIController {
   public constructor() {
@@ -10,12 +10,12 @@ class ACPIController {
   }
 
   protected tries = 0;
-  protected callbacks: callback[] = [];
+  protected callbacks: Callback[] = [];
 
-  public connect(cb: callback): void {
+  public connect(cb: Callback): void {
     this.callbacks.push(cb);
   }
-  public disconnect(cb: callback): void {
+  public disconnect(cb: Callback): void {
     const ind = this.callbacks.findIndex((c) => {
       return c === cb;
     });

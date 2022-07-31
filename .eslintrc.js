@@ -38,7 +38,7 @@ module.exports = {
         leadingUnderscore: "allowSingleOrDouble",
       },
       {
-        selector: ["class", "interface"],
+        selector: ["class", "interface", "enum", "typeAlias"],
         format: ["PascalCase"],
       },
     ],
