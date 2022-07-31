@@ -10,16 +10,16 @@ import {
 import * as path from "path";
 
 import {
-  load_primary_theme_path,
-  load_secondary_theme_path,
-  load_theme_dir,
-  nody_greeter,
+  loadPrimaryThemePath,
+  loadSecondaryThemePath,
+  loadThemeDir,
+  globalNodyConfig,
 } from "./config";
 import { URL } from "url";
 import * as url from "url";
-import { Brightness } from "./utils/brightness";
+import { brightnessController } from "./utils/brightness";
 import { logger } from "./logger";
-import { set_screensaver, reset_screensaver } from "./utils/screensaver";
+import { setScreensaver, resetScreensaver } from "./utils/screensaver";
 import { WindowMetadata } from "./preload";
 
 interface NodyWindow {
@@ -33,7 +33,7 @@ class Browser {
   public windows: NodyWindow[] = [];
 
   public constructor() {
-    this.set_priviliged();
+    this.setPriviliged();
     app.whenReady().then(() => {
       this.init();
     });
@@ -51,13 +51,13 @@ class Browser {
   }
 
   private init(): void {
-    this.set_protocol();
-    this.windows = this.create_windows();
-    this.load_theme();
-    this.init_listeners();
+    this.setProtocol();
+    this.windows = this.createWindows();
+    this.loadTheme();
+    this.initListeners();
   }
 
-  private set_priviliged(): void {
+  private setPriviliged(): void {
     protocol.registerSchemesAsPrivileged([
       {
         scheme: "web-greeter",
@@ -74,48 +74,48 @@ class Browser {
     ]);
   }
 
-  private set_protocol(): void {
+  private setProtocol(): void {
     protocol.registerFileProtocol("web-greeter", (request, callback) => {
-      const req_url = request.url;
-      const url = new URL(req_url);
+      const reqUrl = request.url;
+      const url = new URL(reqUrl);
       const res = decodeURI(url.pathname);
       //console.error("Protocol:", { url, res });
       callback(res);
     });
   }
 
-  public load_theme(): void {
+  public loadTheme(): void {
     // This enforces the reload of theme_dir
     // in case of "Load default theme" or "Reload theme"
-    load_theme_dir();
-    const primary_html = load_primary_theme_path();
-    const secondary_html = load_secondary_theme_path();
+    loadThemeDir();
+    const primaryHtml = loadPrimaryThemePath();
+    const secondaryHtml = loadSecondaryThemePath();
 
-    const primary_url = url.format({
-      pathname: primary_html,
+    const primaryUrl = url.format({
+      pathname: primaryHtml,
       host: "app",
       hostname: "app",
       protocol: "web-greeter:",
     });
-    const secondary_url = url.format({
-      pathname: secondary_html,
+    const secondaryUrl = url.format({
+      pathname: secondaryHtml,
       host: "app",
       hostname: "app",
       protocol: "web-greeter:",
     });
     //console.log({ primary_url, secondary_url });
     for (const w of this.windows) {
-      if (w.is_primary) w.window.loadURL(`${primary_url}`);
-      else w.window.loadURL(`${secondary_url}`);
+      if (w.is_primary) w.window.loadURL(`${primaryUrl}`);
+      else w.window.loadURL(`${secondaryUrl}`);
       w.window.setBackgroundColor("#000000");
 
       w.window.webContents.on("before-input-event", (_event, input) => {
-        const value = nody_greeter.config.features.backlight.value;
+        const value = globalNodyConfig.config.features.backlight.value;
         if (input.type == "keyUp") return;
         if (input.code == "BrightnessDown") {
-          Brightness.dec_brightness(value);
+          brightnessController.decBrightness(value);
         } else if (input.code == "BrightnessUp") {
-          Brightness.inc_brightness(value);
+          brightnessController.incBrightness(value);
         }
       });
     }
@@ -123,7 +123,7 @@ class Browser {
     logger.debug("Theme loaded");
   }
 
-  public create_windows(): NodyWindow[] {
+  public createWindows(): NodyWindow[] {
     logger.debug("Initializing Browser Window");
 
     const displays = screen.getAllDisplays();
@@ -151,9 +151,9 @@ class Browser {
     }
 
     const windows: NodyWindow[] = displays.map((display) => {
-      const is_primary = display.id === primaryDisplay.id;
+      const isPrimary = display.id === primaryDisplay.id;
       return {
-        is_primary,
+        is_primary: isPrimary,
         display,
         window: new BrowserWindow({
           height: display.workAreaSize.height,
@@ -161,20 +161,20 @@ class Browser {
           x: display.bounds.x,
           y: display.bounds.y,
           backgroundColor: "#000000",
-          frame: nody_greeter.app.frame,
+          frame: globalNodyConfig.app.frame,
           show: false,
           webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             nodeIntegration: false,
             contextIsolation: false,
             allowRunningInsecureContent:
-              !nody_greeter.config.greeter.secure_mode, // Should set option
-            devTools: nody_greeter.app.debug_mode, // Should set option
+              !globalNodyConfig.config.greeter.secure_mode, // Should set option
+            devTools: globalNodyConfig.app.debug_mode, // Should set option
           },
         }),
         meta: {
           id: display.id,
-          is_primary,
+          is_primary: isPrimary,
           size: {
             width: display.workAreaSize.width,
             height: display.workAreaSize.height,
@@ -197,20 +197,20 @@ class Browser {
      * - ~/.config/gtk-3.0/settings.ini
      */
 
-    const cursor_theme = nody_greeter.config.greeter.icon_theme;
-    process.env.XCURSOR_THEME = cursor_theme ? cursor_theme : "";
+    const cursorTheme = globalNodyConfig.config.greeter.icon_theme;
+    process.env.XCURSOR_THEME = cursorTheme ? cursorTheme : "";
 
-    set_screensaver();
+    setScreensaver();
 
     this.ready = true;
 
     return windows;
   }
 
-  private init_listeners(): void {
+  private initListeners(): void {
     for (const w of this.windows) {
       w.window.once("ready-to-show", () => {
-        w.window.setFullScreen(nody_greeter.app.fullscreen);
+        w.window.setFullScreen(globalNodyConfig.app.fullscreen);
         w.window.show();
         if (w.is_primary) {
           w.window.focus();
@@ -228,9 +228,9 @@ class Browser {
       });
 
       w.window.webContents.on("context-menu", (_ev, params) => {
-        if (!nody_greeter.app.debug_mode) return;
+        if (!globalNodyConfig.app.debug_mode) return;
         const position = { x: params.x, y: params.y };
-        const menu_template: MenuItemConstructorOptions[] = [
+        const menuTemplate: MenuItemConstructorOptions[] = [
           { role: "undo", enabled: params.editFlags.canUndo, accelerator: "U" },
           { role: "redo", enabled: params.editFlags.canRedo, accelerator: "R" },
           { type: "separator" },
@@ -264,13 +264,13 @@ class Browser {
             accelerator: "I",
           },
         ];
-        const menu = Menu.buildFromTemplate(menu_template);
+        const menu = Menu.buildFromTemplate(menuTemplate);
         menu.popup();
       });
     }
 
     app.on("quit", () => {
-      reset_screensaver();
+      resetScreensaver();
     });
 
     session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
@@ -280,7 +280,7 @@ class Browser {
           url.protocol.includes("web-greeter") ||
           url.protocol.includes("file") ||
           url.protocol.includes("devtools")
-        ) && nody_greeter.config.greeter.secure_mode;
+        ) && globalNodyConfig.config.greeter.secure_mode;
       //console.error("BeforeRequest:", {
       //origin: details.url,
       //url,
@@ -290,7 +290,7 @@ class Browser {
     });
   }
 
-  public get primary_window(): BrowserWindow {
+  public get primaryWindow(): BrowserWindow {
     for (const w of this.windows) {
       if (w.is_primary) {
         return w.window;

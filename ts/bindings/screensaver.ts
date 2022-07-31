@@ -21,10 +21,10 @@ export function getScreenSaver(): Screensaver {
 export function setScreenSaver(
   timeout: number,
   interval?: number,
-  prefer_blank?: number,
-  allow_exp?: number
+  preferBlank?: number,
+  allowExp?: number
 ): void {
-  addon.setScreenSaver(timeout, interval, prefer_blank, allow_exp);
+  addon.setScreenSaver(timeout, interval, preferBlank, allowExp);
 }
 
 /**

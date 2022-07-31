@@ -55,18 +55,20 @@ export class GreeterBroadcastEvent extends Event {
  * Provides a cross-window communication system, useful for multi-monitor setups
  */
 export class Comm {
-  private _window_metadata: WindowMetadata | null = null;
+  // TODO: Remove this eslint-disable comment
+  /* eslint-disable @typescript-eslint/naming-convention */
+  private _windowMetadata: WindowMetadata | null = null;
   /**
    * callback that should be called when the metadata is received
    */
   private _ready: (() => void) | null = null;
-  private readonly _ready_promise: Promise<void>;
+  private readonly _readyPromise: Promise<void>;
 
   public constructor() {
     window.greeter_comm = this;
 
     ipcRenderer.on(CONSTS.channel.window_metadata, (_ev, metadata) => {
-      this._window_metadata = metadata;
+      this._windowMetadata = metadata;
       if (this._ready) this._ready();
     });
 
@@ -78,14 +80,14 @@ export class Comm {
       window.dispatchEvent(event);
     });
 
-    this._ready_promise = new Promise((resolve) => (this._ready = resolve));
+    this._readyPromise = new Promise((resolve) => (this._ready = resolve));
 
     return window.greeter_comm;
   }
 
   public get window_metadata(): WindowMetadata {
-    if (this._window_metadata) {
-      return this._window_metadata;
+    if (this._windowMetadata) {
+      return this._windowMetadata;
     }
     throw new Error(
       `window_metadata not available, did you wait for the GreeterReady event?`
@@ -93,7 +95,7 @@ export class Comm {
   }
 
   /** Resolves when we have received WindowMetadata */
-  public whenReady = (): Promise<void> => this._ready_promise;
+  public whenReady = (): Promise<void> => this._readyPromise;
 
   /**
    * Send a message to all windows currently open for the greeter.
@@ -629,7 +631,7 @@ export class Greeter {
   }
 }
 
-interface gc_branding {
+interface GCBranding {
   /**
    * Path to directory that contains background images
    */
@@ -643,7 +645,7 @@ interface gc_branding {
    */
   user_image: string;
 }
-interface gc_greeter {
+interface GCGreeter {
   /**
    * Greeter theme debug mode
    */
@@ -669,7 +671,7 @@ interface gc_greeter {
    */
   theme: string;
 }
-interface gc_features {
+interface GCFeatures {
   /**
    * Enable greeter and themes to get battery status
    */
@@ -710,7 +712,7 @@ export class GreeterConfig {
    * @property {string} user_image Default user image/avatar. This is used by greeter themes for users that have not configured a `.face` image.
    * @readonly
    */
-  public get branding(): gc_branding {
+  public get branding(): GCBranding {
     return ipcRenderer.sendSync("greeter_config", "branding");
   }
 
@@ -726,7 +728,7 @@ export class GreeterConfig {
    * @property {string}  theme The name of the theme to be used by the greeter.
    * @readonly
    */
-  public get greeter(): gc_greeter {
+  public get greeter(): GCGreeter {
     return ipcRenderer.sendSync("greeter_config", "greeter");
   }
 
@@ -741,7 +743,7 @@ export class GreeterConfig {
    * @property {number}  backlight.steps How many steps are needed to do the change.
    * @readonly
    */
-  public get features(): gc_features {
+  public get features(): GCFeatures {
     return ipcRenderer.sendSync("greeter_config", "features");
   }
 
@@ -755,9 +757,11 @@ export class GreeterConfig {
   }
 }
 
-let time_language: string | null = null;
+let timeLanguage: string | null = null;
 
 export class ThemeUtils {
+  /* eslint-disable @typescript-eslint/naming-convention */
+
   public constructor() {
     if ("theme_utils" in window && window.theme_utils) {
       return window.theme_utils;
@@ -775,17 +779,17 @@ export class ThemeUtils {
    * @deprecated This method has no usage and will be removed on future versions
    */
   public bind_this(context: object): object {
-    const excluded_methods = ["constructor"];
+    const excludedMethods = ["constructor"];
 
-    function not_excluded(_method: string, _context: object): boolean {
-      const is_excluded =
-          excluded_methods.findIndex(
-            (excluded_method) => _method === excluded_method
+    function notExcluded(_method: string, _context: object): boolean {
+      const isExcluded =
+          excludedMethods.findIndex(
+            (excludedMethod) => _method === excludedMethod
           ) > -1,
         // @ts-ignore Just for now
-        is_method = "function" === typeof _context[_method];
+        isMethod = "function" === typeof _context[_method];
 
-      return is_method && !is_excluded;
+      return isMethod && !isExcluded;
     }
 
     for (let obj = context; obj; obj = Object.getPrototypeOf(obj)) {
@@ -795,7 +799,7 @@ export class ThemeUtils {
       }
 
       for (const method of Object.getOwnPropertyNames(obj)) {
-        if (not_excluded(method, context)) {
+        if (notExcluded(method, context)) {
           // @ts-ignore Just for now
           context[method] = context[method].bind(context);
         }
@@ -814,12 +818,12 @@ export class ThemeUtils {
    *   * Is located in `/tmp`.
    *
    * @param path        The abs path to desired directory.
-   * @param only_images Include only images in the results. Default `true`.
+   * @param onlyImages Include only images in the results. Default `true`.
    * @param callback    Callback function to be called with the result.
    */
   public dirlist(
     path: string,
-    only_images = true,
+    onlyImages = true,
     callback: (args: string[]) => void
   ): void {
     if ("" === path || "string" !== typeof path) {
@@ -834,7 +838,7 @@ export class ThemeUtils {
 
     try {
       ipcRenderer
-        .invoke("theme_utils", "dirlist", path, only_images)
+        .invoke("theme_utils", "dirlist", path, onlyImages)
         .then((files) => {
           callback(files);
         });
@@ -854,11 +858,11 @@ export class ThemeUtils {
    *   * Is located in `/tmp`.
    *
    * @param path        The abs path to desired directory.
-   * @param only_images Include only images in the results. Default `true`.
+   * @param onlyImages Include only images in the results. Default `true`.
    * @param callback    Callback function to be called with the result.
    * @experimental Available only for nody-greeter. DO NOT use it if you want compatibility between web-greeter and nody-greeter
    */
-  public dirlist_sync(path: string, only_images = true): string[] {
+  public dirlist_sync(path: string, onlyImages = true): string[] {
     if ("" === path || "string" !== typeof path) {
       console.error(`theme_utils.dirlist(): path must be a non-empty string!`);
       return [];
@@ -868,7 +872,7 @@ export class ThemeUtils {
       path = path.replace(/\/\.+(?=\/)/g, "");
     }
     try {
-      return ipcRenderer.sendSync("theme_utils", "dirlist", path, only_images);
+      return ipcRenderer.sendSync("theme_utils", "dirlist", path, onlyImages);
     } catch (err) {
       console.error(`theme_utils.dirlist(): ${err}`);
       return [];
@@ -883,12 +887,12 @@ export class ThemeUtils {
 
     const locale = [];
 
-    if (time_language === null) {
-      time_language = config?.time_language || "";
+    if (timeLanguage === null) {
+      timeLanguage = config?.time_language || "";
     }
 
-    if (time_language != "") {
-      locale.push(time_language);
+    if (timeLanguage != "") {
+      locale.push(timeLanguage);
     }
 
     const optionsDate: Intl.DateTimeFormatOptions = {
@@ -913,12 +917,12 @@ export class ThemeUtils {
 
     const locale = [];
 
-    if (time_language === null) {
-      time_language = config?.time_language || "";
+    if (timeLanguage === null) {
+      timeLanguage = config?.time_language || "";
     }
 
-    if (time_language != "") {
-      locale.push(time_language);
+    if (timeLanguage != "") {
+      locale.push(timeLanguage);
     }
 
     const optionsTime: Intl.DateTimeFormatOptions = {

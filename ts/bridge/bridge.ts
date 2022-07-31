@@ -2,7 +2,7 @@ import { dialog, ipcMain } from "electron";
 import * as gi from "node-gtk";
 import * as fs from "fs";
 import * as os from "os";
-import { nody_greeter, web_greeter_config } from "../config";
+import { globalNodyConfig, webGreterConfig } from "../config";
 
 const LightDM = gi.require("LightDM", "1");
 
@@ -10,17 +10,17 @@ const LightDMGreeter = new LightDM.Greeter();
 const LightDMUsers = new LightDM.UserList();
 
 import {
-  user_to_obj,
-  language_to_obj,
-  layout_to_obj,
-  session_to_obj,
-  battery_to_obj,
+  userToObject,
+  languageToObject,
+  layoutToObject,
+  sessionToObject,
+  batteryToObject,
 } from "./bridge_objects";
-import { browser, general_error_prompt } from "../globals";
+import { browser, generalErrorPrompt } from "../globals";
 
-import { Brightness } from "../utils/brightness.js";
-import { Battery } from "../utils/battery";
-import { force_screensaver, reset_screensaver } from "../utils/screensaver.js";
+import { brightnessController } from "../utils/brightness.js";
+import { BatteryController } from "../utils/battery";
+import { forceScreensaver, resetScreensaver } from "../utils/screensaver.js";
 import * as path from "path";
 import {
   LightDMBattery,
@@ -33,15 +33,18 @@ import { logger } from "../logger";
 import { CONSTS } from "../consts";
 
 export class Greeter {
-  public _config: web_greeter_config;
-  public _battery: Battery;
-  public _shared_data_directory: string;
+  // TODO: Remove this eslint-disable comment
+  /* eslint-disable @typescript-eslint/naming-convention */
+
+  public _config: webGreterConfig;
+  public _batteryController: BatteryController;
+  public _sharedDataDirectory: string;
   public static _instance: Greeter;
 
-  private constructor(config: web_greeter_config) {
+  private constructor(config: webGreterConfig) {
     this._config = config;
 
-    this._battery = new Battery();
+    this._batteryController = new BatteryController();
 
     try {
       //LightDMGreeter.setResettable(true);
@@ -49,7 +52,7 @@ export class Greeter {
     } catch (err) {
       logger.error(err);
       browser.whenReady().then(() => {
-        dialog.showMessageBoxSync(browser.primary_window, {
+        dialog.showMessageBoxSync(browser.primaryWindow, {
           message:
             "Detected a problem that could interfere with the system login process", // Yeah, that problematic message
           detail: `LightDM: ${err}\nYou can continue without major problems, but you won't be able to log in`,
@@ -60,42 +63,42 @@ export class Greeter {
       });
     }
 
-    this._connect_signals();
+    this._connectSignals();
 
     const user = LightDMUsers.getUsers()[0];
-    const user_data_dir = LightDMGreeter.ensureSharedDataDirSync(user.name);
-    this._shared_data_directory = user_data_dir.slice(
+    const userDataDir = LightDMGreeter.ensureSharedDataDirSync(user.name);
+    this._sharedDataDirectory = userDataDir.slice(
       0,
-      user_data_dir.lastIndexOf("/")
+      userDataDir.lastIndexOf("/")
     );
 
-    if (LightDMGreeter.getLockHint()) force_screensaver(true);
+    if (LightDMGreeter.getLockHint()) forceScreensaver(true);
 
     logger.debug("LightDM API connected");
   }
 
-  private _connect_signals(): void {
+  private _connectSignals(): void {
     LightDMGreeter.connect("authentication-complete", () => {
-      this._emit_signal("authentication-complete");
+      this._emitSignal("authentication-complete");
     });
     LightDMGreeter.connect("autologin-timer-expired", () => {
-      this._emit_signal("autologin-timer-expired");
+      this._emitSignal("autologin-timer-expired");
     });
     LightDMGreeter.connect("show-message", (text: string, type: number) => {
-      this._emit_signal("show-message", text, type);
+      this._emitSignal("show-message", text, type);
     });
     LightDMGreeter.connect("show-prompt", (text: string, type: number) => {
-      this._emit_signal("show-prompt", text, type);
+      this._emitSignal("show-prompt", text, type);
     });
     LightDMGreeter.connect("idle", () => {
-      this._emit_signal("idle");
+      this._emitSignal("idle");
     });
     LightDMGreeter.connect("reset", () => {
-      this._emit_signal("reset");
+      this._emitSignal("reset");
     });
   }
 
-  public _emit_signal(signal: string, ...args: unknown[]): void {
+  public _emitSignal(signal: string, ...args: unknown[]): void {
     //console.log("SIGNAL EMITTED", signal, args)
     for (const win of browser.windows) {
       win.window.webContents.send(
@@ -106,7 +109,7 @@ export class Greeter {
     }
   }
 
-  public static getInstance(config: web_greeter_config): Greeter {
+  public static getInstance(config: webGreterConfig): Greeter {
     return this._instance || (this._instance = new this(config));
   }
 
@@ -150,7 +153,7 @@ export class Greeter {
    * @deprecated Use `battery_data`
    */
   public get batteryData(): LightDMBattery | null {
-    return battery_to_obj(this._battery);
+    return batteryToObject(this._batteryController);
   }
 
   /**
@@ -158,21 +161,21 @@ export class Greeter {
    * @readonly
    */
   public get battery_data(): LightDMBattery | null {
-    return battery_to_obj(this._battery);
+    return batteryToObject(this._batteryController);
   }
 
   /**
    * Gets the brightness
    */
   public get brightness(): number {
-    return Brightness.get_brightness();
+    return brightnessController.getBrightness();
   }
   /**
    * Sets the brightness
    * @param {number} quantity The quantity to set
    */
   public set brightness(quantity: number) {
-    Brightness.set_brightness(quantity);
+    brightnessController.setBrightness(quantity);
   }
 
   /**
@@ -276,7 +279,7 @@ export class Greeter {
    * @readonly
    */
   public get language(): LightDMLanguage | null {
-    return language_to_obj(LightDM.getLanguage());
+    return languageToObject(LightDM.getLanguage());
   }
 
   /**
@@ -284,7 +287,7 @@ export class Greeter {
    * @readonly
    */
   public get languages(): LightDMLanguage[] {
-    return reduceArray(LightDM.getLanguages(), language_to_obj).filter(
+    return reduceArray(LightDM.getLanguages(), languageToObject).filter(
       isDefined
     );
   }
@@ -293,7 +296,7 @@ export class Greeter {
    * The currently active layout for the selected user.
    */
   public get layout(): LightDMLayout | null {
-    return layout_to_obj(LightDM.getLayout());
+    return layoutToObject(LightDM.getLayout());
   }
 
   public set layout(layout: LightDMLayout | null) {
@@ -308,7 +311,7 @@ export class Greeter {
    * @readonly
    */
   public get layouts(): LightDMLayout[] {
-    return reduceArray(LightDM.getLayouts(), layout_to_obj).filter(isDefined);
+    return reduceArray(LightDM.getLayouts(), layoutToObject).filter(isDefined);
   }
 
   /**
@@ -324,7 +327,7 @@ export class Greeter {
    * @readonly
    */
   public get remote_sessions(): LightDMSession[] {
-    return reduceArray(LightDM.getRemoteSessions(), session_to_obj).filter(
+    return reduceArray(LightDM.getRemoteSessions(), sessionToObject).filter(
       isDefined
     );
   }
@@ -350,7 +353,9 @@ export class Greeter {
    * @readonly
    */
   public get sessions(): LightDMSession[] {
-    return reduceArray(LightDM.getSessions(), session_to_obj).filter(isDefined);
+    return reduceArray(LightDM.getSessions(), sessionToObject).filter(
+      isDefined
+    );
   }
 
   /**
@@ -358,7 +363,7 @@ export class Greeter {
    * @readonly
    */
   public get shared_data_directory(): string {
-    return this._shared_data_directory;
+    return this._sharedDataDirectory;
   }
 
   /**
@@ -386,7 +391,7 @@ export class Greeter {
    * @readonly
    */
   public get users(): LightDMUser[] {
-    return reduceArray(LightDMUsers.getUsers(), user_to_obj).filter(isDefined);
+    return reduceArray(LightDMUsers.getUsers(), userToObject).filter(isDefined);
   }
 
   /**
@@ -410,14 +415,14 @@ export class Greeter {
    * @deprecated Use `brightness_set`
    */
   public brightnessSet(quantity: number): void {
-    return Brightness.set_brightness(quantity);
+    return brightnessController.setBrightness(quantity);
   }
   /**
    * Set the brightness to quantity
    * @param {number} quantity The quantity to set
    */
   public brightness_set(quantity: number): void {
-    return Brightness.set_brightness(quantity);
+    return brightnessController.setBrightness(quantity);
   }
 
   /**
@@ -426,14 +431,14 @@ export class Greeter {
    * @deprecated Use `brightness_increase`
    */
   public brightnessIncrease(quantity: number): void {
-    return Brightness.inc_brightness(quantity);
+    return brightnessController.incBrightness(quantity);
   }
   /**
    * Increase the brightness by quantity
    * @param {number} quantity The quantity to increase
    */
   public brightness_increase(quantity: number): void {
-    return Brightness.inc_brightness(quantity);
+    return brightnessController.incBrightness(quantity);
   }
 
   /**
@@ -442,14 +447,14 @@ export class Greeter {
    * @deprecated Use `brightness_decrease`
    */
   public brightnessDecrease(quantity: number): void {
-    return Brightness.dec_brightness(quantity);
+    return brightnessController.decBrightness(quantity);
   }
   /**
    * Decrease the brightness by quantity
    * @param {number} quantity The quantity to decrease
    */
   public brightness_decrease(quantity: number): void {
-    return Brightness.dec_brightness(quantity);
+    return brightnessController.decBrightness(quantity);
   }
 
   /**
@@ -519,12 +524,12 @@ export class Greeter {
   public start_session(session: string | null): boolean {
     try {
       const started = LightDMGreeter.startSessionSync(session);
-      if (started || this.is_authenticated) reset_screensaver();
+      if (started || this.is_authenticated) resetScreensaver();
       return started;
     } catch (err) {
       logger.error(err);
-      general_error_prompt(
-        browser.primary_window,
+      generalErrorPrompt(
+        browser.primaryWindow,
         "LightDM couldn't start session",
         `The provided session: "${session}" couldn't be started\n${err.message}`,
         "An error ocurred"
@@ -542,16 +547,16 @@ export class Greeter {
   }
 }
 
-function get_layouts(config_layouts: string[]): LightDMLayout[] {
+function getLayouts(configLayouts: string[]): LightDMLayout[] {
   const layouts = LightDM.getLayouts();
   const final: LightDMLayout[] = [];
-  for (const ldm_lay of layouts) {
-    for (let conf_lay of config_layouts) {
-      conf_lay = conf_lay.replace(/\s/g, "\t");
-      if (ldm_lay.getName() == conf_lay) {
-        const lays_chips = layout_to_obj(ldm_lay);
-        if (!lays_chips) continue;
-        final.push(lays_chips);
+  for (const ldmLay of layouts) {
+    for (let confLay of configLayouts) {
+      confLay = confLay.replace(/\s/g, "\t");
+      if (ldmLay.getName() == confLay) {
+        const layChips = layoutToObject(ldmLay);
+        if (!layChips) continue;
+        final.push(layChips);
       }
     }
   }
@@ -559,14 +564,14 @@ function get_layouts(config_layouts: string[]): LightDMLayout[] {
 }
 
 export class GreeterConfig {
-  public _config: web_greeter_config;
+  public _config: webGreterConfig;
   public static _instance: GreeterConfig;
 
-  private constructor(config: web_greeter_config) {
+  private constructor(config: webGreterConfig) {
     this._config = config;
   }
 
-  public static getInstance(config: web_greeter_config): GreeterConfig {
+  public static getInstance(config: webGreterConfig): GreeterConfig {
     return this._instance || (this._instance = new this(config));
   }
 
@@ -581,7 +586,7 @@ export class GreeterConfig {
    *                                      for users that have not configured a `.face` image.
    * @readonly
    */
-  public get branding(): web_greeter_config["branding"] {
+  public get branding(): webGreterConfig["branding"] {
     return this._config.branding;
   }
 
@@ -597,7 +602,7 @@ export class GreeterConfig {
    * @property {string}  theme               The name of the theme to be used by the greeter.
    * @readonly
    */
-  public get greeter(): web_greeter_config["greeter"] {
+  public get greeter(): webGreterConfig["greeter"] {
     return this._config.greeter;
   }
 
@@ -611,7 +616,7 @@ export class GreeterConfig {
    * @property {number}  value      The amount to increase/decrease brightness by greeter.
    * @property {number}  steps      How many steps are needed to do the change.
    */
-  public get features(): web_greeter_config["features"] {
+  public get features(): webGreterConfig["features"] {
     return this._config.features;
   }
 
@@ -621,28 +626,28 @@ export class GreeterConfig {
    * @readonly
    */
   public get layouts(): LightDMLayout[] {
-    return get_layouts(this._config.layouts);
+    return getLayouts(this._config.layouts);
   }
 }
 
 export class ThemeUtils {
-  public _config: web_greeter_config;
-  public _allowed_dirs: string[];
+  public _config: webGreterConfig;
+  public _allowedDirs: string[];
   public static _instance: ThemeUtils;
 
-  private constructor(config: web_greeter_config) {
+  private constructor(config: webGreterConfig) {
     this._config = config;
 
-    this._allowed_dirs = [
-      nody_greeter.app.theme_dir,
-      nody_greeter.config.branding.background_images_dir,
+    this._allowedDirs = [
+      globalNodyConfig.app.theme_dir,
+      globalNodyConfig.config.branding.background_images_dir,
       global.lightdmGreeter.shared_data_directory,
-      path.dirname(fs.realpathSync(nody_greeter.config.greeter.theme)),
+      path.dirname(fs.realpathSync(globalNodyConfig.config.greeter.theme)),
       os.tmpdir(),
     ];
   }
 
-  public static getInstance(config: web_greeter_config): ThemeUtils {
+  public static getInstance(config: webGreterConfig): ThemeUtils {
     return this._instance || (this._instance = new this(config));
   }
 
@@ -654,55 +659,55 @@ export class ThemeUtils {
    *   * Is located within the greeter's shared data directory (`/var/lib/lightdm-data`).
    *   * Is located in `/tmp`.
    *
-   * @param dir_path The abs path to the desired directory.
-   * @param only_images Include only images in the results. Default `true`.
+   * @param dirPath The abs path to the desired directory.
+   * @param onlyImages Include only images in the results. Default `true`.
    */
-  public dirlist(dir_path: string, only_images = true): string[] {
-    if (!dir_path || typeof dir_path !== "string" || dir_path === "/") {
+  public dirlist(dirPath: string, onlyImages = true): string[] {
+    if (!dirPath || typeof dirPath !== "string" || dirPath === "/") {
       return [];
     }
-    if (dir_path.startsWith("./")) {
-      dir_path = path.join(path.dirname(this._config.greeter.theme), dir_path);
+    if (dirPath.startsWith("./")) {
+      dirPath = path.join(path.dirname(this._config.greeter.theme), dirPath);
     }
 
     try {
-      dir_path = fs.realpathSync(path.normalize(dir_path));
+      dirPath = fs.realpathSync(path.normalize(dirPath));
     } catch (e) {
       return [];
     }
 
-    if (!path.isAbsolute(dir_path) || !fs.lstatSync(dir_path).isDirectory()) {
+    if (!path.isAbsolute(dirPath) || !fs.lstatSync(dirPath).isDirectory()) {
       return [];
     }
 
     let allowed = false;
 
-    for (let i = 0; i < this._allowed_dirs.length; i++) {
-      if (dir_path.startsWith(this._allowed_dirs[i])) {
+    for (let i = 0; i < this._allowedDirs.length; i++) {
+      if (dirPath.startsWith(this._allowedDirs[i])) {
         allowed = true;
         break;
       }
     }
 
     if (!allowed) {
-      logger.error(`Path "${dir_path}" is not allowed`);
+      logger.error(`Path "${dirPath}" is not allowed`);
       return [];
     }
 
-    const files = fs.readdirSync(dir_path, { withFileTypes: true });
+    const files = fs.readdirSync(dirPath, { withFileTypes: true });
     let result = [];
 
-    if (only_images) {
+    if (onlyImages) {
       result = files.reduce((cb: string[], v) => {
         // This only returns files inside path, not recursively
         if (v.isFile() && v.name.match(/.+\.(jpe?g|png|gif|bmp|webp)/)) {
-          cb.push(path.join(dir_path, v.name));
+          cb.push(path.join(dirPath, v.name));
         }
         return cb;
       }, []);
     } else {
       result = files.reduce((cb: string[], v) => {
-        cb.push(path.join(dir_path, v.name));
+        cb.push(path.join(dirPath, v.name));
         return cb;
       }, []);
     }
@@ -816,7 +821,9 @@ ipcMain.on(CONSTS.channel.window_broadcast, (ev, data: unknown) => {
 });
 
 browser.whenReady().then(() => {
-  global.lightdmGreeter = Greeter.getInstance(nody_greeter.config);
-  global.greeterConfigGreeter = GreeterConfig.getInstance(nody_greeter.config);
-  global.themeUtilsGreeter = ThemeUtils.getInstance(nody_greeter.config);
+  global.lightdmGreeter = Greeter.getInstance(globalNodyConfig.config);
+  global.greeterConfigGreeter = GreeterConfig.getInstance(
+    globalNodyConfig.config
+  );
+  global.themeUtilsGreeter = ThemeUtils.getInstance(globalNodyConfig.config);
 });

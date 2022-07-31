@@ -1,4 +1,4 @@
-import { nody_greeter } from "../config";
+import { globalNodyConfig } from "../config";
 import { logger } from "../logger";
 
 import {
@@ -7,10 +7,10 @@ import {
   setScreenSaver,
 } from "../bindings/screensaver";
 
-let initial_timeout = -1;
+let initialTimeout = -1;
 let taken = false;
 
-function get_screensaver(): number {
+function getScreensaver(): number {
   let timeout = 0;
   try {
     timeout = getScreenSaver().timeout;
@@ -18,18 +18,18 @@ function get_screensaver(): number {
     logger.error(err);
     return -1;
   }
-  if (initial_timeout == -1) initial_timeout = timeout;
+  if (initialTimeout == -1) initialTimeout = timeout;
   taken = true;
   return timeout;
 }
 
-function set_screensaver(timeout?: number): void {
-  if (!taken) get_screensaver();
-  if (initial_timeout == -1) return;
+function setScreensaver(timeout?: number): void {
+  if (!taken) getScreensaver();
+  if (initialTimeout == -1) return;
   timeout =
     timeout != undefined
       ? timeout
-      : nody_greeter.config.greeter.screensaver_timeout;
+      : globalNodyConfig.config.greeter.screensaver_timeout;
   try {
     setScreenSaver(timeout);
   } catch (err) {
@@ -39,11 +39,11 @@ function set_screensaver(timeout?: number): void {
   logger.debug("Screensaver set");
 }
 
-function reset_screensaver(): void {
-  if (!taken) get_screensaver();
-  if (initial_timeout == -1) return;
+function resetScreensaver(): void {
+  if (!taken) getScreensaver();
+  if (initialTimeout == -1) return;
   try {
-    setScreenSaver(initial_timeout);
+    setScreenSaver(initialTimeout);
   } catch (err) {
     logger.error(err);
     return;
@@ -51,13 +51,8 @@ function reset_screensaver(): void {
   logger.debug("Screensaver reset");
 }
 
-function force_screensaver(value: boolean): void {
+function forceScreensaver(value: boolean): void {
   forceScreenSaver(value);
 }
 
-export {
-  get_screensaver,
-  set_screensaver,
-  reset_screensaver,
-  force_screensaver,
-};
+export { getScreensaver, setScreensaver, resetScreensaver, forceScreensaver };

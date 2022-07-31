@@ -42,7 +42,7 @@ const myFormat = winston.format.printf(
   }
 );
 
-const winston_logger = winston.createLogger({
+const winstonLogger = winston.createLogger({
   level: "debug",
   format: winston.format.combine(
     winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
@@ -58,13 +58,13 @@ const winston_logger = winston.createLogger({
 });
 
 class Logger {
-  private winston_logger: winston.Logger;
+  private winstonLogger: winston.Logger;
   public constructor() {
-    this.winston_logger = winston_logger;
+    this.winstonLogger = winstonLogger;
   }
 
   public debug(message: string): void {
-    this.winston_logger.log({
+    this.winstonLogger.log({
       level: "debug",
       message: message,
       line: __line,
@@ -72,7 +72,7 @@ class Logger {
     });
   }
   public warn(message: string): void {
-    this.winston_logger.log({
+    this.winstonLogger.log({
       level: "warn",
       message: message,
       line: __line,
@@ -80,7 +80,7 @@ class Logger {
     });
   }
   public error(message: string): void {
-    this.winston_logger.log({
+    this.winstonLogger.log({
       level: "error",
       message: message,
       line: __line,
@@ -98,7 +98,7 @@ class Logger {
     line: number;
     source: string;
   }): void {
-    this.winston_logger.log({
+    this.winstonLogger.log({
       level: level,
       message: message,
       line: line,
