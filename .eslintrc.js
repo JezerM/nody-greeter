@@ -18,6 +18,30 @@ module.exports = {
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/explicit-function-return-type": "error",
     "@typescript-eslint/explicit-member-accessibility": "error",
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        selector: [
+          "variable",
+          "function",
+          "parameter",
+          "classProperty",
+          "classMethod",
+          "accessor",
+        ],
+        format: ["camelCase", "UPPER_CASE"],
+        filter: {
+          regex:
+            "^(LightDM|greeter_config|theme_utils|greeter_comm|_ready_event)\\w*",
+          match: false,
+        },
+        leadingUnderscore: "allowSingleOrDouble",
+      },
+      {
+        selector: ["class", "interface"],
+        format: ["PascalCase"],
+      },
+    ],
   },
   ignorePatterns: ["*.gyp", "*.cc"],
 };
