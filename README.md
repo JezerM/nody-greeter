@@ -60,7 +60,7 @@ Themes working in **web-greeter** should work also here. All themes shipped with
 ## Installation
 
 ```sh
-git clone https://github.com/JezerM/nody-greeter.git
+git clone --recursive https://github.com/JezerM/nody-greeter.git
 cd nody-greeter
 npm install
 npm run rebuild
