@@ -25,9 +25,11 @@ module.exports = {
           "variable",
           "function",
           "parameter",
+          "parameterProperty",
           "classProperty",
           "classMethod",
           "accessor",
+          "enumMember",
         ],
         format: ["camelCase", "UPPER_CASE"],
         filter: {
@@ -40,6 +42,10 @@ module.exports = {
       {
         selector: ["class", "interface", "enum", "typeAlias"],
         format: ["PascalCase"],
+      },
+      {
+        selector: ["typeProperty", "typeParameter", "typeMethod"],
+        format: ["camelCase", "PascalCase"],
       },
     ],
   },
