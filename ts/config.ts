@@ -63,8 +63,8 @@ export type ThemeConfig = io_ts.TypeOf<typeof THEME_CONFIG>;
 export interface AppConfig {
   fullscreen: boolean;
   frame: boolean;
-  debug_mode: boolean;
-  theme_dir: string;
+  debugMode: boolean;
+  themeDir: string;
 }
 
 export interface NodyConfig {
@@ -102,8 +102,8 @@ export const globalNodyConfig: NodyConfig = {
   app: {
     fullscreen: true,
     frame: false,
-    debug_mode: false,
-    theme_dir:
+    debugMode: false,
+    themeDir:
       process.env.NODY_GREETER_THEME_DIR || "/usr/share/web-greeter/themes/",
   },
   theme: {
@@ -122,7 +122,7 @@ let themeDir: string | undefined;
  */
 export function loadThemeDir(): string {
   const theme = globalNodyConfig.config.greeter.theme;
-  const dir = globalNodyConfig.app.theme_dir;
+  const dir = globalNodyConfig.app.themeDir;
   const defTheme = "gruvbox";
   themeDir = path.join(dir, theme);
 
@@ -148,7 +148,7 @@ export function loadPrimaryThemePath(): string {
   if (!themeDir) themeDir = loadThemeDir();
   const absTheme = globalNodyConfig.config.greeter.theme;
   const absThemeName = absTheme.split("/").pop();
-  const dir = globalNodyConfig.app.theme_dir;
+  const dir = globalNodyConfig.app.themeDir;
   const defTheme = "gruvbox";
 
   if (absThemeName?.endsWith(".html"))
@@ -248,7 +248,7 @@ export function ensureTheme(): void {
   if (!themeDir) themeDir = loadThemeDir();
 
   const primary = globalNodyConfig.theme.primary_html;
-  const dir = globalNodyConfig.app.theme_dir;
+  const dir = globalNodyConfig.app.themeDir;
   const defTheme = "gruvbox";
 
   const primaryExists = fs.existsSync(path.join(themeDir, primary));

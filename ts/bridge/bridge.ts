@@ -302,7 +302,13 @@ export class Greeter {
   public set layout(layout: LightDMLayout | null) {
     if (layout) {
       LightDM.getLayout();
-      LightDM.setLayout(new LightDM.Layout(layout));
+      LightDM.setLayout(
+        new LightDM.Layout({
+          name: layout.name,
+          description: layout.description,
+          shortDescription: layout.short_description,
+        })
+      );
     }
   }
 
@@ -639,7 +645,7 @@ export class ThemeUtils {
     this._config = config;
 
     this._allowedDirs = [
-      globalNodyConfig.app.theme_dir,
+      globalNodyConfig.app.themeDir,
       globalNodyConfig.config.branding.background_images_dir,
       global.lightdmGreeter.shared_data_directory,
       path.dirname(fs.realpathSync(globalNodyConfig.config.greeter.theme)),

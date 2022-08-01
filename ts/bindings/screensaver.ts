@@ -4,8 +4,8 @@ const addon = require("./build/Release/screensaver");
 export interface Screensaver {
   timeout: number;
   interval: number;
-  prefer_blank: number;
-  allow_exp: number;
+  preferBlank: number;
+  allowExp: number;
 }
 
 /**

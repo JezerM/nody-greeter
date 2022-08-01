@@ -23,7 +23,7 @@ import { setScreensaver, resetScreensaver } from "./utils/screensaver";
 import { WindowMetadata } from "./preload";
 
 interface NodyWindow {
-  is_primary: boolean;
+  isPrimary: boolean;
   display: Electron.Display;
   window: BrowserWindow;
   meta: WindowMetadata;
@@ -105,7 +105,7 @@ class Browser {
     });
     //console.log({ primary_url, secondary_url });
     for (const w of this.windows) {
-      if (w.is_primary) w.window.loadURL(`${primaryUrl}`);
+      if (w.isPrimary) w.window.loadURL(`${primaryUrl}`);
       else w.window.loadURL(`${secondaryUrl}`);
       w.window.setBackgroundColor("#000000");
 
@@ -153,7 +153,7 @@ class Browser {
     const windows: NodyWindow[] = displays.map((display) => {
       const isPrimary = display.id === primaryDisplay.id;
       return {
-        is_primary: isPrimary,
+        isPrimary,
         display,
         window: new BrowserWindow({
           height: display.workAreaSize.height,
@@ -169,7 +169,7 @@ class Browser {
             contextIsolation: false,
             allowRunningInsecureContent:
               !globalNodyConfig.config.greeter.secure_mode, // Should set option
-            devTools: globalNodyConfig.app.debug_mode, // Should set option
+            devTools: globalNodyConfig.app.debugMode, // Should set option
           },
         }),
         meta: {
@@ -212,7 +212,7 @@ class Browser {
       w.window.once("ready-to-show", () => {
         w.window.setFullScreen(globalNodyConfig.app.fullscreen);
         w.window.show();
-        if (w.is_primary) {
+        if (w.isPrimary) {
           w.window.focus();
         }
         logger.debug("Nody Greeter started win: " + w.meta.id);
@@ -228,7 +228,7 @@ class Browser {
       });
 
       w.window.webContents.on("context-menu", (_ev, params) => {
-        if (!globalNodyConfig.app.debug_mode) return;
+        if (!globalNodyConfig.app.debugMode) return;
         const position = { x: params.x, y: params.y };
         const menuTemplate: MenuItemConstructorOptions[] = [
           { role: "undo", enabled: params.editFlags.canUndo, accelerator: "U" },
@@ -292,7 +292,7 @@ class Browser {
 
   public get primaryWindow(): BrowserWindow {
     for (const w of this.windows) {
-      if (w.is_primary) {
+      if (w.isPrimary) {
         return w.window;
       }
     }

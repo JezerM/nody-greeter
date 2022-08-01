@@ -1,3 +1,6 @@
+// TODO: Remove this eslint-disable comment
+/* eslint-disable @typescript-eslint/naming-convention */
+
 interface LightDMLanguage {
   code: string;
   name: string;

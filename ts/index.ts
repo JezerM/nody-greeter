@@ -39,7 +39,7 @@ const res = yargs
   .alias("v", "version").argv;
 
 function listThemes(print = true): void {
-  let dir = globalNodyConfig.app.theme_dir;
+  let dir = globalNodyConfig.app.themeDir;
   dir = fs.existsSync(dir) ? dir : "/usr/share/web-greeter/themes";
   const filenames = fs.readdirSync(dir, { withFileTypes: true });
   const dirlist: string[] = [];
@@ -62,7 +62,7 @@ function setDebug(mode: boolean): void {
   globalNodyConfig.config.greeter.debug_mode = mode;
   globalNodyConfig.app.fullscreen = !mode;
   globalNodyConfig.app.frame = mode;
-  globalNodyConfig.app.debug_mode = mode;
+  globalNodyConfig.app.debugMode = mode;
 }
 
 if (res.d || res.mode == "debug") {

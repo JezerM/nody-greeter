@@ -13,6 +13,8 @@ import {
  * functionality / themes.
  */
 export interface WindowMetadata {
+  // TODO: Remove this eslint-disable comment
+  /* eslint-disable @typescript-eslint/naming-convention */
   id: number;
   is_primary: boolean;
   position: {
