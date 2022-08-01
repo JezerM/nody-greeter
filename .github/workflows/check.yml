@@ -31,7 +31,7 @@ jobs:
       name: Checkout
       uses: actions/checkout@v2
       with:
-        submodules: true
+        submodules: recursive
     -
       name: Setup node
       uses: actions/setup-node@v2
@@ -58,7 +58,7 @@ jobs:
       name: Checkout
       uses: actions/checkout@v2
       with:
-        submodules: true
+        submodules: recursive
     -
       name: Setup node
       uses: actions/setup-node@v2
@@ -88,7 +88,7 @@ jobs:
       name: Checkout
       uses: actions/checkout@v2
       with:
-        submodules: true
+        submodules: recursive
     -
       name: Setup node
       uses: actions/setup-node@v2
@@ -118,7 +118,7 @@ jobs:
       name: Checkout
       uses: actions/checkout@v2
       with:
-        submodules: true
+        submodules: recursive
     -
       name: Setup node
       uses: actions/setup-node@v2

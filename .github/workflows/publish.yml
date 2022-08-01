@@ -16,7 +16,7 @@ jobs:
         name: Checkout
         uses: actions/checkout@v2
         with:
-          submodules: true
+          submodules: recursive
       -
         name: Run build action
         uses: "./.github/actions/build"
@@ -40,7 +40,7 @@ jobs:
         name: Checkout
         uses: actions/checkout@v2
         with:
-          submodules: true
+          submodules: recursive
       -
         name: Run build action
         uses: "./.github/actions/build"
@@ -64,7 +64,7 @@ jobs:
         name: Checkout
         uses: actions/checkout@v2
         with:
-          submodules: true
+          submodules: recursive
       -
         name: Dispatch void-linux build
         uses: aurelien-baudet/workflow-dispatch@v2
