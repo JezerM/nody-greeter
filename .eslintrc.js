@@ -47,6 +47,10 @@ module.exports = {
         selector: ["typeProperty", "typeParameter", "typeMethod"],
         format: ["camelCase", "PascalCase"],
       },
+      {
+        selector: ["objectLiteralProperty", "objectLiteralMethod"],
+        format: ["camelCase", "PascalCase", "snake_case"],
+      },
     ],
   },
   ignorePatterns: ["*.gyp", "*.cc"],
