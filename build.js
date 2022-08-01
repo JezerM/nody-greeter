@@ -292,7 +292,7 @@ let copies_prepare = [
     to: path.join(lightdm_path, "Xgreeter"),
   },
   {
-    from: "./themes/",
+    from: "./themes/themes/",
     to: path.join(webg_path, "themes/"),
   },
   {
