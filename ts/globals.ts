@@ -1,7 +1,7 @@
 import { BrowserWindow, dialog } from "electron";
 import { Browser } from "./browser";
 import { logger } from "./logger";
-import { nody_greeter } from "./config";
+import { globalNodyConfig } from "./config";
 
 const browser = new Browser();
 
@@ -24,7 +24,7 @@ function initLogger(): void {
             line: line,
             source: sourceID,
           });
-          error_prompt(win.window, message, sourceID, line);
+          errorPrompt(win.window, message, sourceID, line);
         } else if (code == 2) {
           logger.log({
             level: "warn",
@@ -45,14 +45,14 @@ function initLogger(): void {
  * @param {string} source Source of error
  * @param {number} line Line number where error was detected
  */
-function error_prompt(
+function errorPrompt(
   win: BrowserWindow,
   message: string,
   source: string,
   line: number
 ): void {
-  if (!nody_greeter.config.greeter.detect_theme_errors) return;
-  general_error_prompt(
+  if (!globalNodyConfig.config.greeter.detect_theme_errors) return;
+  generalErrorPrompt(
     win,
     "An error ocurred. Do you want to change to default theme? (gruvbox)",
     `${source} ${line}: ${message}`,
@@ -60,7 +60,7 @@ function error_prompt(
   );
 }
 
-function general_error_prompt(
+function generalErrorPrompt(
   win: BrowserWindow,
   message: string,
   detail: string,
@@ -77,8 +77,8 @@ function general_error_prompt(
     case 0: // Cancel
       break;
     case 1: // Default theme
-      nody_greeter.config.greeter.theme = "gruvbox";
-      browser.load_theme();
+      globalNodyConfig.config.greeter.theme = "gruvbox";
+      browser.loadTheme();
       break;
     case 2: // Reload theme
       for (const win of browser.windows) {
@@ -90,4 +90,4 @@ function general_error_prompt(
   }
 }
 
-export { browser, logger, error_prompt, general_error_prompt };
+export { browser, logger, errorPrompt, generalErrorPrompt };

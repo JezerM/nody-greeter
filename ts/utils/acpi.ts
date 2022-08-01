@@ -1,21 +1,21 @@
 import * as child_process from "child_process";
 import { logger } from "../logger";
 
-type callback = (data: string) => void;
+type Callback = (data: string) => void;
 
-class ACPI_controller {
+class ACPIController {
   public constructor() {
-    if (this.check_acpi()) this.listen();
+    if (this.checkAcpi()) this.listen();
     else logger.error("ACPI: acpi_listen does not exists");
   }
 
   protected tries = 0;
-  protected callbacks: callback[] = [];
+  protected callbacks: Callback[] = [];
 
-  public connect(cb: callback): void {
+  public connect(cb: Callback): void {
     this.callbacks.push(cb);
   }
-  public disconnect(cb: callback): void {
+  public disconnect(cb: Callback): void {
     const ind = this.callbacks.findIndex((c) => {
       return c === cb;
     });
@@ -23,7 +23,7 @@ class ACPI_controller {
     this.callbacks.splice(ind, 1);
   }
 
-  private check_acpi(): boolean {
+  private checkAcpi(): boolean {
     const res = child_process.spawnSync("which", ["acpi_listen"], {
       encoding: "utf-8",
     });
@@ -53,6 +53,6 @@ class ACPI_controller {
   }
 }
 
-const ACPI = new ACPI_controller();
+const ACPI = new ACPIController();
 
 export { ACPI };

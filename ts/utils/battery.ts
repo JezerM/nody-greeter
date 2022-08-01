@@ -1,45 +1,45 @@
 import * as path from "path";
 import * as fs from "fs";
 
-import { nody_greeter } from "../config";
+import { globalNodyConfig } from "../config";
 import { ACPI } from "./acpi";
 
-interface battery {
+interface Battery {
   name: string;
   status: string;
   perc: number;
   capacity: number;
 }
 
-let running_update = false;
+let runningUpdate = false;
 
-class Battery {
-  public _batteries: battery[] = [];
-  public ps_path = "/sys/class/power_supply/";
+class BatteryController {
+  public _batteries: Battery[] = [];
+  public PS_PATH = "/sys/class/power_supply/";
   private _ac = "AC0";
   private _perc = -1;
   private _status = "N/A";
-  private _ac_status = false;
+  private _acStatus = false;
   private _capacity = 0;
   private _time = "";
   private _watt = 0;
 
   public constructor() {
-    if (nody_greeter.config.features.battery == true) this._init();
+    if (globalNodyConfig.config.features.battery == true) this._init();
   }
 
   private _init(): void {
     if (this._batteries.length == 0) {
-      scandir_line(this.ps_path, (lines) => this._update_batteries(lines));
+      scandirLine(this.PS_PATH, (lines) => this._updateBatteries(lines));
     }
-    this.acpi_listen();
-    this.full_update();
+    this.acpiListen();
+    this.fullUpdate();
   }
 
   /**
    * Update available batteries and AC
    */
-  private _update_batteries(line: string): void {
+  private _updateBatteries(line: string): void {
     const match = line.match(/BAT\w+/);
     if (match) {
       this._batteries.push({
@@ -62,8 +62,8 @@ class Battery {
   public get status(): string {
     return this._status;
   }
-  public get ac_status(): boolean {
-    return this._ac_status;
+  public get acStatus(): boolean {
+    return this._acStatus;
   }
   public get capacity(): number {
     return this._capacity;
@@ -75,10 +75,10 @@ class Battery {
     return this._watt;
   }
 
-  public acpi_listen(): void {
+  public acpiListen(): void {
     ACPI.connect((data) => {
       if (data.match(/battery|ac_adapter/)) {
-        this.full_update();
+        this.fullUpdate();
       }
     });
   }
@@ -89,68 +89,68 @@ class Battery {
    * * (c) 2010-2012, Peter Hofmann
    * @see https://github.com/lcpz/lain/blob/master/widget/bat.lua
    */
-  public async full_update(): Promise<void> {
-    if (running_update) return;
-    running_update = true;
+  public async fullUpdate(): Promise<void> {
+    if (runningUpdate) return;
+    runningUpdate = true;
 
-    let sum_rate_current = 0;
-    let sum_rate_power = 0;
-    let sum_rate_energy = 0;
-    let sum_energy_now = 0;
-    let sum_energy_full = 0;
-    let sum_charge_full = 0;
-    let sum_charge_design = 0;
+    let sumRateCurrent = 0;
+    let sumRatePower = 0;
+    let sumRateEnergy = 0;
+    let sumEnergyNow = 0;
+    let sumEnergyFull = 0;
+    let sumChargeFull = 0;
+    let sumChargeDesign = 0;
 
-    async function read_data(...p: string[]): Promise<string> {
-      return read_first_line(path.join(...p));
+    async function readData(...p: string[]): Promise<string> {
+      return readFirstLine(path.join(...p));
     }
 
     for (let i = 0; i < this._batteries.length; i++) {
       const battery = this._batteries[i];
-      const bat_path = this.ps_path + battery.name;
-      const present = await read_first_line(path.join(bat_path, "present"));
+      const batPath = this.PS_PATH + battery.name;
+      const present = await readFirstLine(path.join(batPath, "present"));
 
       if (parseInt(present) == 1) {
-        const rate_current = parseInt(await read_data(bat_path, "current_now"));
-        const rate_voltage = parseInt(await read_data(bat_path, "voltage_now"));
-        const rate_power = parseInt(await read_data(bat_path, "power_now"));
-        const charge_full = parseInt(await read_data(bat_path, "charge_full"));
-        const charge_desing = parseInt(
-          await read_data(bat_path, "charge_full_design")
+        const rateCurrent = parseInt(await readData(batPath, "current_now"));
+        const rateVoltage = parseInt(await readData(batPath, "voltage_now"));
+        const ratePower = parseInt(await readData(batPath, "power_now"));
+        const chargeFull = parseInt(await readData(batPath, "charge_full"));
+        const chargeDesign = parseInt(
+          await readData(batPath, "charge_full_design")
         );
 
-        const energy_now = parseInt(
-          (await read_data(bat_path, "energy_now")) ||
-            (await read_data(bat_path, "charge_now"))
+        const energyNow = parseInt(
+          (await readData(batPath, "energy_now")) ||
+            (await readData(batPath, "charge_now"))
         );
-        const energy_full =
-          parseInt(await read_data(bat_path, "energy_full")) || charge_full;
-        const energy_percentage =
-          parseInt(await read_data(bat_path, "capacity")) ||
-          Math.floor((energy_now / energy_full) * 100);
+        const energyFull =
+          parseInt(await readData(batPath, "energy_full")) || chargeFull;
+        const energyPercentage =
+          parseInt(await readData(batPath, "capacity")) ||
+          Math.floor((energyNow / energyFull) * 100);
         this._batteries[i].status =
-          (await read_data(bat_path, "status")) || "N/A";
-        this._batteries[i].perc = energy_percentage || this._batteries[i].perc;
+          (await readData(batPath, "status")) || "N/A";
+        this._batteries[i].perc = energyPercentage || this._batteries[i].perc;
 
-        if (!charge_desing || charge_desing == 0) {
+        if (!chargeDesign || chargeDesign == 0) {
           this._batteries[i].capacity = 0;
         } else {
           this._batteries[i].capacity = Math.floor(
-            (charge_full / charge_desing) * 100
+            (chargeFull / chargeDesign) * 100
           );
         }
-        sum_rate_current += rate_current || 0;
-        sum_rate_power += rate_power || 0;
-        sum_rate_energy +=
-          rate_power || ((rate_voltage || 0) * (rate_current || 0)) / 1e6;
-        sum_energy_now += energy_now || 0;
-        sum_energy_full += energy_full || 0;
-        sum_charge_full += charge_full || 0;
-        sum_charge_design += charge_desing || 0;
+        sumRateCurrent += rateCurrent || 0;
+        sumRatePower += ratePower || 0;
+        sumRateEnergy +=
+          ratePower || ((rateVoltage || 0) * (rateCurrent || 0)) / 1e6;
+        sumEnergyNow += energyNow || 0;
+        sumEnergyFull += energyFull || 0;
+        sumChargeFull += chargeFull || 0;
+        sumChargeDesign += chargeDesign || 0;
       }
     }
     this._capacity = Math.floor(
-      Math.min(100, (sum_charge_full / sum_charge_design) * 100)
+      Math.min(100, (sumChargeFull / sumChargeDesign) * 100)
     );
     this._status =
       this._batteries.length > 0 ? this._batteries[0].status : "N/A";
@@ -161,45 +161,44 @@ class Battery {
         this._status = battery.status;
       }
     }
-    this._ac_status =
-      Boolean(parseInt(await read_data(this.ps_path, this._ac, "online"))) ??
+    this._acStatus =
+      Boolean(parseInt(await readData(this.PS_PATH, this._ac, "online"))) ??
       false;
 
-    let rate_time: number;
-    let rate_time_magnitude: number;
+    let rateTime: number;
+    let rateTimeMagnitude: number;
 
     if (this._status != "N/A") {
       if (
         this._status != "Full" &&
-        sum_rate_power == 0 &&
-        this._ac_status == true
+        sumRatePower == 0 &&
+        this._acStatus == true
       ) {
         this._perc = Math.floor(
-          Math.min(100, (sum_energy_now / sum_energy_full) * 100 + 0.5)
+          Math.min(100, (sumEnergyNow / sumEnergyFull) * 100 + 0.5)
         );
         this._time = "00:00";
         this._watt = 0;
       } else if (this._status != "Full") {
-        rate_time = 0;
-        if (sum_rate_power > 0 || sum_rate_current > 0) {
-          const div =
-            (sum_rate_power > 0 && sum_rate_power) || sum_rate_current;
+        rateTime = 0;
+        if (sumRatePower > 0 || sumRateCurrent > 0) {
+          const div = (sumRatePower > 0 && sumRatePower) || sumRateCurrent;
           if (this._status == "Charging")
-            rate_time = (sum_energy_full - sum_energy_now) / div;
-          else rate_time = sum_energy_now / div;
-          if (0 < rate_time && rate_time < 0.01) {
-            rate_time_magnitude = Math.abs(Math.floor(Math.log10(rate_time)));
-            rate_time = (rate_time * 10) ^ (rate_time_magnitude - 2);
+            rateTime = (sumEnergyFull - sumEnergyNow) / div;
+          else rateTime = sumEnergyNow / div;
+          if (0 < rateTime && rateTime < 0.01) {
+            rateTimeMagnitude = Math.abs(Math.floor(Math.log10(rateTime)));
+            rateTime = (rateTime * 10) ^ (rateTimeMagnitude - 2);
           }
-          const hours = Math.floor(rate_time);
-          const minutes = Math.floor((rate_time - hours) * 60);
+          const hours = Math.floor(rateTime);
+          const minutes = Math.floor((rateTime - hours) * 60);
           this._perc = Math.floor(
-            Math.min(100, (sum_energy_now / sum_energy_full) * 100 + 0.5)
+            Math.min(100, (sumEnergyNow / sumEnergyFull) * 100 + 0.5)
           );
           this._time = `${hours.toString().padStart(2, "0")}:${minutes
             .toString()
             .padStart(2, "0")}`;
-          this._watt = sum_rate_energy / 1e6;
+          this._watt = sumRateEnergy / 1e6;
         }
       } else if (this._status == "Full") {
         this._perc = 100;
@@ -210,16 +209,16 @@ class Battery {
     this._perc = this._perc == null ? 0 : this._perc;
 
     if (global.lightdmGreeter)
-      global.lightdmGreeter._emit_signal("battery_update");
+      global.lightdmGreeter._emitSignal("battery_update");
 
-    running_update = false;
+    runningUpdate = false;
   }
 }
 
 /**
  * List a directory and run callback for each element
  */
-function scandir_line(dir: string, callback: (lines: string) => void): void {
+function scandirLine(dir: string, callback: (lines: string) => void): void {
   const lines = fs.readdirSync(dir, { encoding: "utf8" });
   lines.forEach((l) => callback(l));
 }
@@ -227,9 +226,9 @@ function scandir_line(dir: string, callback: (lines: string) => void): void {
 /**
  * Read first line of a file asynchronously
  */
-function read_first_line(file_path: string): Promise<string> {
+function readFirstLine(filePath: string): Promise<string> {
   return new Promise((resolve) => {
-    const rs = fs.createReadStream(file_path, { encoding: "utf8" });
+    const rs = fs.createReadStream(filePath, { encoding: "utf8" });
     let val = "";
     let ind = 0;
     let pos = 0;
@@ -250,4 +249,4 @@ function read_first_line(file_path: string): Promise<string> {
   });
 }
 
-export { Battery };
+export { BatteryController };

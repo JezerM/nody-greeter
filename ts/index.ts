@@ -2,7 +2,7 @@ import * as yargs from "yargs";
 import * as fs from "fs";
 import * as path from "path";
 
-import { ensure_theme, load_theme_config, nody_greeter } from "./config";
+import { ensureTheme, loadThemeConfig, globalNodyConfig } from "./config";
 
 const res = yargs
   .scriptName("nody-greeter")
@@ -38,8 +38,8 @@ const res = yargs
   .alias("h", "help")
   .alias("v", "version").argv;
 
-function list_themes(print = true): void {
-  let dir = nody_greeter.app.theme_dir;
+function listThemes(print = true): void {
+  let dir = globalNodyConfig.app.themeDir;
   dir = fs.existsSync(dir) ? dir : "/usr/share/web-greeter/themes";
   const filenames = fs.readdirSync(dir, { withFileTypes: true });
   const dirlist: string[] = [];
@@ -47,8 +47,8 @@ function list_themes(print = true): void {
   filenames.forEach((file) => {
     if (file.isDirectory()) dirlist.push(file.name);
     else if (file.isSymbolicLink()) {
-      const real_path = fs.realpathSync(path.join(dir, file.name));
-      if (fs.statSync(real_path).isDirectory()) dirlist.push(file.name);
+      const realPath = fs.realpathSync(path.join(dir, file.name));
+      if (fs.statSync(realPath).isDirectory()) dirlist.push(file.name);
     }
   });
 
@@ -58,34 +58,34 @@ function list_themes(print = true): void {
   }
 }
 
-function set_debug(mode: boolean): void {
-  nody_greeter.config.greeter.debug_mode = mode;
-  nody_greeter.app.fullscreen = !mode;
-  nody_greeter.app.frame = mode;
-  nody_greeter.app.debug_mode = mode;
+function setDebug(mode: boolean): void {
+  globalNodyConfig.config.greeter.debug_mode = mode;
+  globalNodyConfig.app.fullscreen = !mode;
+  globalNodyConfig.app.frame = mode;
+  globalNodyConfig.app.debugMode = mode;
 }
 
 if (res.d || res.mode == "debug") {
-  set_debug(true);
+  setDebug(true);
 } else if (res.n || res.mode == "normal") {
-  set_debug(false);
+  setDebug(false);
 }
 if (res.theme && typeof res.theme === "string") {
-  nody_greeter.config.greeter.theme = res.theme;
+  globalNodyConfig.config.greeter.theme = res.theme;
 }
 if (res.list) {
-  list_themes();
+  listThemes();
   process.exit();
 }
 
-if (nody_greeter.config.greeter.debug_mode == true) {
-  set_debug(true);
+if (globalNodyConfig.config.greeter.debug_mode == true) {
+  setDebug(true);
 }
 
 // Import browser and bridge to initialize nody-greeter
 
-load_theme_config();
-ensure_theme();
+loadThemeConfig();
+ensureTheme();
 
 import "./browser";
 

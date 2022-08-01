@@ -54,26 +54,26 @@ export const THEME_CONFIG = io_ts.intersection([
 /**
  * web-greeter's config inside `/etc/lightdm/web-greeter.yml`
  */
-export type web_greeter_config = io_ts.TypeOf<typeof WEB_GREETER_CONFIG>;
+export type WebGreeterConfig = io_ts.TypeOf<typeof WEB_GREETER_CONFIG>;
 /**
  * Theme's config inside `$THEME/index.yml`
  */
-export type theme_config = io_ts.TypeOf<typeof THEME_CONFIG>;
+export type ThemeConfig = io_ts.TypeOf<typeof THEME_CONFIG>;
 
-export interface app_config {
+export interface AppConfig {
   fullscreen: boolean;
   frame: boolean;
-  debug_mode: boolean;
-  theme_dir: string;
+  debugMode: boolean;
+  themeDir: string;
 }
 
-export interface nody_config {
-  config: web_greeter_config;
-  app: app_config;
-  theme: theme_config;
+export interface NodyConfig {
+  config: WebGreeterConfig;
+  app: AppConfig;
+  theme: ThemeConfig;
 }
 
-export const nody_greeter: nody_config = {
+export const globalNodyConfig: NodyConfig = {
   config: {
     branding: {
       background_images_dir: "/usr/share/backgrounds",
@@ -102,8 +102,8 @@ export const nody_greeter: nody_config = {
   app: {
     fullscreen: true,
     frame: false,
-    debug_mode: false,
-    theme_dir:
+    debugMode: false,
+    themeDir:
       process.env.NODY_GREETER_THEME_DIR || "/usr/share/web-greeter/themes/",
   },
   theme: {
@@ -112,111 +112,111 @@ export const nody_greeter: nody_config = {
   },
 };
 
-const path_to_config =
+const pathToConfig =
   process.env.NODY_GREETER_CONFIG || "/etc/lightdm/web-greeter.yml";
 
-let theme_dir: string | undefined;
+let themeDir: string | undefined;
 
 /**
  * Loads the theme directory
  */
-export function load_theme_dir(): string {
-  const theme = nody_greeter.config.greeter.theme;
-  const dir = nody_greeter.app.theme_dir;
-  const def_theme = "gruvbox";
-  theme_dir = path.join(dir, theme);
+export function loadThemeDir(): string {
+  const theme = globalNodyConfig.config.greeter.theme;
+  const dir = globalNodyConfig.app.themeDir;
+  const defTheme = "gruvbox";
+  themeDir = path.join(dir, theme);
 
-  if (theme.startsWith("/")) theme_dir = theme;
+  if (theme.startsWith("/")) themeDir = theme;
   else if (theme.includes(".") || theme.includes("/"))
-    theme_dir = path.join(process.cwd(), theme);
+    themeDir = path.join(process.cwd(), theme);
 
-  if (theme_dir.endsWith(".html")) theme_dir = path.dirname(theme_dir);
+  if (themeDir.endsWith(".html")) themeDir = path.dirname(themeDir);
 
-  if (!fs.existsSync(theme_dir)) {
-    logger.warn(`"${theme}" theme does not exists. Using "${def_theme}" theme`);
-    theme_dir = path.join(dir, def_theme);
+  if (!fs.existsSync(themeDir)) {
+    logger.warn(`"${theme}" theme does not exists. Using "${defTheme}" theme`);
+    themeDir = path.join(dir, defTheme);
   }
 
-  return theme_dir;
+  return themeDir;
 }
 
 /**
  * Loads the primary theme path
  * The provided theme with `--theme` flag is preferred over index.yml
  */
-export function load_primary_theme_path(): string {
-  if (!theme_dir) theme_dir = load_theme_dir();
-  const abs_theme = nody_greeter.config.greeter.theme;
-  const abs_theme_name = abs_theme.split("/").pop();
-  const dir = nody_greeter.app.theme_dir;
-  const def_theme = "gruvbox";
+export function loadPrimaryThemePath(): string {
+  if (!themeDir) themeDir = loadThemeDir();
+  const absTheme = globalNodyConfig.config.greeter.theme;
+  const absThemeName = absTheme.split("/").pop();
+  const dir = globalNodyConfig.app.themeDir;
+  const defTheme = "gruvbox";
 
-  if (abs_theme_name?.endsWith(".html"))
-    nody_greeter.theme.primary_html = abs_theme_name;
+  if (absThemeName?.endsWith(".html"))
+    globalNodyConfig.theme.primary_html = absThemeName;
 
-  const primary = nody_greeter.theme.primary_html;
-  let path_to_theme = path.join(theme_dir, primary);
+  const primary = globalNodyConfig.theme.primary_html;
+  let pathToTheme = path.join(themeDir, primary);
 
-  if (!path_to_theme.endsWith(".html"))
-    path_to_theme = path.join(path_to_theme, "index.html");
+  if (!pathToTheme.endsWith(".html"))
+    pathToTheme = path.join(pathToTheme, "index.html");
 
-  if (!fs.existsSync(path_to_theme)) {
+  if (!fs.existsSync(pathToTheme)) {
     logger.warn(
-      `"${path_to_theme}" theme does not exists. Using "${def_theme}" theme`
+      `"${pathToTheme}" theme does not exists. Using "${defTheme}" theme`
     );
-    path_to_theme = path.join(dir, def_theme, "index.html");
+    pathToTheme = path.join(dir, defTheme, "index.html");
   }
 
-  nody_greeter.config.greeter.theme = path_to_theme;
-  return path_to_theme;
+  globalNodyConfig.config.greeter.theme = pathToTheme;
+  return pathToTheme;
 }
 /**
  * Loads the secondary theme path
  * This can only be set with index.yml, either it defaults to primary html
  */
-export function load_secondary_theme_path(): string {
-  if (!theme_dir) theme_dir = load_theme_dir();
-  const primary = nody_greeter.theme.primary_html;
-  const secondary = nody_greeter.theme.secondary_html;
-  let path_to_theme = path.join(theme_dir, secondary || primary);
+export function loadSecondaryThemePath(): string {
+  if (!themeDir) themeDir = loadThemeDir();
+  const primary = globalNodyConfig.theme.primary_html;
+  const secondary = globalNodyConfig.theme.secondary_html;
+  let pathToTheme = path.join(themeDir, secondary || primary);
 
-  if (!path_to_theme.endsWith(".html"))
-    path_to_theme = path.join(path_to_theme, "index.html");
+  if (!pathToTheme.endsWith(".html"))
+    pathToTheme = path.join(pathToTheme, "index.html");
 
-  if (!fs.existsSync(path_to_theme)) {
+  if (!fs.existsSync(pathToTheme)) {
     logger.warn(
       `"${secondary}" does not exists. Using "${primary}" for secondary monitors`
     );
-    path_to_theme = load_primary_theme_path();
+    pathToTheme = loadPrimaryThemePath();
   }
 
-  return path_to_theme;
+  return pathToTheme;
 }
 
-function validate_config<T>(decoder: io_ts.Type<T>, obj: unknown): T {
+function validateConfig<T>(decoder: io_ts.Type<T>, obj: unknown): T {
   const decoded = decoder.decode(obj);
   if (isRight(decoded)) {
     return decoded.right;
   } else {
     const errors = decoded.left;
     let message = "";
-    const fm_errors: { key: string; value: string; type: string }[] = [];
+    const fmErrors: { key: string; value: string; type: string }[] = [];
     for (let i = 0; i < errors.length; i++) {
       const context = errors[i].context;
       const type = context[context.length - 1].type.name;
       const key = context[context.length - 2].key;
       const value = errors[i].value;
-      const can_color = process.stdout.isTTY && process.stdout.hasColors();
-      const fm_value = util.inspect(value, { colors: can_color });
+      const canColor = process.stdout.isTTY && process.stdout.hasColors();
+      const fmValue = util.inspect(value, { colors: canColor });
 
-      const ind = fm_errors.findIndex((e) => e.key === key);
+      const ind = fmErrors.findIndex((e) => e.key === key);
       if (ind == -1) {
-        fm_errors.push({ key, value: fm_value, type });
+        fmErrors.push({ key, value: fmValue, type });
       } else {
-        fm_errors[ind].type += "|" + type;
+        fmErrors[ind].type += "|" + type;
       }
     }
-    for (const err of fm_errors) {
+    for (const err of fmErrors) {
       message += `{ ${err.key}: ${err.value} } couldn't be validated as (${err.type})\n`;
     }
     throw new Error(`Invalid config: ${message}`);
@@ -226,14 +226,14 @@ function validate_config<T>(decoder: io_ts.Type<T>, obj: unknown): T {
 /**
  * Loads the theme config inside "index.yml"
  */
-export function load_theme_config(): void {
-  if (!theme_dir) theme_dir = load_theme_dir();
-  const path_to_theme_config = path.join(theme_dir, "index.yml");
+export function loadThemeConfig(): void {
+  if (!themeDir) themeDir = loadThemeDir();
+  const pathToThemeConfig = path.join(themeDir, "index.yml");
   try {
-    const file = fs.readFileSync(path_to_theme_config, "utf-8");
-    const theme_config = yaml.load(file);
+    const file = fs.readFileSync(pathToThemeConfig, "utf-8");
+    const themeConfig = yaml.load(file);
 
-    nody_greeter.theme = validate_config(THEME_CONFIG, theme_config);
+    globalNodyConfig.theme = validateConfig(THEME_CONFIG, themeConfig);
   } catch (err) {
     logger.warn(`Theme config was not loaded:\n\t${err}`);
     logger.debug("Using default theme config");
@@ -244,36 +244,36 @@ export function load_theme_config(): void {
  * Ensures that the theme does exists
  * If it doesn't, default theme (gruvbox) is used
  */
-export function ensure_theme(): void {
-  if (!theme_dir) theme_dir = load_theme_dir();
+export function ensureTheme(): void {
+  if (!themeDir) themeDir = loadThemeDir();
 
-  const primary = nody_greeter.theme.primary_html;
-  const dir = nody_greeter.app.theme_dir;
-  const def_theme = "gruvbox";
+  const primary = globalNodyConfig.theme.primary_html;
+  const dir = globalNodyConfig.app.themeDir;
+  const defTheme = "gruvbox";
 
-  const primary_exists = fs.existsSync(path.join(theme_dir, primary));
+  const primaryExists = fs.existsSync(path.join(themeDir, primary));
 
-  if (!primary_exists) {
-    theme_dir = path.join(dir, def_theme);
-    load_theme_config();
+  if (!primaryExists) {
+    themeDir = path.join(dir, defTheme);
+    loadThemeConfig();
   }
 }
 
 /**
  * Load web-greeter.yml config
  */
-export function load_config(): void {
+export function loadConfig(): void {
   try {
-    const file = fs.readFileSync(path_to_config, "utf-8");
-    const webg_config = yaml.load(file);
+    const file = fs.readFileSync(pathToConfig, "utf-8");
+    const webgConfig = yaml.load(file);
 
-    nody_greeter.config = validate_config(WEB_GREETER_CONFIG, webg_config);
+    globalNodyConfig.config = validateConfig(WEB_GREETER_CONFIG, webgConfig);
   } catch (err) {
     logger.error(`Config was not loaded:\n\t${err}`);
     logger.warn("Using default config");
   }
 }
 
-load_config();
+loadConfig();
 
 export {};

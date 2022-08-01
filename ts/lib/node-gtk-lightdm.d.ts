@@ -23,7 +23,7 @@ declare module "node-gtk" {
               user_data: unknown
             ) => void)
           | null,
-        user_data?: unknown
+        userData?: unknown
       ): void;
       public connectToDaemonFinish(result: Gio.AsyncResult): boolean;
       public connectToDaemonSync(): boolean;
@@ -37,7 +37,7 @@ declare module "node-gtk" {
               user_data: unknown
             ) => void)
           | null,
-        user_data?: unknown
+        userData?: unknown
       ): void;
       public ensureSharedDataDirSync(name: string): string;
       public ensureSharedDataDirFinish(result: Gio.AsyncResult): boolean;
@@ -86,7 +86,7 @@ declare module "node-gtk" {
               user_data: unknown
             ) => void)
           | null,
-        user_data?: unknown
+        userData?: unknown
       ): boolean;
       public startSessionSync(session: string | null): boolean;
     }
@@ -165,11 +165,11 @@ declare module "node-gtk" {
       public constructor(layout: {
         name: string;
         description: string;
-        short_description: string;
+        shortDescription: string;
       });
       public name: string;
       public description: string;
-      public short_description: string;
+      public shortDescription: string;
 
       public getDescription(): string;
       public getName(): string;

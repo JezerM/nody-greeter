@@ -7,10 +7,9 @@ import {
 } from "../ldm_interfaces";
 
 import { LightDM } from "node-gtk";
-import { Battery } from "../utils/battery";
+import { BatteryController } from "../utils/battery";
 
-// eslint-disable-next-line
-function session_to_obj(
+function sessionToObject(
   session: LightDM.LightDMSession
 ): LightDMSession | null {
   if (!session) return null;
@@ -22,8 +21,7 @@ function session_to_obj(
   };
 }
 
-// eslint-disable-next-line
-function user_to_obj(user: LightDM.LightDMUser): LightDMUser | null {
+function userToObject(user: LightDM.LightDMUser): LightDMUser | null {
   if (!user) return null;
   return {
     background: user.getBackground(),
@@ -39,8 +37,7 @@ function user_to_obj(user: LightDM.LightDMUser): LightDMUser | null {
   };
 }
 
-// eslint-disable-next-line
-function language_to_obj(
+function languageToObject(
   lang: LightDM.LightDMLanguage
 ): LightDMLanguage | null {
   if (!lang) return null;
@@ -51,8 +48,7 @@ function language_to_obj(
   };
 }
 
-// eslint-disable-next-line
-function layout_to_obj(layout: LightDM.LightDMLayout): LightDMLayout | null {
+function layoutToObject(layout: LightDM.LightDMLayout): LightDMLayout | null {
   if (!layout) return null;
   return {
     description: layout.getDescription(),
@@ -61,15 +57,14 @@ function layout_to_obj(layout: LightDM.LightDMLayout): LightDMLayout | null {
   };
 }
 
-// eslint-disable-next-line
-function battery_to_obj(battery: Battery): LightDMBattery | null {
+function batteryToObject(battery: BatteryController): LightDMBattery | null {
   if (!battery) return null;
   if (battery._batteries.length == 0) return null;
   return {
     name: battery.name,
     level: battery.level,
     status: battery.status,
-    ac_status: battery.ac_status,
+    ac_status: battery.acStatus,
     capacity: battery.capacity,
     time: battery.time,
     watt: battery.watt,
@@ -77,9 +72,9 @@ function battery_to_obj(battery: Battery): LightDMBattery | null {
 }
 
 export {
-  session_to_obj,
-  battery_to_obj,
-  language_to_obj,
-  layout_to_obj,
-  user_to_obj,
+  sessionToObject,
+  batteryToObject,
+  languageToObject,
+  layoutToObject,
+  userToObject,
 };
