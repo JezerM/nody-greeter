@@ -1,3 +1,4 @@
+const packageJson = require("../package.json");
 import yargs from "yargs";
 import * as fs from "fs";
 import * as path from "path";
@@ -33,6 +34,10 @@ const res = yargs
     describe: "Set debug mode",
     conflicts: ["d", "mode"],
   })
+  .option("api-version", {
+    type: "boolean",
+    describe: "Show JavaScript API version number",
+  })
   .showHelpOnFail(false, "Use --help for available options")
   .help("h")
   .alias("h", "help")
@@ -66,6 +71,10 @@ function setDebug(mode: boolean): void {
   globalNodyConfig.app.debugMode = mode;
 }
 
+if (res.apiVersion) {
+  console.log(packageJson.apiVersion);
+  process.exit();
+}
 if (res.d || res.mode == "debug") {
   setDebug(true);
 } else if (res.n || res.mode == "normal") {
