@@ -35,45 +35,14 @@
   },
   "license": "ISC",
   "homepage": "https://github.com/JezerM/nody-greeter",
-  "build": {
-    "appId": "nody-greeter.app",
-    "productName": "nody-greeter",
-    "npmRebuild": false,
-    "directories": {
-      "output": "build"
-    },
-    "linux": {
-      "target": [
-        "tar.xz"
-      ],
-      "category": "system"
-    },
-    "deb": {
-      "depends": [
-        "gobject-introspection",
-        "liblightdm-gobject-1-0",
-        "libcairo2"
-      ]
-    },
-    "extraFiles": [
-      {
-        "from": "./dist/web-greeter.yml",
-        "to": "/etc/lightdm/web-greeter.yml"
-      },
-      {
-        "from": "./dist/nody-greeter.desktop",
-        "to": "/usr/share/xgreeters/nody-greeter.desktop"
-      }
-    ]
-  },
   "devDependencies": {
     "@types/js-yaml": "^4.0.2",
+    "@types/yargs": "^17.0.10",
     "@typescript-eslint/eslint-plugin": "^5.9.1",
     "@typescript-eslint/parser": "^5.9.1",
     "asar": "^3.0.3",
     "cli-progress": "^3.9.1",
     "electron": "^16.2.8",
-    "electron-builder": "^22.11.7",
     "electron-rebuild": "^3.2.8",
     "eslint": "^8.6.0",
     "eslint-config-prettier": "^8.3.0",
