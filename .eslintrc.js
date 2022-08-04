@@ -18,6 +18,7 @@ module.exports = {
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/explicit-function-return-type": "error",
     "@typescript-eslint/explicit-member-accessibility": "error",
+    "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/naming-convention": [
       "error",
       {
