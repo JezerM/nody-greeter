@@ -80,7 +80,8 @@ class BrightnessController {
   private canRead(path: string): boolean {
     try {
       fs.accessSync(path, fs.constants.R_OK);
-    } catch (err) {
+    } catch (exception) {
+      const err = exception as NodeJS.ErrnoException;
       logger.error(`${err.code}: Cannot read "${path}"`);
       return false;
     }
@@ -89,7 +90,8 @@ class BrightnessController {
   private canWrite(path: string): boolean {
     try {
       fs.accessSync(path, fs.constants.W_OK);
-    } catch (err) {
+    } catch (exception) {
+      const err = exception as NodeJS.ErrnoException;
       logger.error(`${err.code}: Cannot write on "${path}"`);
       console.log(err);
       return false;

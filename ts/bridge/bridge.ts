@@ -49,8 +49,9 @@ export class Greeter {
     try {
       //LightDMGreeter.setResettable(true);
       LightDMGreeter.connectToDaemonSync();
-    } catch (err) {
-      logger.error(err);
+    } catch (exception) {
+      const err = exception as NodeJS.ErrnoException;
+      logger.error(err.stack ?? "");
       browser.whenReady().then(() => {
         dialog.showMessageBoxSync(browser.primaryWindow, {
           message:
@@ -532,8 +533,9 @@ export class Greeter {
       const started = LightDMGreeter.startSessionSync(session);
       if (started || this.is_authenticated) resetScreensaver();
       return started;
-    } catch (err) {
-      logger.error(err);
+    } catch (exception) {
+      const err = exception as NodeJS.ErrnoException;
+      logger.error(err.stack ?? "");
       generalErrorPrompt(
         browser.primaryWindow,
         "LightDM couldn't start session",

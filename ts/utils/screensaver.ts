@@ -14,8 +14,9 @@ function getScreensaver(): number {
   let timeout = 0;
   try {
     timeout = getScreenSaver().timeout;
-  } catch (err) {
-    logger.error(err);
+  } catch (exception) {
+    const err = exception as NodeJS.ErrnoException;
+    logger.error(String(err));
     return -1;
   }
   if (initialTimeout == -1) initialTimeout = timeout;
@@ -32,8 +33,9 @@ function setScreensaver(timeout?: number): void {
       : globalNodyConfig.config.greeter.screensaver_timeout;
   try {
     setScreenSaver(timeout);
-  } catch (err) {
-    logger.error(err);
+  } catch (exception) {
+    const err = exception as NodeJS.ErrnoException;
+    logger.error(String(err));
     return;
   }
   logger.debug("Screensaver set");
@@ -44,8 +46,9 @@ function resetScreensaver(): void {
   if (initialTimeout == -1) return;
   try {
     setScreenSaver(initialTimeout);
-  } catch (err) {
-    logger.error(err);
+  } catch (exception) {
+    const err = exception as NodeJS.ErrnoException;
+    logger.error(String(err));
     return;
   }
   logger.debug("Screensaver reset");
