@@ -1,4 +1,4 @@
-import * as yargs from "yargs";
+import yargs from "yargs";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -36,7 +36,8 @@ const res = yargs
   .showHelpOnFail(false, "Use --help for available options")
   .help("h")
   .alias("h", "help")
-  .alias("v", "version").argv;
+  .alias("v", "version")
+  .parseSync();
 
 function listThemes(print = true): void {
   let dir = globalNodyConfig.app.themeDir;
