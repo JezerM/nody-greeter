@@ -172,7 +172,7 @@ function find_electron_binding() {
   let electronVersion = ".*";
   if (electronMatch && electronMatch.groups) {
     const major = electronMatch.groups.major;
-    const minor = electronMatch.groups.minor ?? "0";
+    const minor = electronMatch.groups.minor ? electronMatch.groups.minor : "0";
     electronVersion = `${major}.${minor}`;
   }
   let binding_exists = fs.pathExistsSync(
