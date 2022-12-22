@@ -182,4 +182,18 @@ function patchFile(file, patch) {
   }
 }
 
-module.exports = { iterateCopy, makeCopy, makeCopyFromTo, getFileSize, wait, patchFile };
+/**
+ * Get current Linux distro
+ */
+function getLinuxDistro() {
+  const os = fs.readFileSync("/etc/os-release", "utf8");
+  const regex = /^ID="?(?<distro>\w+)"?/gim;
+
+  const matched = regex.exec(os);
+  if (!matched.groups)
+    return "unknown";
+
+  return matched.groups.distro;
+}
+
+module.exports = { iterateCopy, makeCopy, makeCopyFromTo, getFileSize, wait, patchFile, getLinuxDistro };
