@@ -7,7 +7,7 @@ const packageJson = require("./package.json");
 const fs = require("fs-extra");
 const path = require("path");
 const child_process = require("child_process");
-const { makeCopy, makeCopyFromTo, patchFile } = require("./build/utils.js");
+const { makeCopy, makeCopyFromTo, patchFile, getLinuxDistro } = require("./build/utils.js");
 const yargs = require("yargs");
 const ora = require("ora");
 
@@ -314,6 +314,15 @@ async function prepare_install() {
     });
 
   await makeCopyFromTo(copies_prepare);
+
+  const distro = getLinuxDistro();
+
+  switch (distro) {
+    case "fedora":
+      console.log("The current distro has some issues with sandboxed browsers in the LightDM environment. Patching...")
+      patchFile(path.join(lightdm_path, "Xgreeter"), "./build/Xgreeter.patch");
+      break;
+  }
 
   fs.removeSync(path.join(nody_path, "resources"));
   fs.renameSync(
