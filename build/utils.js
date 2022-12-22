@@ -163,4 +163,23 @@ async function makeCopyFromTo(array) {
   copy_bar.stop();
 }
 
-module.exports = { iterateCopy, makeCopy, makeCopyFromTo, getFileSize, wait };
+/**
+ * Patch a file
+ * @param {string} file Original file path
+ * @param {string} patch Patch file path
+ */
+function patchFile(file, patch) {
+  if (!fs.pathExistsSync(file) || !fs.pathExistsSync(patch)) {
+    console.error("pat")
+  }
+  try {
+    child_process.execSync(`patch -bN ${file} ${patch}`, {
+      enconding: "utf-8",
+      stdio: "ignore",
+    });
+  } catch (err) {
+    console.log("Patch didn't succeeded, perhaps it was applied before. Ignoring.");
+  }
+}
+
+module.exports = { iterateCopy, makeCopy, makeCopyFromTo, getFileSize, wait, patchFile };

@@ -4,11 +4,10 @@
  */
 
 const packageJson = require("./package.json");
-const asar = require("asar");
 const fs = require("fs-extra");
 const path = require("path");
 const child_process = require("child_process");
-const { makeCopy, makeCopyFromTo } = require("./build/utils.js");
+const { makeCopy, makeCopyFromTo, patchFile } = require("./build/utils.js");
 const yargs = require("yargs");
 const ora = require("ora");
 
@@ -332,6 +331,11 @@ async function prepare_install() {
 }
 
 async function build_asar() {
+  // The following applies a patch to solve some asar issues that are not resolved in upstream
+  // This fixes #29 (https://github.com/JezerM/nody-greeter/issues/29)
+  patchFile("./node_modules/asar/lib/filesystem.js", "./build/asar.patch");
+  console.log("Asar issue patched");
+
   let asar_dest = path.join(nody_path, "resources/app.asar");
 
   console.log(`Creating 'asar' package in '${asar_dest}'`);
@@ -342,6 +346,7 @@ async function build_asar() {
   });
   spinner.start();
 
+  const asar = require("asar");
   await asar.createPackage(ASAR_ROOT, asar_dest);
   spinner.succeed('"asar" package created');
 }
