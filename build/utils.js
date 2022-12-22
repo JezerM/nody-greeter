@@ -186,7 +186,12 @@ function patchFile(file, patch) {
  * Get current Linux distro
  */
 function getLinuxDistro() {
-  const os = fs.readFileSync("/etc/os-release", "utf8");
+  let os = "";
+  try {
+    os = fs.readFileSync("/etc/os-release", "utf8");
+  } catch (err) {
+    return "unknown";
+  }
   const regex = /^ID="?(?<distro>\w+)"?/gim;
 
   const matched = regex.exec(os);
