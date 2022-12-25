@@ -39,6 +39,8 @@ runs:
       name: Prepare deb build (common)
       shell: bash
       run: |
+        package_size="$(du -s build/unpacked | cut -f1)"
+        sed -i "s/Installed-Size:.*/Installed-Size: ${package_size}/g" build/DEBIAN/control
         cp -r build/DEBIAN/ build/unpacked/
     -
       name: Prepare deb build (for Debian)
