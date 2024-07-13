@@ -743,16 +743,19 @@ function hasKey<T extends object>(obj: T, key: PropertyKey): key is keyof T {
 
 function handler(
   accesor: Greeter | GreeterConfig | ThemeUtils,
-  ev: Electron.IpcMainInvokeEvent,
   ...args: string[]
 ): unknown {
-  if (args.length == 0) return (ev.returnValue = undefined);
+  if (args.length == 0) {
+    return undefined;
+  }
   const descriptors = Object.getOwnPropertyDescriptors(
     Object.getPrototypeOf(accesor)
   );
   const param = args[0];
   args.shift();
-  if (!hasKey(accesor, param)) return (ev.returnValue = undefined);
+  if (!hasKey(accesor, param)) {
+    return undefined;
+  }
   const pr: unknown = accesor[param];
   const ac = descriptors[param];
 
@@ -774,7 +777,7 @@ function handler(
   //args,
   //param,
   //});
-  return (ev.returnValue = value);
+  return value;
 }
 
 ipcMain.on("greeter_config", (ev, ...args) => {
@@ -786,15 +789,17 @@ ipcMain.on("greeter_config", (ev, ...args) => {
 });
 
 ipcMain.on("theme_utils", (ev, ...args) => {
-  handler(global.themeUtilsGreeter, ev, ...args);
+  const value = handler(global.themeUtilsGreeter, ...args);
+  ev.returnValue = value;
 });
 
-ipcMain.handle("theme_utils", (ev, ...args) => {
-  return handler(global.themeUtilsGreeter, ev, ...args);
+ipcMain.handle("theme_utils", (_ev, ...args) => {
+  return handler(global.themeUtilsGreeter, ...args);
 });
 
 ipcMain.on("lightdm", (ev, ...args) => {
-  handler(global.lightdmGreeter, ev, ...args);
+  const value = handler(global.lightdmGreeter, ...args);
+  ev.returnValue = value;
 });
 
 ipcMain.on(CONSTS.channel.window_metadata, (ev) => {

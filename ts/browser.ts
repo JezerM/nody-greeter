@@ -165,8 +165,6 @@ class Browser {
           show: false,
           webPreferences: {
             preload: path.join(__dirname, "preload.js"),
-            nodeIntegration: false,
-            contextIsolation: false,
             allowRunningInsecureContent:
               !globalNodyConfig.config.greeter.secure_mode, // Should set option
             devTools: globalNodyConfig.app.debugMode, // Should set option
