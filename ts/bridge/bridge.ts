@@ -737,7 +737,7 @@ function isDefined<T>(val: T | null | undefined): val is T {
   return val !== null && val !== undefined;
 }
 
-function hasKey<T>(obj: T, key: PropertyKey): key is keyof T {
+function hasKey<T extends object>(obj: T, key: PropertyKey): key is keyof T {
   return key in obj;
 }
 
