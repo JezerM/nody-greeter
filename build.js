@@ -172,8 +172,10 @@ async function create_build() {
   console.log("Resources copied");
 
   try {
-    console.log("Installing packages with 'npm ci --production -s'");
-    childProcess.execSync("npm ci --production -s", {
+    console.log(
+      "Installing packages with 'npm ci --production -s --ignore-scripts'"
+    );
+    childProcess.execSync("npm ci --production -s --ignore-scripts", {
       cwd: "./build/nody-asar",
       encoding: "utf-8",
       stdio: "inherit",
