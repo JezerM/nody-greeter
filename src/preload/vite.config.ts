@@ -11,6 +11,7 @@ export default defineConfig({
     target: "modules",
     outDir: "out/preload",
     assetsDir: "",
+    sourcemap: true,
     rollupOptions: {
       input: fileURLToPath(new URL("./index.ts", import.meta.url)),
       output: { entryFileNames: "[name].cjs", format: "cjs" },

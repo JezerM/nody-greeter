@@ -21,6 +21,7 @@ export default defineConfig({
     target: "node18", // NOTE: Update this on electron version update
     outDir: "out/main",
     emptyOutDir: false,
+    sourcemap: true,
     rollupOptions: {
       input: fileURLToPath(new URL("./index.ts", import.meta.url)),
       output: { entryFileNames: "[name].cjs", format: "cjs" },
