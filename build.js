@@ -79,7 +79,7 @@ INSTALL_BASH_COMPLETION = argv.INSTALL_BASH_COMPLETION;
 // Some global variables
 
 let nody_path = path.join(INSTALL_ROOT, "opt/nody-greeter");
-let bin_path = path.join(INSTALL_ROOT, PREFIX, "bin");
+// let bin_path = path.join(INSTALL_ROOT, PREFIX, "bin");
 let lightdm_path = path.join(INSTALL_ROOT, "etc/lightdm");
 let webg_path = path.join(INSTALL_ROOT, PREFIX, "share/web-greeter");
 let xgreeters_path = path.join(INSTALL_ROOT, PREFIX, "share/xgreeters");

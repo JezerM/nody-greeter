@@ -161,9 +161,9 @@ class BatteryController {
         this._status = battery.status;
       }
     }
-    this._acStatus =
-      Boolean(parseInt(await readData(this.PS_PATH, this._ac, "online"))) ??
-      false;
+    this._acStatus = Boolean(
+      parseInt(await readData(this.PS_PATH, this._ac, "online"))
+    );
 
     let rateTime: number;
     let rateTimeMagnitude: number;

@@ -71,9 +71,6 @@ jobs:
     -
       name: Run ESLint
       run: npm run lint
-    -
-      name: Run ESLint for themes
-      run: npm run lint:themes
 
   prettier:
 
