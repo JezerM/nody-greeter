@@ -41,7 +41,7 @@ Themes working in **web-greeter** should work also here. All themes shipped with
 
 ### Build dependencies
 
-- Node.js (v12, v14 and v16 are supported)
+- Node.js (v18 supported)
 - Python 3
 - base-devel (build-essentials)
 
@@ -129,7 +129,7 @@ Check `nody-greeter --help` for more commands.
 
 ### node-gyp fails on `npm run rebuild`
 
-> Supported Node.js versions: 12, 14, 15, 16 (other versions should work but are untested)
+> Supported Node.js versions: 16, 18 (other versions should work but are untested)
 
 Make sure you are using a [node-gtk][node-gtk] supported Node.js version.
 

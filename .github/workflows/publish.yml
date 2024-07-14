@@ -67,7 +67,7 @@ jobs:
           submodules: recursive
       -
         name: Dispatch void-linux build
-        uses: aurelien-baudet/workflow-dispatch@v2
+        uses: the-actions-org/workflow-dispatch@v4
         with:
           workflow: build.yml
           repo: JezerM/nody-greeter-void
