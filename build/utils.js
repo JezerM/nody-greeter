@@ -169,8 +169,13 @@ export async function makeCopyFromTo(array) {
  * @param {string} patch Patch file path
  */
 export function patchFile(file, patch) {
-  if (!fs.pathExistsSync(file) || !fs.pathExistsSync(patch)) {
-    console.error("pat");
+  if (!fs.pathExistsSync(file)) {
+    console.error("File to patch does not exist", file);
+    return;
+  }
+  if (!fs.pathExistsSync(patch)) {
+    console.error("Patch does not exist", patch);
+    return;
   }
   try {
     childProcess.execSync(`patch -bN ${file} ${patch}`, {

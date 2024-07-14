@@ -366,11 +366,6 @@ async function prepare_install() {
 }
 
 async function build_asar() {
-  // The following applies a patch to solve some asar issues that are not resolved in upstream
-  // This fixes #29 (https://github.com/JezerM/nody-greeter/issues/29)
-  patchFile("./node_modules/asar/lib/filesystem.js", "./build/asar.patch");
-  console.log("Asar issue patched");
-
   let asar_dest = path.join(nody_path, "resources/app.asar");
 
   console.log(`Creating 'asar' package in '${asar_dest}'`);
