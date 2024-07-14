@@ -379,7 +379,7 @@ async function build_asar() {
   });
   spinner.start();
 
-  const asar = await import("asar");
+  const asar = await import("@electron/asar");
   await asar.createPackage(ASAR_ROOT, asar_dest);
   spinner.succeed('"asar" package created');
 }

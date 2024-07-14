@@ -18,7 +18,7 @@ export default defineConfig({
     mainFields: ["module", "jsnext:main", "jsnext"],
   },
   build: {
-    target: "node18",
+    target: "node18", // NOTE: Update this on electron version update
     outDir: "out/main",
     emptyOutDir: false,
     rollupOptions: {
