@@ -1,12 +1,15 @@
-const fs = require("fs-extra");
-const path = require("path");
-const yargs = require("yargs");
-const { makeCopy } = require("./build/utils.js");
-const { build } = require("./build.js");
+import fs from "fs-extra";
+import path from "path";
+import { makeCopy } from "./build/utils.js";
+import { fileURLToPath } from "url";
+import yaargs from "yargs";
+import { hideBin } from "yargs/helpers";
+
+const yargs = yaargs(hideBin(process.argv));
 
 let DEST_DIR = "/";
 let PREFIX = "/usr";
-let INSTALL_ROOT = path.resolve(__dirname, "./build/unpacked/");
+let INSTALL_ROOT = fileURLToPath(new URL("./build/unpacked/", import.meta.url));
 
 yargs.parserConfiguration({
   "short-option-groups": true,
@@ -37,7 +40,7 @@ let argv = yargs
 PREFIX = argv.PREFIX;
 DEST_DIR = argv.DEST_DIR;
 
-async function install() {
+export async function install() {
   console.log(`Copying nody-greeter to "${DEST_DIR}"...`);
   await makeCopy(INSTALL_ROOT, DEST_DIR);
   fs.createSymlinkSync(
@@ -46,9 +49,3 @@ async function install() {
   );
   console.log("\x1b[92mSUCCESS!!\x1b[0m");
 }
-
-if (require.main == module) {
-  install();
-}
-
-module.exports = { install };

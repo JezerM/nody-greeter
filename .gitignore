@@ -1,6 +1,7 @@
 node_modules/
 build/*
 js/
+out/
 !themes/**/js
 !build/DEBIAN
 !build/utils.js

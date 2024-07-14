@@ -3,21 +3,31 @@
  * Then, you can package the "unpacked" folder to whatever you want~
  */
 
-const packageJson = require("./package.json");
-const fs = require("fs-extra");
-const path = require("path");
-const child_process = require("child_process");
-const { makeCopy, makeCopyFromTo, patchFile, getLinuxDistro } = require("./build/utils.js");
-const yargs = require("yargs");
-const ora = require("ora");
+import packageJson from "./package.json" assert { type: "json" };
+import fs from "fs-extra";
+import path from "path";
+import childProcess from "child_process";
+
+import {
+  makeCopy,
+  makeCopyFromTo,
+  patchFile,
+  getLinuxDistro,
+} from "./build/utils.js";
+import yaargs from "yargs";
+import ora from "ora";
+import { hideBin } from "yargs/helpers";
+import { fileURLToPath } from "url";
+
+const yargs = yaargs(hideBin(process.argv));
 
 let DEST_DIR = "/";
 let PREFIX = "/usr";
 let INSTALL_ZSH_COMPLETION = true;
 let INSTALL_BASH_COMPLETION = true;
 let ARCH = process.arch;
-let INSTALL_ROOT = path.resolve(__dirname, "./build/unpacked/");
-let ASAR_ROOT = path.resolve(__dirname, "./build/nody-asar/");
+let INSTALL_ROOT = fileURLToPath(new URL("./build/unpacked/", import.meta.url));
+let ASAR_ROOT = fileURLToPath(new URL("./build/nody-asar/", import.meta.url));
 
 yargs.parserConfiguration({
   "short-option-groups": true,
@@ -90,12 +100,22 @@ let zsh_c_path = path.join(
 // Functions
 
 let copies_binding = [
-  { from: "./ts/bindings/screensaver.cc", to: "./js/bindings/screensaver.cc" },
-  { from: "./ts/bindings/binding.gyp", to: "./js/bindings/binding.gyp" },
-  { from: "./ts/bindings/package.json", to: "./js/bindings/package.json" },
+  {
+    from: "./src/main/bindings/screensaver.cc",
+    to: "./out/main/bindings/screensaver.cc",
+  },
+  {
+    from: "./src/main/bindings/binding.gyp",
+    to: "./out/main/bindings/binding.gyp",
+  },
+  {
+    from: "./src/main/bindings/package.json",
+    to: "./out/main/bindings/package.json",
+  },
 ];
 
 async function compile_bindings() {
+  fs.ensureDirSync("./out/main/bindings/");
   await makeCopyFromTo(copies_binding);
   console.log("Bindings copied");
 
@@ -106,10 +126,10 @@ async function compile_bindings() {
   spinner.start();
 
   await new Promise((resolve) => {
-    child_process.exec(
+    childProcess.exec(
       `npx electron-rebuild -m . --arch ${ARCH}`,
       {
-        cwd: "./js/bindings",
+        cwd: "./out/main/bindings",
         encoding: "utf-8",
         stdio: "ignore",
       },
@@ -127,7 +147,7 @@ async function compile_bindings() {
 }
 
 let copies = [
-  { from: "./js", to: path.join(ASAR_ROOT, "js") },
+  { from: "./out", to: path.join(ASAR_ROOT, "out") },
   { from: "./package.json", to: path.join(ASAR_ROOT, "package.json") },
   {
     from: "./package-lock.json",
@@ -136,7 +156,7 @@ let copies = [
 ];
 
 function check_program(program) {
-  let res = child_process.spawnSync("which", [program], {
+  let res = childProcess.spawnSync("which", [program], {
     encoding: "utf-8",
   });
   if (res.status == 0) return true;
@@ -153,7 +173,7 @@ async function create_build() {
 
   try {
     console.log("Installing packages with 'npm ci --production -s'");
-    child_process.execSync("npm ci --production -s", {
+    childProcess.execSync("npm ci --production -s", {
       cwd: "./build/nody-asar",
       encoding: "utf-8",
       stdio: "inherit",
@@ -203,7 +223,7 @@ async function ensure_electron_binding() {
       spinner.start();
 
       await new Promise((resolve) => {
-        child_process.exec(
+        childProcess.exec(
           `npx electron-rebuild -w node-gtk --build-from-source --arch ${ARCH}`,
           {
             encoding: "utf-8",
@@ -319,7 +339,9 @@ async function prepare_install() {
 
   switch (distro) {
     case "fedora":
-      console.log("The current distro has some issues with sandboxed browsers in the LightDM environment. Patching...")
+      console.log(
+        "The current distro has some issues with sandboxed browsers in the LightDM environment. Patching..."
+      );
       patchFile(path.join(lightdm_path, "Xgreeter"), "./build/Xgreeter.patch");
       break;
   }
@@ -355,12 +377,12 @@ async function build_asar() {
   });
   spinner.start();
 
-  const asar = require("asar");
+  const asar = await import("asar");
   await asar.createPackage(ASAR_ROOT, asar_dest);
   spinner.succeed('"asar" package created');
 }
 
-async function build() {
+export async function build() {
   console.log("Building with prefix:", PREFIX);
   await compile_bindings();
   await create_build();
@@ -369,9 +391,3 @@ async function build() {
   await build_asar();
   console.log("\x1b[92mSUCCESS!\x1b[0m");
 }
-
-if (require.main == module) {
-  build();
-}
-
-module.exports = { build };

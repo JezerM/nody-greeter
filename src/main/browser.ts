@@ -7,7 +7,6 @@ import {
   Menu,
   MenuItemConstructorOptions,
 } from "electron";
-import * as path from "path";
 
 import {
   loadPrimaryThemePath,
@@ -15,12 +14,12 @@ import {
   loadThemeDir,
   globalNodyConfig,
 } from "./config";
-import { URL } from "url";
+import { fileURLToPath, URL } from "url";
 import * as url from "url";
 import { brightnessController } from "./utils/brightness";
 import { logger } from "./logger";
 import { setScreensaver, resetScreensaver } from "./utils/screensaver";
-import { WindowMetadata } from "./preload";
+import { WindowMetadata } from "../preload/index";
 
 interface NodyWindow {
   isPrimary: boolean;
@@ -164,7 +163,10 @@ class Browser {
           frame: globalNodyConfig.app.frame,
           show: false,
           webPreferences: {
-            preload: path.join(__dirname, "preload.js"),
+            preload: fileURLToPath(
+              new URL("../preload/index.cjs", import.meta.url)
+            ),
+            contextIsolation: false,
             allowRunningInsecureContent:
               !globalNodyConfig.config.greeter.secure_mode, // Should set option
             devTools: globalNodyConfig.app.debugMode, // Should set option

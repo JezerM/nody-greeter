@@ -1,8 +1,10 @@
-const fs = require("fs-extra");
-const path = require("path");
-const yargs = require("yargs");
-const { wait } = require("./build/utils.js");
-const ora = require("ora");
+import fs from "fs-extra";
+import path from "path";
+import ora from "ora";
+import yaargs from "yargs";
+import { hideBin } from "yargs/helpers";
+
+const yargs = yaargs(hideBin(process.argv));
 
 let DEST_DIR = "/";
 let PREFIX = "/usr";
@@ -57,7 +59,7 @@ let uninstall_paths = [
   path.join(bin_path, "nody-greeter"),
 ];
 
-async function uninstall() {
+export async function uninstall() {
   console.log(`Uninstalling nody-greeter inside "${DEST_DIR}"...`);
   let spinner = ora({ text: "Uninstalling...", spinner: "dots" });
   spinner.start();
@@ -81,9 +83,3 @@ async function uninstall() {
     `\n\t${path.join(lightdm_path, "web-greeter.yml")}`
   );
 }
-
-if (require.main == module) {
-  uninstall();
-}
-
-module.exports = { uninstall };

@@ -1,16 +1,16 @@
-const fs = require("fs-extra");
-const path = require("path");
-const progress = require("cli-progress");
-const child_process = require("child_process");
+import fs from "fs-extra";
+import path from "path";
+import progress from "cli-progress";
+import childProcess from "child_process";
 
-async function wait(ms) {
+export async function wait(ms) {
   return new Promise((resolve) => {
     setTimeout(() => resolve(), ms);
   });
 }
 
-function getFileSize(ph) {
-  let buf = child_process.execSync(`du -sb "${ph}"`, { encoding: "utf-8" });
+export function getFileSize(ph) {
+  let buf = childProcess.execSync(`du -sb "${ph}"`, { encoding: "utf-8" });
 
   let match = buf.match(/^(\d+)/);
   return Number(match[0]);
@@ -20,7 +20,7 @@ function getFileSize(ph) {
  * Does the copy file-to-file
  * @returns {Promise<number>}
  */
-async function do_copy(source_file, dest_file, copy_bar, bytes) {
+export async function do_copy(source_file, dest_file, copy_bar, bytes) {
   let bytesCopied = bytes;
 
   let file_stat = fs.statSync(source_file);
@@ -62,7 +62,7 @@ async function do_copy(source_file, dest_file, copy_bar, bytes) {
  * @param {number} bytes The bytes copied
  * @returns {Promise<number>} The number of bytes written
  */
-async function iterateCopy(source, dest, copy_bar, bytes) {
+export async function iterateCopy(source, dest, copy_bar, bytes) {
   let bytesCopied = bytes;
 
   let stat = fs.statSync(source);
@@ -104,7 +104,7 @@ async function iterateCopy(source, dest, copy_bar, bytes) {
  * @param {string} dest Destination directory
  * @returns {Promise<void>} A promise
  */
-async function makeCopy(source, dest) {
+export async function makeCopy(source, dest) {
   if (!fs.pathExistsSync(source))
     throw new Error("Source does not exists: " + source);
   let source_size = getFileSize(source);
@@ -128,7 +128,7 @@ async function makeCopy(source, dest) {
   await iterateCopy(source, dest, copy_bar, 0);
 }
 
-async function makeCopyFromTo(array) {
+export async function makeCopyFromTo(array) {
   let source_size = array.reduce((prev, curr) => {
     let size = getFileSize(curr.from);
     //console.log(curr.from, size);
@@ -168,24 +168,26 @@ async function makeCopyFromTo(array) {
  * @param {string} file Original file path
  * @param {string} patch Patch file path
  */
-function patchFile(file, patch) {
+export function patchFile(file, patch) {
   if (!fs.pathExistsSync(file) || !fs.pathExistsSync(patch)) {
-    console.error("pat")
+    console.error("pat");
   }
   try {
-    child_process.execSync(`patch -bN ${file} ${patch}`, {
+    childProcess.execSync(`patch -bN ${file} ${patch}`, {
       enconding: "utf-8",
       stdio: "ignore",
     });
   } catch (err) {
-    console.log("Patch didn't succeeded, perhaps it was applied before. Ignoring.");
+    console.log(
+      "Patch didn't succeeded, perhaps it was applied before. Ignoring."
+    );
   }
 }
 
 /**
  * Get current Linux distro
  */
-function getLinuxDistro() {
+export function getLinuxDistro() {
   let os = "";
   try {
     os = fs.readFileSync("/etc/os-release", "utf8");
@@ -195,10 +197,7 @@ function getLinuxDistro() {
   const regex = /^ID="?(?<distro>\w+)"?/gim;
 
   const matched = regex.exec(os);
-  if (!matched.groups)
-    return "unknown";
+  if (!matched.groups) return "unknown";
 
   return matched.groups.distro;
 }
-
-module.exports = { iterateCopy, makeCopy, makeCopyFromTo, getFileSize, wait, patchFile, getLinuxDistro };

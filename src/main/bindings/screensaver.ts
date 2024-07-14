@@ -1,5 +1,6 @@
 // eslint-disable-next-line
-const addon = require("./build/Release/screensaver");
+const addon = require("./bindings/build/Release/screensaver");
+// const addon = await import("./bindings/build/Release/" + "screensaver");
 
 export interface Screensaver {
   timeout: number;

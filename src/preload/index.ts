@@ -1,12 +1,12 @@
 import { ipcRenderer } from "electron";
-import { CONSTS } from "./consts";
+import { CONSTS } from "common/consts";
 import {
   LightDMBattery,
   LightDMLanguage,
   LightDMLayout,
   LightDMSession,
   LightDMUser,
-} from "./ldm_interfaces";
+} from "common/ldm_interfaces";
 
 /**
  * Metadata that is sent to each window to handle more interesting multi-monitor

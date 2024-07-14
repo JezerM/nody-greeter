@@ -30,7 +30,7 @@ import {
   LightDMUser,
 } from "../ldm_interfaces";
 import { logger } from "../logger";
-import { CONSTS } from "../consts";
+import { CONSTS } from "common/consts";
 
 export class Greeter {
   // TODO: Remove this eslint-disable comment

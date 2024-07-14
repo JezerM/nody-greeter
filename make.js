@@ -1,13 +1,14 @@
-const fs = require("fs-extra");
-const path = require("path");
-const yargs = require("yargs");
+import fs from "fs-extra";
+import yaargs from "yargs";
+import { hideBin } from "yargs/helpers";
+
+const yargs = yaargs(hideBin(process.argv));
 
 let DEST_DIR = "/";
 let PREFIX = "/usr";
 let INSTALL_ZSH_COMPLETION = true;
 let INSTALL_BASH_COMPLETION = true;
 let ARCH = process.arch;
-let INSTALL_ROOT = path.resolve(__dirname, "./build/unpacked/");
 
 yargs.parserConfiguration({
   "short-option-groups": true,
@@ -59,8 +60,8 @@ DEST_DIR = argv.DEST_DIR;
 ARCH = argv.ARCH;
 
 async function do_install() {
-  const { build } = require("./build.js");
-  const { install } = require("./install.js");
+  const { build } = await import("./build.js");
+  const { install } = await import("./install.js");
 
   if (!fs.pathExistsSync("./build/unpacked")) {
     console.log("nody-greeter is not built");
@@ -70,13 +71,13 @@ async function do_install() {
 }
 
 async function do_build() {
-  const { build } = require("./build.js");
+  const { build } = await import("./build.js");
 
   build();
 }
 
 async function do_uninstall() {
-  const { uninstall } = require("./uninstall.js");
+  const { uninstall } = await import("./uninstall.js");
 
   uninstall();
 }

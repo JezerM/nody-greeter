@@ -3,12 +3,13 @@
   "version": "1.5.2",
   "apiVersion": "1.0.0",
   "description": "Node.js (electron) greeter for LightDM",
-  "main": "js/index.js",
+  "main": "out/main/index.cjs",
+  "type": "module",
   "scripts": {
     "start": "electron .",
     "rebuild": "electron-rebuild -w node-gtk",
-    "build": "npm run build:tsc && node make build",
-    "build:tsc": "tsc --build && npm run build:themes",
+    "build": "npm run build:vite && node make build",
+    "build:vite": "node vite.js && npm run build:themes",
     "build:theme:gruvbox": "tsc --build themes/themes/gruvbox",
     "build:theme:dracula": "tsc --build themes/themes/dracula",
     "build:themes": "npm run build:theme:gruvbox && npm run build:theme:dracula",
@@ -52,7 +53,8 @@
     "node-abi": "^3.24.0",
     "ora": "^5.4.1",
     "prettier": "^3.3.3",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "vite": "^5.3.3"
   },
   "dependencies": {
     "fp-ts": "^2.11.7",
