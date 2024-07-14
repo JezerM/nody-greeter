@@ -173,9 +173,9 @@ async function create_build() {
 
   try {
     console.log(
-      "Installing packages with 'npm ci --production -s --ignore-scripts'"
+      "Installing packages with 'npm ci --omit=dev --ignore-scripts'"
     );
-    childProcess.execSync("npm ci --production -s --ignore-scripts", {
+    childProcess.execSync("npm ci --omit=dev --ignore-scripts", {
       cwd: "./build/nody-asar",
       encoding: "utf-8",
       stdio: "inherit",
