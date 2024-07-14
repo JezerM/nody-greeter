@@ -28,7 +28,7 @@ import {
   LightDMLayout,
   LightDMSession,
   LightDMUser,
-} from "../ldm_interfaces";
+} from "common/ldm_interfaces";
 import { logger } from "../logger";
 import { CONSTS } from "common/consts";
 

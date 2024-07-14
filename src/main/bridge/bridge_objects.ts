@@ -4,7 +4,7 @@ import {
   LightDMLayout,
   LightDMSession,
   LightDMUser,
-} from "../ldm_interfaces";
+} from "common/ldm_interfaces";
 
 import { LightDM } from "node-gtk";
 import { BatteryController } from "../utils/battery";

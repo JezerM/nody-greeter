@@ -19,7 +19,7 @@ import * as url from "url";
 import { brightnessController } from "./utils/brightness";
 import { logger } from "./logger";
 import { setScreensaver, resetScreensaver } from "./utils/screensaver";
-import { WindowMetadata } from "../preload/index";
+import { WindowMetadata } from "common/ldm_interfaces";
 
 interface NodyWindow {
   isPrimary: boolean;

@@ -5,7 +5,7 @@ import * as path from "path";
 
 import { ensureTheme, loadThemeConfig, globalNodyConfig } from "./config";
 
-const res = yargs
+const res = yargs(process.argv)
   .scriptName("nody-greeter")
   .usage("$0 [args]")
   .option("mode", {

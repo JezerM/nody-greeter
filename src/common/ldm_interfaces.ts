@@ -43,10 +43,41 @@ interface LightDMBattery {
   watt: number;
 }
 
+/**
+ * Metadata that is sent to each window to handle more interesting multi-monitor
+ * functionality / themes.
+ */
+interface WindowMetadata {
+  // TODO: Remove this eslint-disable comment
+  /* eslint-disable @typescript-eslint/naming-convention */
+  id: number;
+  is_primary: boolean;
+  position: {
+    x: number;
+    y: number;
+  };
+  size: {
+    width: number;
+    height: number;
+  };
+  /**
+   * The total real-estate across all screens,
+   * this can be used to assist in, for example,
+   * correctly positioning multi-monitor backgrounds.
+   */
+  overallBoundary: {
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
+  };
+}
+
 export {
   LightDMBattery,
   LightDMLanguage,
   LightDMLayout,
   LightDMSession,
   LightDMUser,
+  WindowMetadata,
 };

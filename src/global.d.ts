@@ -1,4 +1,4 @@
-import { Greeter, GreeterConfig, ThemeUtils } from "./bridge/bridge";
+import { Greeter, GreeterConfig, ThemeUtils } from "./main/bridge/bridge";
 
 declare global {
   /* eslint-disable no-var */

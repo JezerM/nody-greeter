@@ -1,0 +1,24 @@
+{
+  "extends": "@tsconfig/node18/tsconfig.json",
+  "include": [
+    "env.d.ts",
+    "src/global.d.ts",
+    "src/main/**/*",
+    "src/common/**/*"
+  ],
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.main.tsbuildinfo",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": [
+      "node"
+    ],
+    "paths": {
+      "common/*": [
+        "./src/common/*"
+      ]
+    }
+  }
+}
