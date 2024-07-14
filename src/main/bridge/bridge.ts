@@ -307,7 +307,7 @@ export class Greeter {
         new LightDM.Layout({
           name: layout.name,
           description: layout.description,
-          shortDescription: layout.short_description,
+          short_description: layout.short_description,
         })
       );
     }

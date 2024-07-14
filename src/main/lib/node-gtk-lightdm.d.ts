@@ -165,7 +165,7 @@ declare module "node-gtk" {
       public constructor(layout: {
         name: string;
         description: string;
-        shortDescription: string;
+        short_description: string;
       });
       public name: string;
       public description: string;
