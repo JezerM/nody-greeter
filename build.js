@@ -251,6 +251,8 @@ async function ensure_electron_binding() {
     console.error("Electron binding couldn't be found");
     process.exit(1);
   }
+  // Remove node-gtk build files
+  fs.removeSync("./build/nody-asar/node_modules/node-gtk/build/");
   return electron_binding;
 }
 
