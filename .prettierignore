@@ -1,0 +1,7 @@
+themes/
+out/
+build/unpacked
+build/nody-asar
+.github/
+dist/
+*.json

@@ -98,9 +98,6 @@ jobs:
     -
       name: Run Prettier
       run: npm run prettier
-    -
-      name: Run Prettier for themes
-      run: npm run prettier:themes
 
   package-lock:
 

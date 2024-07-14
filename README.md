@@ -71,6 +71,7 @@ sudo node make install
 This will rebuild **electron** along with **node-gtk**, compile typescript with `npx tsc`, and then build the package root directory inside `build/unpacked`. Later, install it with `node make install`.
 
 Also, you can package `build/unpacked` to whatever you want, like **.deb** with:
+
 ```sh
 dpkg-deb --root-owner-group --build unpacked
 ```
@@ -78,13 +79,15 @@ dpkg-deb --root-owner-group --build unpacked
 ### Setting up with LightDM
 
 Inside `/etc/lightdm/lightdm.conf`, below a Seat configuration, add:
+
 ```
 greeter-session=nody-greeter
 ```
 
 Afterwards, restart the lightdm service.
 
-> ***Note:*** Be sure that nody-greeter works before restarting lightdm
+> [!CAUTION]
+> Be sure that nody-greeter works before restarting lightdm
 
 ## Theme JavaScript API
 
@@ -99,6 +102,7 @@ npm install nody-greeter-types
 ## Additional features
 
 ### Brightness control
+
 `acpi` is the only tool needed to control the brightness, besides a compatible device. This functionality is based on [acpilight][acpilight] replacement for `xbacklight`.
 
 udev rules are needed to be applied before using it, check [acpilight rules][acpilight_rules]. Then, lightdm will need to be allowed to change backlight values, to do so add lightdm user to **video** group: `sudo usermod -a -G video lightdm`
@@ -106,11 +110,13 @@ udev rules are needed to be applied before using it, check [acpilight rules][acp
 You can enable it inside `/etc/lightdm/web-greeter.yml`
 
 ### Battery status
+
 `acpi` and `acpi_listen` are the only tools you need (and a battery). This functionality is based on ["bat" widget][bat_widget] from ["lain" awesome-wm library][lain].
 
 You can enable it inside `/etc/lightdm/web-greeter.yml`.
 
 ## Debugging
+
 You can run the greeter from within your desktop session if you add the following line to the desktop file for your session located in `/usr/share/xsessions/`: `X-LightDM-Allow-Greeter=true`.
 
 You have to log out and log back in after adding that line. Then you can run the greeter from command line.
@@ -123,7 +129,8 @@ nody-greeter --debug
 
 Check `nody-greeter --help` for more commands.
 
-> ***Note:*** Do not use `lightdm --test-mode` as it is not supported.
+> [!NOTE]
+> Do not use `lightdm --test-mode` as it is not supported.
 
 ## Troubleshooting
 
@@ -133,9 +140,8 @@ Check `nody-greeter --help` for more commands.
 
 Make sure you are using a [node-gtk][node-gtk] supported Node.js version.
 
-
 [web-greeter]: https://github.com/JezerM/web-greeter "Web Greeter"
-[nody-greeter-types]: https://github.com/JezerM/nody-greeter-types "nody-greeter-types" 
+[nody-greeter-types]: https://github.com/JezerM/nody-greeter-types "nody-greeter-types"
 [web-greeter-docs]: https://jezerm.github.io/web-greeter-page/docs/ "API Documentation"
 [acpilight]: https://gitlab.com/wavexx/acpilight/ "acpilight"
 [acpilight_rules]: https://gitlab.com/wavexx/acpilight/-/blob/master/90-backlight.rules "udev rules"
