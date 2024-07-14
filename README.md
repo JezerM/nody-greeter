@@ -42,7 +42,7 @@ Themes working in **web-greeter** should work also here. All themes shipped with
 ### Build dependencies
 
 - Node.js (v18 supported)
-- Python 3
+- Python 3 with distutils (`setuptools`)
 - base-devel (build-essentials)
 
 ### Common dependencies
@@ -137,6 +137,10 @@ Check `nody-greeter --help` for more commands.
 ### node-gyp fails on `npm run rebuild`
 
 > Supported Node.js versions: 16, 18 (other versions should work but are untested)
+
+### Issues with distutils
+
+Since python3.12, distutils was deprecated. For `node-gyp` to work, you must install the `setuptools` library for python, either with your package manager or pip.
 
 Make sure you are using a [node-gtk][node-gtk] supported Node.js version.
 
