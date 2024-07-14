@@ -1,6 +1,6 @@
 {
   "name": "nody-greeter",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "apiVersion": "1.0.0",
   "description": "Node.js (electron) greeter for LightDM",
   "main": "out/main/index.cjs",
