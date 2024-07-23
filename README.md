@@ -146,7 +146,7 @@ Make sure you are using a [node-gtk][node-gtk] supported Node.js version.
 
 [web-greeter]: https://github.com/JezerM/web-greeter "Web Greeter"
 [nody-greeter-types]: https://github.com/JezerM/nody-greeter-types "nody-greeter-types"
-[web-greeter-docs]: https://jezerm.github.io/web-greeter-page/docs/ "API Documentation"
+[web-greeter-docs]: https://web-greeter-page.vercel.app/ "Documentation"
 [acpilight]: https://gitlab.com/wavexx/acpilight/ "acpilight"
 [acpilight_rules]: https://gitlab.com/wavexx/acpilight/-/blob/master/90-backlight.rules "udev rules"
 [bat_widget]: https://github.com/lcpz/lain/blob/master/widget/bat.lua "Battery widget"
