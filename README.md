@@ -49,15 +49,15 @@ Themes working in **web-greeter** should work also here. All themes shipped with
 
 ```sh
 sudo apt install \
-  lightdm \
-  gobject-introspection \
-  liblightdm-gobject-1-0 \
-  liblightdm-gobject-dev \
-  libgirepository1.0-dev \
-  libcairo2 \
-  libcairo2-dev \
-  libxcb-dev \
-  libx11-dev
+lightdm \
+gobject-introspection \
+liblightdm-gobject \ 
+liblightdm-gobject-dev \
+libgirepository1.0-dev \
+libcairo2 \
+libcairo2-dev \
+libxcb-dev \
+libx11-dev
 ```
 ## Installation
 
