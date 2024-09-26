@@ -51,7 +51,7 @@ Themes working in **web-greeter** should work also here. All themes shipped with
 sudo apt install \
 lightdm \
 gobject-introspection \
-liblightdm-gobject \ 
+liblightdm-gobject \
 liblightdm-gobject-dev \
 libgirepository1.0-dev \
 libcairo2 \
