@@ -47,16 +47,18 @@ Themes working in **web-greeter** should work also here. All themes shipped with
 
 ### Common dependencies
 
-- lightdm (as obvious)
-- gobject-introspection
-- liblightdm-gobject
-- liblightdm-gobject-dev
-- libgirepository1.0-dev
-- libcairo2
-- libcairo2-dev
-- libxcb-dev
-- libx11-dev
-
+```sh
+sudo apt install \
+  lightdm \
+  gobject-introspection \
+  liblightdm-gobject-1-0 \
+  liblightdm-gobject-dev \
+  libgirepository1.0-dev \
+  libcairo2 \
+  libcairo2-dev \
+  libxcb-dev \
+  libx11-dev
+```
 ## Installation
 
 ```sh
@@ -74,6 +76,12 @@ Also, you can package `build/unpacked` to whatever you want, like **.deb** with:
 
 ```sh
 dpkg-deb --root-owner-group --build unpacked
+
+> [!NOTE]
+> For Debian systems:
+> 1. Copy build/DEBIAN/ to build/unpacked
+> 2. In the control file, replace the liblightdm-gobject-1-dev dependency with liblightdm-gobject-dev.
+> the liblightdm-gobject-1-dev package only exists in Ubuntu, the Debian equivalent is liblightdm-gobject-dev.
 ```
 
 ### Setting up with LightDM
@@ -88,6 +96,12 @@ Afterwards, restart the lightdm service.
 
 > [!CAUTION]
 > Be sure that nody-greeter works before restarting lightdm
+
+### Installing Themes
+
+All themes must be installed at /usr/share/web-greeter/themes/
+
+View community themes: https://web-greeter-page.vercel.app/themes
 
 ## Theme JavaScript API
 
@@ -121,10 +135,10 @@ You can run the greeter from within your desktop session if you add the followin
 
 You have to log out and log back in after adding that line. Then you can run the greeter from command line.
 
-Themes can be opened with a debug console if you set `debug_mode` as `true` inside `/etc/lightdm/web-greeter.yml`. Or, you could run the `nody-greeter` with the parameter `--debug`. I recommend to use the last one, as it is easier and handy.
+Themes can be opened with a debug console if you set `debug_mode` as `true` inside `/etc/lightdm/web-greeter.yml`. Or, you could run the `nody-greeter` with the parameter `--inspect`. I recommend to use the last one, as it is easier and handy.
 
 ```sh
-nody-greeter --debug
+nody-greeter --inspect
 ```
 
 Check `nody-greeter --help` for more commands.
@@ -136,7 +150,7 @@ Check `nody-greeter --help` for more commands.
 
 ### node-gyp fails on `npm run rebuild`
 
-> Supported Node.js versions: 16, 18 (other versions should work but are untested)
+> Supported Node.js versions: 16, 18, 20, 22.
 
 ### Issues with distutils
 
