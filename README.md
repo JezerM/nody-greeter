@@ -99,7 +99,7 @@ Afterwards, restart the lightdm service.
 
 ### Installing Themes
 
-All themes must be installed at /usr/share/web-greeter/themes/
+All themes must be installed at `/usr/share/web-greeter/themes/`
 
 View community themes: https://web-greeter-page.vercel.app/themes
 
