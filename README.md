@@ -70,10 +70,10 @@ dpkg-deb --root-owner-group --build unpacked
 
 > [!NOTE]
 > For Debian systems:
+>
 > 1. Copy build/DEBIAN/ to build/unpacked
 > 2. In the control file, replace the liblightdm-gobject-1-dev dependency with liblightdm-gobject-dev.
-> the liblightdm-gobject-1-dev package only exists in Ubuntu, the Debian equivalent is liblightdm-gobject-dev.
-
+>    the liblightdm-gobject-1-dev package only exists in Ubuntu, the Debian equivalent is liblightdm-gobject-dev.
 
 ### Setting up with LightDM
 
