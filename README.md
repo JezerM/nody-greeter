@@ -126,10 +126,10 @@ You can run the greeter from within your desktop session if you add the followin
 
 You have to log out and log back in after adding that line. Then you can run the greeter from command line.
 
-Themes can be opened with a debug console if you set `debug_mode` as `true` inside `/etc/lightdm/web-greeter.yml`. Or, you could run the `nody-greeter` with the parameter `--inspect`. I recommend to use the last one, as it is easier and handy.
+Themes can be opened with a debug console if you set `debug_mode` as `true` inside `/etc/lightdm/web-greeter.yml`. Or, you could run the `nody-greeter` with the parameter `--debug`. I recommend to use the last one, as it is easier and handy.
 
 ```sh
-nody-greeter --inspect
+nody-greeter --debug
 ```
 
 Check `nody-greeter --help` for more commands.
