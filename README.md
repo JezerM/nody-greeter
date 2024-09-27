@@ -47,18 +47,8 @@ Themes working in **web-greeter** should work also here. All themes shipped with
 
 ### Common dependencies
 
-```sh
-sudo apt install \
-lightdm \
-gobject-introspection \
-liblightdm-gobject \
-liblightdm-gobject-dev \
-libgirepository1.0-dev \
-libcairo2 \
-libcairo2-dev \
-libxcb-dev \
-libx11-dev
-```
+`lightdm gobject-introspection liblightdm-gobject-1-0 liblightdm-gobject-dev libgirepository1.0-dev libcairo2 libcairo2-dev libxcb1-dev libx11-dev`
+
 ## Installation
 
 ```sh
@@ -76,13 +66,14 @@ Also, you can package `build/unpacked` to whatever you want, like **.deb** with:
 
 ```sh
 dpkg-deb --root-owner-group --build unpacked
+```
 
 > [!NOTE]
 > For Debian systems:
 > 1. Copy build/DEBIAN/ to build/unpacked
 > 2. In the control file, replace the liblightdm-gobject-1-dev dependency with liblightdm-gobject-dev.
 > the liblightdm-gobject-1-dev package only exists in Ubuntu, the Debian equivalent is liblightdm-gobject-dev.
-```
+
 
 ### Setting up with LightDM
 
