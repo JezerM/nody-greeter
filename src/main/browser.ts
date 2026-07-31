@@ -30,6 +30,8 @@ interface NodyWindow {
 class Browser {
   public ready = false;
   public windows: NodyWindow[] = [];
+  private readonly themeLoadBlockers: Promise<unknown>[] = [];
+  private themeLoadBarrierClosed = false;
 
   public constructor() {
     this.setPriviliged();
@@ -49,9 +51,23 @@ class Browser {
     });
   }
 
-  private init(): void {
+  public deferThemeLoadUntil(blocker: Promise<unknown>): void {
+    if (this.themeLoadBarrierClosed) {
+      throw new Error(
+        "Cannot register a theme-load blocker after browser initialization has started"
+      );
+    }
+
+    this.themeLoadBlockers.push(blocker);
+  }
+
+  private async init(): Promise<void> {
     this.setProtocol();
     this.windows = this.createWindows();
+
+    this.themeLoadBarrierClosed = true;
+    await Promise.all(this.themeLoadBlockers);
+
     this.loadTheme();
     this.initListeners();
   }

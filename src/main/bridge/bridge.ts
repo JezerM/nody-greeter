@@ -833,10 +833,12 @@ ipcMain.on(CONSTS.channel.window_broadcast, (ev, data: unknown) => {
   }
 });
 
-browser.whenReady().then(() => {
+const bridgeReady = browser.whenReady().then(() => {
   global.lightdmGreeter = Greeter.getInstance(globalNodyConfig.config);
   global.greeterConfigGreeter = GreeterConfig.getInstance(
     globalNodyConfig.config
   );
   global.themeUtilsGreeter = ThemeUtils.getInstance(globalNodyConfig.config);
 });
+
+browser.deferThemeLoadUntil(bridgeReady);
