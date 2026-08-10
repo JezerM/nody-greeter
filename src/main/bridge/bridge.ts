@@ -2,7 +2,7 @@ import { dialog, ipcMain } from "electron";
 import * as gi from "node-gtk";
 import * as fs from "fs";
 import * as os from "os";
-import { globalNodyConfig, WebGreeterConfig } from "../config";
+import { globalNodyConfig, loadThemeDir, WebGreeterConfig } from "../config";
 
 const LightDM = gi.require("LightDM", "1");
 
@@ -650,7 +650,7 @@ export class ThemeUtils {
       globalNodyConfig.app.themeDir,
       globalNodyConfig.config.branding.background_images_dir,
       global.lightdmGreeter.shared_data_directory,
-      path.dirname(fs.realpathSync(globalNodyConfig.config.greeter.theme)),
+      fs.realpathSync(loadThemeDir()),
       os.tmpdir(),
     ];
   }
@@ -833,10 +833,12 @@ ipcMain.on(CONSTS.channel.window_broadcast, (ev, data: unknown) => {
   }
 });
 
-browser.whenReady().then(() => {
+const bridgeReady = browser.whenReady().then(() => {
   global.lightdmGreeter = Greeter.getInstance(globalNodyConfig.config);
   global.greeterConfigGreeter = GreeterConfig.getInstance(
     globalNodyConfig.config
   );
   global.themeUtilsGreeter = ThemeUtils.getInstance(globalNodyConfig.config);
 });
+
+browser.deferThemeLoadUntil(bridgeReady);
